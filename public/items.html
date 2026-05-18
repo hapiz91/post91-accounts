@@ -3,38 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Items Master | Post91 Accounts</title>
+<title>Item / Category / Brand Master | Post91 Accounts</title>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
-body{background:#f4f8fc;color:#061833;padding:32px;}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;}
+body{background:#eef3f8;color:#061833;padding:28px;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
 .header h1{font-size:34px}.header p{color:#64748b;margin-top:6px}
-.back{background:white;color:#0d6efd;text-decoration:none;padding:13px 18px;border-radius:14px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);}
-.card{background:white;border-radius:28px;padding:30px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:25px;}
-.note{background:#e0f2fe;border:1px solid #bae6fd;color:#075985;padding:18px;border-radius:18px;margin-bottom:22px;line-height:1.6;font-weight:700;}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
-.form-group{margin-bottom:18px;}
-label{display:block;margin-bottom:8px;font-weight:800;}
-input,select,textarea{width:100%;padding:15px 16px;border-radius:14px;border:1px solid #dbe4f0;font-size:15px;outline:none;background:white;}
-textarea{min-height:90px;resize:vertical;}
-input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4px rgba(13,110,253,.1);}
+.back{background:white;color:#0d6efd;text-decoration:none;padding:12px 16px;border-radius:13px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);}
+.card{background:white;border-radius:22px;padding:26px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:22px;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+label{display:block;margin-bottom:7px;font-weight:800;}
+input,select,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #dbe4f0;font-size:15px;}
+textarea{min-height:70px;resize:vertical;}
 .full{grid-column:1/-1;}
-.btn{border:none;background:#0d6efd;color:white;padding:15px 24px;border-radius:14px;font-weight:900;cursor:pointer;font-size:15px;box-shadow:0 14px 30px rgba(13,110,253,.22);}
-.btn-light{background:#e2e8f0;color:#0f172a;box-shadow:none;margin-left:10px;}
-.search{margin-bottom:18px;}
-table{width:100%;border-collapse:collapse;}
-th{text-align:left;color:#64748b;padding-bottom:14px;font-size:14px;}
-td{padding:14px 0;border-top:1px solid #eef2f7;font-weight:700;vertical-align:top;}
-.small{font-size:13px;color:#64748b;font-weight:700;margin-top:4px;line-height:1.5;}
-.badge{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:900;display:inline-block;margin-top:4px;}
-.inventory{background:#dcfce7;color:#166534;}
-.service{background:#dbeafe;color:#1d4ed8;}
-.tax{background:#fef3c7;color:#92400e;}
+.btn{border:none;background:#0d6efd;color:white;padding:13px 19px;border-radius:13px;font-weight:900;cursor:pointer;}
+.btn-light{background:#e2e8f0;color:#0f172a;margin-left:8px;}
+.btn-danger{background:#ef4444;color:white;padding:8px 12px;border-radius:10px;border:none;font-weight:900;cursor:pointer;}
+table{width:100%;border-collapse:collapse;margin-top:18px;}
+th{text-align:left;color:#64748b;padding:12px;border-bottom:1px solid #e5edf7;font-size:14px;}
+td{padding:12px;border-bottom:1px solid #eef2f7;font-weight:700;vertical-align:top;}
+.badge{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:900;display:inline-block;}
+.active{background:#dcfce7;color:#166534;}
 .inactive{background:#fee2e2;color:#991b1b;}
-.action-btn{border:none;padding:8px 12px;border-radius:10px;font-weight:900;cursor:pointer;margin-right:6px;}
-.edit{background:#dbeafe;color:#1d4ed8;}
-.delete{background:#fee2e2;color:#991b1b;}
-@media(max-width:900px){.grid{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}table{font-size:13px;display:block;overflow-x:auto;white-space:nowrap}}
+.note{background:#e0f2fe;border:1px solid #bae6fd;color:#075985;padding:15px;border-radius:16px;margin-bottom:18px;font-weight:700;line-height:1.6;}
+.small{font-size:12px;color:#64748b;margin-top:4px;line-height:1.5;font-weight:700;}
+.section-hide{display:none;}
+@media(max-width:900px){.grid{grid-template-columns:1fr;}table{display:block;overflow-x:auto;white-space:nowrap}.header{flex-direction:column;align-items:flex-start;gap:15px}}
 </style>
 </head>
 
@@ -42,425 +37,617 @@ td{padding:14px 0;border-top:1px solid #eef2f7;font-weight:700;vertical-align:to
 
 <div class="header">
   <div>
-    <h1>Items Master</h1>
-    <p>Main category, sub category, optional brand, optional part number and optional OEM number.</p>
+    <h1>Item / Category / Brand / Type Master</h1>
+    <p>Create items, categories, brands and vehicle/machine/pump types separately.</p>
   </div>
-  <a class="back" href="/dashboard.html">Back to Dashboard</a>
+  <a href="/dashboard.html" class="back">Back to Dashboard</a>
+</div>
+
+<div class="note">
+  Select Create Type first. Only related fields will show. Item Name is required only for Item. Category, Brand and Vehicle/Machine/Pump Type can be created separately.
 </div>
 
 <div class="card">
-  <div class="note">
-    Part Number, OEM Number, Brands and Vehicle Compatibility are optional. If blank, they will not show in quotation or invoice print.
-  </div>
+  <h2 style="color:#0d6efd;margin-bottom:18px;">Create / Edit Master</h2>
 
-  <form id="itemForm">
+  <form id="masterForm">
     <input type="hidden" id="editIndex">
+    <input type="hidden" id="editStorageKey">
 
     <div class="grid">
-
-      <div class="form-group">
-        <label>Main Category *</label>
-        <select id="mainCategory" required>
-          <option value="">Select Main Category</option>
-          <option>Engine Parts</option>
-          <option>Fuel System</option>
-          <option>Suspension</option>
-          <option>Electrical</option>
-          <option>Brake System</option>
-          <option>Cooling System</option>
-          <option>Body Parts</option>
-          <option>Garage Service</option>
-          <option>Labor Charge</option>
-          <option>General Trading</option>
-          <option>Custom</option>
+      <div>
+        <label>Create Type *</label>
+        <select id="createType" onchange="changeCreateType()">
+          <option>Item</option>
+          <option>Category</option>
+          <option>Brand Name</option>
+          <option>Vehicle / Machine / Pump Type</option>
         </select>
       </div>
-
-      <div class="form-group" id="customMainCategoryBox" style="display:none;">
-        <label>Custom Main Category</label>
-        <input type="text" id="customMainCategory" placeholder="Enter custom main category">
-      </div>
-
-      <div class="form-group">
-        <label>Main Category Brand Optional</label>
-        <input type="text" id="mainCategoryBrand" placeholder="Example: Toyota, Bosch, Denso">
-      </div>
-
-      <div class="form-group">
-        <label>Sub Category</label>
-        <select id="subCategory">
-          <option value="">Select Sub Category</option>
-          <option>Pump</option>
-          <option>Injector</option>
-          <option>Nozzle</option>
-          <option>Repair Kit</option>
-          <option>Valve</option>
-          <option>Filter</option>
-          <option>Sensor</option>
-          <option>Bearing</option>
-          <option>Oil Change</option>
-          <option>Calibration</option>
-          <option>Labour</option>
-          <option>Custom</option>
-        </select>
-      </div>
-
-      <div class="form-group" id="customSubCategoryBox" style="display:none;">
-        <label>Custom Sub Category</label>
-        <input type="text" id="customSubCategory" placeholder="Enter custom sub category">
-      </div>
-
-      <div class="form-group">
-        <label>Sub Category Brand Optional</label>
-        <input type="text" id="subCategoryBrand" placeholder="Example: Aisin, Delphi, Genuine">
-      </div>
-
-      <div class="form-group">
-        <label>Item Type</label>
-        <select id="itemType">
-          <option>Inventory Item</option>
-          <option>Service Item</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Item / Service Name *</label>
-        <input type="text" id="itemName" placeholder="Example: Water Pump" required>
-      </div>
-
-      <div class="form-group">
-        <label>Item Code / SKU Optional</label>
-        <input type="text" id="itemCode" placeholder="Internal code if any">
-      </div>
-
-      <div class="form-group">
-        <label>Part Number Optional</label>
-        <input type="text" id="partNumber" placeholder="Example: WP-909">
-      </div>
-
-      <div class="form-group">
-        <label>OEM Number Optional</label>
-        <input type="text" id="oemNumber" placeholder="Example: 16100-39466">
-      </div>
-
-      <div class="form-group full">
-        <label>Vehicle Compatibility Optional</label>
-        <input type="text" id="vehicleCompatibility" placeholder="Example: Corolla 1.8 / Hilux 2.7 / Universal">
-      </div>
-
-      <div class="form-group">
-        <label>Selling Price</label>
-        <input type="number" step="0.001" id="sellingPrice" placeholder="0.000">
-      </div>
-
-      <div class="form-group">
-        <label>Cost Price</label>
-        <input type="number" step="0.001" id="costPrice" placeholder="0.000">
-      </div>
-
-      <div class="form-group">
-        <label>VAT Type</label>
-        <select id="vatType">
-          <option>VAT Exclusive</option>
-          <option>VAT Inclusive</option>
-          <option>Non-VAT</option>
-          <option>Zero Rated</option>
-          <option>Exempt Supply</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>VAT Percentage</label>
-        <input type="number" id="vatPercentage" value="5">
-      </div>
-
-      <div class="form-group">
-        <label>Unit</label>
-        <select id="unit">
-          <option>PCS</option>
-          <option>SET</option>
-          <option>BOX</option>
-          <option>LTR</option>
-          <option>KG</option>
-          <option>JOB</option>
-          <option>HOUR</option>
-          <option>SERVICE</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Opening Stock</label>
-        <input type="number" id="openingStock" placeholder="0">
-      </div>
-
-      <div class="form-group">
-        <label>Minimum Stock Alert</label>
-        <input type="number" id="minStock" placeholder="0">
-      </div>
-
-      <div class="form-group">
-        <label>Status</label>
-        <select id="status">
-          <option>Active</option>
-          <option>Inactive</option>
-        </select>
-      </div>
-
-      <div class="form-group full">
-        <label>Description Optional</label>
-        <textarea id="description" placeholder="Additional description if required"></textarea>
-      </div>
-
     </div>
 
-    <button class="btn" type="submit">Save Item</button>
+    <br>
+
+    <div id="simpleMasterFields" class="section-hide">
+      <div class="grid">
+        <div>
+          <label id="simpleNameLabel">Name *</label>
+          <input type="text" id="simpleName" placeholder="Enter name">
+        </div>
+
+        <div>
+          <label>Status</label>
+          <select id="simpleStatus">
+            <option>Active</option>
+            <option>Inactive</option>
+          </select>
+        </div>
+
+        <div class="full">
+          <label>Remarks Optional</label>
+          <textarea id="simpleRemarks" placeholder="Optional remarks"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div id="itemFields">
+      <div class="grid">
+
+        <div>
+          <label>Item Name *</label>
+          <input type="text" id="itemName" placeholder="Repair Kit / Injector Valve / Labour Charge">
+        </div>
+
+        <div>
+          <label>Vehicle / Machine / Pump Type Optional</label>
+          <input type="text" id="machineType" list="machineTypeList" placeholder="CR Injector / Diesel Pump">
+          <datalist id="machineTypeList"></datalist>
+        </div>
+
+        <div>
+          <label>Category Optional</label>
+          <input type="text" id="category" list="categoryList" placeholder="Spare Parts / Service">
+          <datalist id="categoryList"></datalist>
+        </div>
+
+        <div>
+          <label>Brand Name Optional</label>
+          <input type="text" id="brandName" list="brandNameList" placeholder="Denso / Bosch">
+          <datalist id="brandNameList"></datalist>
+        </div>
+
+        <div>
+          <label>Sub Category Optional</label>
+          <input type="text" id="subCategory" list="subCategoryList" placeholder="Nozzle / Calibration / Repair">
+          <datalist id="subCategoryList"></datalist>
+        </div>
+
+        <div>
+          <label>Unit</label>
+          <select id="unit">
+            <option>PCS</option>
+            <option>SET</option>
+            <option>NOS</option>
+            <option>JOB</option>
+            <option>LTR</option>
+            <option>KG</option>
+            <option>MTR</option>
+            <option>BOX</option>
+            <option>PACK</option>
+            <option>HOUR</option>
+            <option>SERVICE</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Part Number Optional</label>
+          <input type="text" id="partNumber" placeholder="Part No">
+        </div>
+
+        <div>
+          <label>OEM Number Optional</label>
+          <input type="text" id="oemNumber" placeholder="OEM No">
+        </div>
+
+        <div>
+          <label>Purchase Price</label>
+          <input type="number" step="0.001" id="purchasePrice" value="0.000">
+        </div>
+
+        <div>
+          <label>Selling Price</label>
+          <input type="number" step="0.001" id="sellingPrice" value="0.000">
+        </div>
+
+        <div>
+          <label>Opening Stock</label>
+          <input type="number" step="0.001" id="openingStock" value="0">
+        </div>
+
+        <div>
+          <label>Reorder Level</label>
+          <input type="number" step="0.001" id="reorderLevel" value="0">
+        </div>
+
+        <div>
+          <label>Status</label>
+          <select id="status">
+            <option>Active</option>
+            <option>Inactive</option>
+          </select>
+        </div>
+
+        <div class="full">
+          <label>Description / Compatibility</label>
+          <textarea id="description" placeholder="Vehicle compatibility, technical note, application details"></textarea>
+        </div>
+
+      </div>
+    </div>
+
+    <br>
+    <button class="btn" type="submit">Save</button>
     <button class="btn btn-light" type="button" onclick="resetForm()">Clear</button>
   </form>
 </div>
 
 <div class="card">
-  <h2 style="margin-bottom:18px;">Items List</h2>
-  <input class="search" type="text" id="searchBox" placeholder="Search by item, category, part number, OEM number..." onkeyup="loadItems()">
+  <h2 style="color:#0d6efd;margin-bottom:18px;">Saved Masters</h2>
+
+  <div class="grid">
+    <div>
+      <label>View Master Type</label>
+      <select id="viewType" onchange="loadTable()">
+        <option>Items</option>
+        <option>Categories</option>
+        <option>Brand Names</option>
+        <option>Vehicle / Machine / Pump Types</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Search</label>
+      <input type="text" id="searchInput" placeholder="Search..." oninput="loadTable()">
+    </div>
+  </div>
 
   <table>
-    <thead>
-      <tr>
-        <th>Category</th>
-        <th>Item Details</th>
-        <th>Part / OEM</th>
-        <th>Price</th>
-        <th>VAT</th>
-        <th>Stock</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="itemsTable"></tbody>
+    <thead id="tableHead"></thead>
+    <tbody id="tableBody"></tbody>
   </table>
 </div>
 
 <script>
-const defaultMainCategories = [
-  "Engine Parts","Fuel System","Suspension","Electrical","Brake System",
-  "Cooling System","Body Parts","Garage Service","Labor Charge","General Trading","Custom"
-];
-
-const defaultSubCategories = [
-  "Pump","Injector","Nozzle","Repair Kit","Valve","Filter","Sensor",
-  "Bearing","Oil Change","Calibration","Labour","Custom"
-];
-
-function finalMainCategory(){
-  return document.getElementById("mainCategory").value === "Custom"
-    ? document.getElementById("customMainCategory").value
-    : document.getElementById("mainCategory").value;
+function getData(key){
+  return JSON.parse(localStorage.getItem(key) || "[]");
 }
 
-function finalSubCategory(){
-  return document.getElementById("subCategory").value === "Custom"
-    ? document.getElementById("customSubCategory").value
-    : document.getElementById("subCategory").value;
+function saveData(key,data){
+  localStorage.setItem(key, JSON.stringify(data));
 }
 
-function toggleCustomFields(){
-  const main = document.getElementById("mainCategory").value;
-  const sub = document.getElementById("subCategory").value;
+function getItems(){ return getData("post91Items"); }
+function getCategories(){ return getData("post91Categories"); }
+function getBrands(){ return getData("post91Brands"); }
+function getMachineTypes(){ return getData("post91MachineTypes"); }
 
-  document.getElementById("customMainCategoryBox").style.display = main === "Custom" ? "block" : "none";
-  document.getElementById("customSubCategoryBox").style.display = sub === "Custom" ? "block" : "none";
-
-  document.getElementById("customMainCategory").required = main === "Custom";
-  document.getElementById("customSubCategory").required = sub === "Custom";
-
-  if(main !== "Custom") document.getElementById("customMainCategory").value = "";
-  if(sub !== "Custom") document.getElementById("customSubCategory").value = "";
+function money(n){
+  return "OMR " + Number(n || 0).toFixed(3);
 }
 
-document.getElementById("mainCategory").addEventListener("change", toggleCustomFields);
-document.getElementById("subCategory").addEventListener("change", toggleCustomFields);
-
-function getItems(){
-  return JSON.parse(localStorage.getItem("post91Items") || "[]");
+function uniqueClean(arr){
+  return [...new Set(arr.map(v => (v || "").trim()).filter(Boolean))];
 }
 
-function saveItems(items){
-  localStorage.setItem("post91Items", JSON.stringify(items));
+function simpleStorageByCreateType(type){
+  if(type === "Category") return "post91Categories";
+  if(type === "Brand Name") return "post91Brands";
+  if(type === "Vehicle / Machine / Pump Type") return "post91MachineTypes";
+  return "post91Items";
 }
 
-function loadItems(){
+function viewStorageKey(){
+  const type = document.getElementById("viewType").value;
+
+  if(type === "Categories") return "post91Categories";
+  if(type === "Brand Names") return "post91Brands";
+  if(type === "Vehicle / Machine / Pump Types") return "post91MachineTypes";
+  return "post91Items";
+}
+
+function changeCreateType(){
+  const type = document.getElementById("createType").value;
+
+  document.getElementById("itemFields").style.display =
+    type === "Item" ? "block" : "none";
+
+  document.getElementById("simpleMasterFields").style.display =
+    type === "Item" ? "none" : "block";
+
+  if(type === "Category"){
+    document.getElementById("simpleNameLabel").textContent = "Category Name *";
+    document.getElementById("simpleName").placeholder = "Spare Parts / Service / Consumables";
+  }
+
+  if(type === "Brand Name"){
+    document.getElementById("simpleNameLabel").textContent = "Brand Name *";
+    document.getElementById("simpleName").placeholder = "Denso / Bosch / Caterpillar";
+  }
+
+  if(type === "Vehicle / Machine / Pump Type"){
+    document.getElementById("simpleNameLabel").textContent = "Vehicle / Machine / Pump Type Name *";
+    document.getElementById("simpleName").placeholder = "CR Injector / Diesel Pump / Engine";
+  }
+
+  refreshDataLists();
+}
+
+function refreshDataLists(){
   const items = getItems();
-  const search = document.getElementById("searchBox").value.toLowerCase();
-  const tbody = document.getElementById("itemsTable");
 
-  tbody.innerHTML = "";
+  const categories = uniqueClean([
+    ...getCategories().map(x=>x.name),
+    ...items.map(i => i.category || i.mainCategory || "")
+  ]);
 
-  items
-  .filter(i => {
-    const text = `
-      ${i.mainCategory || ""}
-      ${i.subCategory || ""}
-      ${i.mainCategoryBrand || ""}
-      ${i.subCategoryBrand || ""}
-      ${i.itemName || ""}
-      ${i.itemCode || ""}
-      ${i.partNumber || ""}
-      ${i.oemNumber || ""}
-      ${i.vehicleCompatibility || ""}
-    `.toLowerCase();
+  const brands = uniqueClean([
+    ...getBrands().map(x=>x.name),
+    ...items.map(i => i.brandName || i.mainCategoryBrand || i.subCategoryBrand || "")
+  ]);
 
-    return text.includes(search);
-  })
-  .forEach((i,index)=>{
+  const machineTypes = uniqueClean([
+    ...getMachineTypes().map(x=>x.name),
+    ...items.map(i => i.machineType || "")
+  ]);
+
+  const subCategories = uniqueClean(items.map(i => i.subCategory || ""));
+
+  fillDatalist("categoryList", categories);
+  fillDatalist("brandNameList", brands);
+  fillDatalist("machineTypeList", machineTypes);
+  fillDatalist("subCategoryList", subCategories);
+}
+
+function fillDatalist(id, list){
+  const dl = document.getElementById(id);
+  dl.innerHTML = "";
+
+  list.forEach(value=>{
+    const opt = document.createElement("option");
+    opt.value = value;
+    dl.appendChild(opt);
+  });
+}
+
+document.getElementById("masterForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  const type = document.getElementById("createType").value;
+  const editIndex = document.getElementById("editIndex").value;
+  const editStorageKey = document.getElementById("editStorageKey").value;
+
+  if(type === "Item"){
+    saveItemRecord(editIndex, editStorageKey);
+  } else {
+    saveSimpleMaster(type, editIndex, editStorageKey);
+  }
+
+  resetForm();
+  refreshDataLists();
+  loadTable();
+});
+
+function saveSimpleMaster(type, editIndex, editStorageKey){
+  const key = editStorageKey || simpleStorageByCreateType(type);
+  const data = getData(key);
+
+  const name = document.getElementById("simpleName").value.trim();
+
+  if(!name){
+    alert("Name is required.");
+    return;
+  }
+
+  const record = {
+    name,
+    status: document.getElementById("simpleStatus").value,
+    remarks: document.getElementById("simpleRemarks").value.trim(),
+    updatedAt: new Date().toISOString()
+  };
+
+  if(editIndex === ""){
+    record.createdAt = new Date().toISOString();
+    data.push(record);
+    alert("Master saved successfully.");
+  } else {
+    data[editIndex] = {
+      ...data[editIndex],
+      ...record
+    };
+    alert("Master updated successfully.");
+  }
+
+  saveData(key, data);
+}
+
+function saveItemRecord(editIndex, editStorageKey){
+  const key = editStorageKey || "post91Items";
+  const items = getData(key);
+
+  const item = {
+    itemName: document.getElementById("itemName").value.trim(),
+
+    machineType: document.getElementById("machineType").value.trim(),
+    category: document.getElementById("category").value.trim(),
+    brandName: document.getElementById("brandName").value.trim(),
+    subCategory: document.getElementById("subCategory").value.trim(),
+
+    mainCategory: document.getElementById("category").value.trim(),
+    mainCategoryBrand: document.getElementById("brandName").value.trim(),
+    subCategoryBrand: document.getElementById("brandName").value.trim(),
+
+    unit: document.getElementById("unit").value || "PCS",
+    partNumber: document.getElementById("partNumber").value.trim(),
+    oemNumber: document.getElementById("oemNumber").value.trim(),
+
+    purchasePrice: document.getElementById("purchasePrice").value || "0.000",
+    sellingPrice: document.getElementById("sellingPrice").value || "0.000",
+
+    openingStock: document.getElementById("openingStock").value || "0",
+    reorderLevel: document.getElementById("reorderLevel").value || "0",
+
+    status: document.getElementById("status").value,
+    description: document.getElementById("description").value.trim(),
+    updatedAt: new Date().toISOString()
+  };
+
+  if(!item.itemName){
+    alert("Item Name is required.");
+    return;
+  }
+
+  if(editIndex === ""){
+    item.createdAt = new Date().toISOString();
+    items.push(item);
+    alert("Item saved successfully.");
+  } else {
+    items[editIndex] = {
+      ...items[editIndex],
+      ...item
+    };
+    alert("Item updated successfully.");
+  }
+
+  saveData(key, items);
+}
+
+function matchText(record, query){
+  if(!query) return true;
+
+  const text = JSON.stringify(record).toLowerCase();
+  return text.includes(query.toLowerCase());
+}
+
+function loadTable(){
+  const type = document.getElementById("viewType").value;
+  const key = viewStorageKey();
+  const data = getData(key);
+  const query = document.getElementById("searchInput").value || "";
+
+  if(type === "Items"){
+    renderItems(data, query);
+  } else {
+    renderSimpleMasters(data, query, type);
+  }
+}
+
+function renderSimpleMasters(data, query, type){
+  const head = document.getElementById("tableHead");
+  const body = document.getElementById("tableBody");
+
+  head.innerHTML = `
+    <tr>
+      <th>Name</th>
+      <th>Status</th>
+      <th>Remarks</th>
+      <th>Action</th>
+    </tr>
+  `;
+
+  body.innerHTML = "";
+
+  const filtered = data
+    .map((record,index)=>({record,index}))
+    .filter(x => matchText(x.record, query));
+
+  if(filtered.length === 0){
+    body.innerHTML = `<tr><td colspan="4">No ${type} found.</td></tr>`;
+    return;
+  }
+
+  filtered.forEach(({record,index})=>{
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${record.name || "-"}</td>
+      <td>
+        <span class="badge ${record.status === "Active" ? "active" : "inactive"}">
+          ${record.status || "Active"}
+        </span>
+      </td>
+      <td>${record.remarks || "-"}</td>
+      <td>
+        <button class="btn btn-light" type="button" onclick="editSimple('${viewStorageKey()}',${index})">Edit</button>
+        <button class="btn-danger" type="button" onclick="deleteRecord('${viewStorageKey()}',${index})">Delete</button>
+      </td>
+    `;
+
+    body.appendChild(tr);
+  });
+}
+
+function renderItems(items, query){
+  const head = document.getElementById("tableHead");
+  const body = document.getElementById("tableBody");
+
+  head.innerHTML = `
+    <tr>
+      <th>Item</th>
+      <th>Type</th>
+      <th>Category</th>
+      <th>Brand</th>
+      <th>Sub Category</th>
+      <th>Part / OEM</th>
+      <th>Unit</th>
+      <th>Price</th>
+      <th>Stock</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  `;
+
+  body.innerHTML = "";
+
+  const filtered = items
+    .map((item,index)=>({item,index}))
+    .filter(x => matchText(x.item, query));
+
+  if(filtered.length === 0){
+    body.innerHTML = `<tr><td colspan="11">No items found.</td></tr>`;
+    return;
+  }
+
+  filtered.forEach(({item,index})=>{
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
       <td>
-        <strong>${i.mainCategory || "-"}</strong>
-        ${i.mainCategoryBrand ? `<div class="small">Brand: ${i.mainCategoryBrand}</div>` : ""}
-        ${i.subCategory ? `<div class="small">Sub: ${i.subCategory}</div>` : ""}
-        ${i.subCategoryBrand ? `<div class="small">Sub Brand: ${i.subCategoryBrand}</div>` : ""}
+        ${item.itemName || "-"}
+        <div class="small">
+          ${item.partNumber ? "Part No: " + item.partNumber : ""}
+          ${item.oemNumber ? (item.partNumber ? " | " : "") + "OEM: " + item.oemNumber : ""}
+        </div>
+      </td>
+
+      <td>${item.machineType || "-"}</td>
+      <td>${item.category || item.mainCategory || "-"}</td>
+      <td>${item.brandName || item.mainCategoryBrand || item.subCategoryBrand || "-"}</td>
+      <td>${item.subCategory || "-"}</td>
+
+      <td>
+        Part: ${item.partNumber || "-"}<br>
+        OEM: ${item.oemNumber || "-"}
+      </td>
+
+      <td>${item.unit || "PCS"}</td>
+
+      <td>
+        Purchase: ${money(item.purchasePrice)}<br>
+        Selling: ${money(item.sellingPrice)}
       </td>
 
       <td>
-        ${i.itemName || "-"}
-        <div class="small">${i.itemCode || "No SKU"}</div>
-        ${i.vehicleCompatibility ? `<div class="small">Vehicle: ${i.vehicleCompatibility}</div>` : ""}
-        <span class="badge ${i.itemType === "Inventory Item" ? "inventory" : "service"}">${i.itemType}</span>
+        Opening: ${Number(item.openingStock || 0).toFixed(3)}<br>
+        Reorder: ${Number(item.reorderLevel || 0).toFixed(3)}
       </td>
 
       <td>
-        ${i.partNumber ? `<div>Part: ${i.partNumber}</div>` : `<div class="small">No Part No</div>`}
-        ${i.oemNumber ? `<div>OEM: ${i.oemNumber}</div>` : `<div class="small">No OEM</div>`}
-      </td>
-
-      <td>OMR ${Number(i.sellingPrice || 0).toFixed(3)}</td>
-
-      <td>
-        <span class="badge tax">${i.vatType}</span>
-        <div class="small">${i.vatPercentage || 0}%</div>
+        <span class="badge ${item.status === "Active" ? "active" : "inactive"}">
+          ${item.status || "Active"}
+        </span>
       </td>
 
       <td>
-        ${i.openingStock || 0}
-        <div class="small">Min: ${i.minStock || 0}</div>
-      </td>
-
-      <td>
-        <span class="badge ${i.status === "Active" ? "inventory" : "inactive"}">${i.status}</span>
-      </td>
-
-      <td>
-        <button class="action-btn edit" onclick="editItem(${index})">Edit</button>
-        <button class="action-btn delete" onclick="deleteItem(${index})">Delete</button>
+        <button class="btn btn-light" type="button" onclick="editItem(${index})">Edit</button>
+        <button class="btn-danger" type="button" onclick="deleteRecord('post91Items',${index})">Delete</button>
       </td>
     `;
 
-    tbody.appendChild(tr);
+    body.appendChild(tr);
   });
 }
 
-document.getElementById("itemForm").addEventListener("submit", function(e){
-  e.preventDefault();
-
-  const items = getItems();
-  const editIndex = document.getElementById("editIndex").value;
-
-  const item = {
-    mainCategory: finalMainCategory(),
-    mainCategoryBrand: document.getElementById("mainCategoryBrand").value,
-    subCategory: finalSubCategory(),
-    subCategoryBrand: document.getElementById("subCategoryBrand").value,
-    itemType: document.getElementById("itemType").value,
-    itemName: document.getElementById("itemName").value,
-    itemCode: document.getElementById("itemCode").value,
-    partNumber: document.getElementById("partNumber").value,
-    oemNumber: document.getElementById("oemNumber").value,
-    vehicleCompatibility: document.getElementById("vehicleCompatibility").value,
-    sellingPrice: document.getElementById("sellingPrice").value,
-    costPrice: document.getElementById("costPrice").value,
-    vatType: document.getElementById("vatType").value,
-    vatPercentage: document.getElementById("vatPercentage").value,
-    unit: document.getElementById("unit").value,
-    openingStock: document.getElementById("openingStock").value,
-    minStock: document.getElementById("minStock").value,
-    status: document.getElementById("status").value,
-    description: document.getElementById("description").value
-  };
-
-  if(editIndex === ""){
-    items.push(item);
-    alert("Item saved successfully.");
-  } else {
-    items[editIndex] = item;
-    alert("Item updated successfully.");
-  }
-
-  saveItems(items);
-  resetForm();
-  loadItems();
-});
-
-function editItem(index){
-  const i = getItems()[index];
+function editSimple(key,index){
+  const record = getData(key)[index];
 
   document.getElementById("editIndex").value = index;
+  document.getElementById("editStorageKey").value = key;
 
-  if(defaultMainCategories.includes(i.mainCategory)){
-    document.getElementById("mainCategory").value = i.mainCategory;
-    document.getElementById("customMainCategory").value = "";
-  } else {
-    document.getElementById("mainCategory").value = "Custom";
-    document.getElementById("customMainCategory").value = i.mainCategory;
+  if(key === "post91Categories"){
+    document.getElementById("createType").value = "Category";
   }
 
-  if(defaultSubCategories.includes(i.subCategory)){
-    document.getElementById("subCategory").value = i.subCategory;
-    document.getElementById("customSubCategory").value = "";
-  } else {
-    document.getElementById("subCategory").value = "Custom";
-    document.getElementById("customSubCategory").value = i.subCategory;
+  if(key === "post91Brands"){
+    document.getElementById("createType").value = "Brand Name";
   }
 
-  toggleCustomFields();
+  if(key === "post91MachineTypes"){
+    document.getElementById("createType").value = "Vehicle / Machine / Pump Type";
+  }
 
-  document.getElementById("mainCategoryBrand").value = i.mainCategoryBrand || "";
-  document.getElementById("subCategoryBrand").value = i.subCategoryBrand || "";
-  document.getElementById("itemType").value = i.itemType || "Inventory Item";
-  document.getElementById("itemName").value = i.itemName || "";
-  document.getElementById("itemCode").value = i.itemCode || "";
-  document.getElementById("partNumber").value = i.partNumber || "";
-  document.getElementById("oemNumber").value = i.oemNumber || "";
-  document.getElementById("vehicleCompatibility").value = i.vehicleCompatibility || "";
-  document.getElementById("sellingPrice").value = i.sellingPrice || "";
-  document.getElementById("costPrice").value = i.costPrice || "";
-  document.getElementById("vatType").value = i.vatType || "VAT Exclusive";
-  document.getElementById("vatPercentage").value = i.vatPercentage || 5;
-  document.getElementById("unit").value = i.unit || "PCS";
-  document.getElementById("openingStock").value = i.openingStock || "";
-  document.getElementById("minStock").value = i.minStock || "";
-  document.getElementById("status").value = i.status || "Active";
-  document.getElementById("description").value = i.description || "";
+  changeCreateType();
+
+  document.getElementById("simpleName").value = record.name || "";
+  document.getElementById("simpleStatus").value = record.status || "Active";
+  document.getElementById("simpleRemarks").value = record.remarks || "";
 
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
-function deleteItem(index){
-  if(confirm("Delete this item?")){
-    const items = getItems();
-    items.splice(index,1);
-    saveItems(items);
-    loadItems();
+function editItem(index){
+  const item = getItems()[index];
+
+  document.getElementById("editIndex").value = index;
+  document.getElementById("editStorageKey").value = "post91Items";
+  document.getElementById("createType").value = "Item";
+  changeCreateType();
+
+  document.getElementById("itemName").value = item.itemName || "";
+  document.getElementById("machineType").value = item.machineType || "";
+  document.getElementById("category").value = item.category || item.mainCategory || "";
+  document.getElementById("brandName").value = item.brandName || item.mainCategoryBrand || item.subCategoryBrand || "";
+  document.getElementById("subCategory").value = item.subCategory || "";
+  document.getElementById("unit").value = item.unit || "PCS";
+  document.getElementById("partNumber").value = item.partNumber || "";
+  document.getElementById("oemNumber").value = item.oemNumber || "";
+  document.getElementById("purchasePrice").value = item.purchasePrice || "0.000";
+  document.getElementById("sellingPrice").value = item.sellingPrice || "0.000";
+  document.getElementById("openingStock").value = item.openingStock || "0";
+  document.getElementById("reorderLevel").value = item.reorderLevel || "0";
+  document.getElementById("status").value = item.status || "Active";
+  document.getElementById("description").value = item.description || "";
+
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function deleteRecord(key,index){
+  if(confirm("Delete this record?")){
+    const data = getData(key);
+    data.splice(index,1);
+    saveData(key,data);
+    refreshDataLists();
+    loadTable();
   }
 }
 
 function resetForm(){
-  document.getElementById("itemForm").reset();
+  document.getElementById("masterForm").reset();
   document.getElementById("editIndex").value = "";
-  document.getElementById("vatPercentage").value = 5;
-  toggleCustomFields();
+  document.getElementById("editStorageKey").value = "";
+  document.getElementById("createType").value = "Item";
+  document.getElementById("unit").value = "PCS";
+  document.getElementById("purchasePrice").value = "0.000";
+  document.getElementById("sellingPrice").value = "0.000";
+  document.getElementById("openingStock").value = "0";
+  document.getElementById("reorderLevel").value = "0";
+  document.getElementById("status").value = "Active";
+  document.getElementById("simpleStatus").value = "Active";
+  changeCreateType();
 }
 
-loadItems();
+changeCreateType();
+refreshDataLists();
+loadTable();
 </script>
 
 </body>

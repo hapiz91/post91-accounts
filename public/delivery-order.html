@@ -6,55 +6,386 @@
 <title>Delivery Order | Post91 Accounts</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
-body{background:#eef3f8;color:#061833;padding:28px;}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
-.header h1{font-size:34px}.header p{color:#64748b;margin-top:6px}
-.back,.quick-create{background:white;color:#0d6efd;text-decoration:none;padding:12px 16px;border-radius:13px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);display:inline-block;}
-.quick-create{font-size:13px;margin-top:8px;}
-.card{background:white;border-radius:22px;padding:26px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:22px;}
-.card h2{margin-bottom:18px;font-size:22px;color:#0d6efd;}
-.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.form-group{margin-bottom:16px;}
-label{display:block;margin-bottom:7px;font-weight:800;color:#0f172a;}
-input,select,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #dbe4f0;font-size:15px;outline:none;background:white;}
-textarea{min-height:80px;resize:vertical;}
-input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4px rgba(13,110,253,.1);}
-.full{grid-column:1/-1;}
-.note{background:#e0f2fe;border:1px solid #bae6fd;color:#075985;padding:16px;border-radius:16px;margin-bottom:18px;line-height:1.6;font-weight:700;}
-.btn{border:none;background:#0d6efd;color:white;padding:13px 19px;border-radius:13px;font-weight:900;cursor:pointer;font-size:14px;box-shadow:0 14px 30px rgba(13,110,253,.22);}
-.btn-light{background:#e2e8f0;color:#0f172a;box-shadow:none;}
-.btn-danger{background:#ef4444;color:white;box-shadow:none;}
-.btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;}
-table{width:100%;border-collapse:collapse;}
-th{background:#f8fbff;color:#061833;text-align:left;padding:12px;border:1px solid #dbe4f0;font-size:14px;}
-td{border:1px solid #dbe4f0;padding:8px;vertical-align:top;}
-td input,td select,td textarea{border:none;padding:8px;border-radius:8px;}
-.preview-wrap{background:white;border-radius:22px;padding:24px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;}
-.paper{background:white;border:1px solid #111;max-width:1050px;margin:auto;color:#000;}
-.print-top{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #111;}
-.print-top div{padding:8px;font-weight:800;font-size:16px;}
-.print-title{text-align:center;font-size:24px;text-decoration:underline;}
-.print-section{border-bottom:1px solid #111;}
-.print-row{display:grid;grid-template-columns:160px 1fr 160px 1fr;border-bottom:1px solid #ddd;}
-.print-row:last-child{border-bottom:none;}
-.print-row div{padding:7px;min-height:31px;}
-.print-label{font-weight:900;}
-.print-items th,.print-items td{border:1px solid #111;padding:7px;font-size:15px;}
-.print-items th{background:white;text-align:center;}
-.print-note{border-top:1px solid #111;padding:12px;min-height:70px;}
-.print-sign{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid #111;}
-.print-sign div{padding:12px;min-height:75px;}
-.saved-card{margin-top:22px;}
-.small{font-size:12px;color:#64748b;font-weight:700;margin-top:4px;line-height:1.4;}
-@media(max-width:1000px){.main-grid,.grid{grid-template-columns:1fr;}table{display:block;overflow-x:auto;white-space:nowrap;}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.header h1{margin:0;color:#0d6efd}
+.back,.quick{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001;display:inline-block}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.full{grid-column:1/-1}
+label{display:block;font-weight:800;margin-bottom:6px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
+textarea{min-height:75px}
+.btn{border:0;background:#0d6efd;color:white;padding:12px 17px;border-radius:12px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-danger{background:#ef4444}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #dbe4f0;padding:8px;vertical-align:top}
+th{background:#f8fbff}
+.total-box{max-width:440px;margin-left:auto;background:#f8fbff;border:1px solid #dbe4f0;border-radius:15px;padding:14px;margin-top:16px}
+.total-row{display:flex;justify-content:space-between;border-bottom:1px solid #dbe4f0;padding:8px 0;font-weight:900}
+.grand{font-size:20px;color:#0d6efd;border-bottom:0}
+.small{font-size:12px;color:#64748b;font-weight:700}
+.badge{padding:6px 11px;border-radius:99px;font-size:12px;font-weight:900}
+.draft{background:#fef3c7;color:#92400e}
+.submitted{background:#dcfce7;color:#166534}
+.modal{display:none;position:fixed;inset:0;background:#0009;z-index:99;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.modal-box{background:white;border-radius:18px;padding:20px;max-width:720px;width:100%}
+.modal-head{display:flex;justify-content:space-between;align-items:center}
+.x{border:0;background:#fee2e2;color:#991b1b;border-radius:10px;padding:8px 12px;font-weight:900}
+.search{position:relative}
+.panel{display:none;position:absolute;left:0;right:0;top:100%;background:white;border:1px solid #dbe4f0;border-radius:12px;box-shadow:0 15px 35px #0002;z-index:10;max-height:240px;overflow:auto}
+.panel.show{display:block}
+.opt{padding:11px;border-bottom:1px solid #eef2f7;cursor:pointer}
+.opt:hover{background:#f8fbff}
+.opt b{display:block}
+.opt span{font-size:12px;color:#64748b}
+
+/* =========================================================
+   PRINT DOCUMENT
+========================================================= */
+
+.paper{
+  background:#fff;
+  border:1px solid #111;
+  max-width:1000px;
+  width:100%;
+  min-height:1120px;
+  margin:auto;
+  color:#000;
+  padding:10px;
+}
+
+/* Letterhead / company header space */
+.doc-letterhead-space{
+  width:100%;
+  height:4cm;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  margin-bottom:14px;
+  border-bottom:3px double #111;
+}
+
+.letterhead-img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:none;
+}
+
+.company-header-fallback{
+  width:100%;
+  height:100%;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+
+.company-name{
+  font-size:28px;
+  font-weight:900;
+  color:#004b7a;
+}
+
+.company-line{
+  font-size:13px;
+  font-weight:700;
+  margin-top:5px;
+}
+
+.print-title-box{
+  text-align:center;
+  margin:0 0 10px;
+}
+
+.print-title{
+  font-size:21px;
+  font-weight:900;
+  text-decoration:underline;
+}
+
+.print-box{
+  border:1px solid #111;
+  border-bottom:0;
+}
+
+.print-row{
+  display:grid;
+  grid-template-columns:120px 1.45fr 120px 1fr;
+  border-bottom:1px solid #bbb;
+}
+
+.print-row div{
+  padding:4px 7px;
+  min-height:21px;
+  font-size:12px;
+  line-height:1.1;
+}
+
+.print-label{
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.print-value{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.tech-grid{
+  display:grid;
+  grid-template-columns:115px 1.2fr 115px 1fr 120px 1fr;
+  border:1px solid #111;
+  border-bottom:0;
+  margin-top:8px;
+}
+
+.tech-grid div{
+  padding:4px 7px;
+  min-height:21px;
+  font-size:12px;
+  line-height:1.1;
+  border-bottom:1px solid #111;
+}
+
+.tech-label{
+  font-style:italic;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.tech-value{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.print-items{
+  margin-top:10px;
+  table-layout:fixed;
+  width:100%;
+}
+
+.print-items th,
+.print-items td{
+  border:1px solid #111;
+  padding:5px;
+  font-size:12px;
+  color:#000;
+}
+
+.print-items td{
+  height:24px;
+}
+
+.print-total-area{
+  display:grid;
+  grid-template-columns:auto 330px;
+  width:100%;
+  margin-top:-1px;
+}
+
+.print-total-area > div:first-child{
+  border-left:1px solid #111;
+  border-right:1px solid #111;
+  border-bottom:1px solid #111;
+}
+
+.print-totals{
+  border-left:1px solid #111;
+  border-right:1px solid #111;
+  border-bottom:1px solid #111;
+}
+.print-total-row{
+  display:grid;
+  grid-template-columns:1fr 120px;
+  border-bottom:1px solid #111;
+}
+
+.print-total-row:last-child{
+  border-bottom:0;
+}
+
+.print-total-row div{
+  padding:6px;
+  font-weight:900;
+  font-size:12px;
+}
+
+.print-note{
+  border-top:1px solid #111;
+  border-bottom:1px solid #111;
+  padding:10px;
+  min-height:45px;
+  font-size:12px;
+}
+
+.footer-sign{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  border-bottom:1px solid #111;
+}
+
+.footer-sign div{
+  padding:12px;
+  min-height:70px;
+  font-size:12px;
+}
+
+@media screen and (max-width:900px){
+  .grid,.grid3{grid-template-columns:1fr}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+}
+
 @media print{
-  body{background:white;padding:0;}
-  .header,.source-card,.main-grid,.editor-card,.btn-row,.saved-card,.note{display:none!important;}
-  .preview-wrap{box-shadow:none;border:none;padding:0;}
-  .preview-wrap h2{display:none;}
-  .paper{border:1px solid #000;max-width:100%;}
+
+  @page{
+    size:A4;
+    margin:5mm;
+  }
+
+  html,
+  body{
+    width:210mm;
+    height:297mm;
+    margin:0;
+    padding:0;
+    background:#fff;
+  }
+
+  .header,
+  .editor,
+  .saved,
+  .note,
+  .btn-row,
+  .screen-title{
+    display:none!important;
+  }
+
+  .card{
+    border:0!important;
+    box-shadow:none!important;
+    margin:0!important;
+    padding:0!important;
+    background:#fff!important;
+  }
+
+  .paper{
+    width:200mm !important;
+    max-width:200mm !important;
+    min-height:287mm;
+    margin:0 auto !important;
+    padding:4mm !important;
+    border:1px solid #111 !important;
+    background:#fff !important;
+    overflow:hidden;
+  }
+
+  .doc-letterhead-space{
+    height:4cm;
+    margin-bottom:10px;
+  }
+
+  .print-title{
+    font-size:16px;
+  }
+
+  .company-name{
+    font-size:24px;
+  }
+
+  .company-line{
+    font-size:11px;
+  }
+
+  .print-row{
+    grid-template-columns:105px 1.5fr 90px 1fr;
+  }
+
+  .print-row div{
+    font-size:10px;
+    padding:3px 5px;
+    min-height:16px;
+  }
+
+  .tech-grid{
+    grid-template-columns:95px 1.15fr 90px .9fr 100px .9fr;
+  }
+
+  .tech-grid div{
+    font-size:10px;
+    padding:3px 5px;
+    min-height:16px;
+  }
+
+  .print-items{
+    width:100%;
+    table-layout:fixed;
+    margin-top:8px;
+  }
+
+  .print-items th,
+  .print-items td{
+    font-size:10px;
+    padding:4px;
+  }
+
+  .print-total-area{
+    display:grid;
+    grid-template-columns:auto 300px;
+    width:100%;
+    margin-top:-1px;
+  }
+
+  .print-total-row div{
+    font-size:10px;
+    padding:4px;
+  }
+
+  .print-note{
+    font-size:10px;
+    padding:8px;
+    min-height:32px;
+  }
+
+  .footer-sign div{
+    font-size:10px;
+    padding:10px;
+    min-height:50px;
+  }
+  table,
+  .print-items{
+    display:table !important;
+    width:100% !important;
+    table-layout:fixed !important;
+    border-collapse:collapse !important;
+  }
+
+  .print-items thead{
+    display:table-header-group !important;
+  }
+
+  .print-items tbody{
+    display:table-row-group !important;
+  }
+
+  .print-items tr{
+    display:table-row !important;
+  }
+
+  .print-items th,
+  .print-items td{
+    display:table-cell !important;
+  }
 }
 </style>
 </head>
@@ -64,22 +395,22 @@ td input,td select,td textarea{border:none;padding:8px;border-radius:8px;}
 <div class="header">
   <div>
     <h1>Delivery Order</h1>
-    <p>Create manually or load from quotation. Print with price or without price.</p>
+    <p>Manual or quotation-based delivery order with full pump/workshop technical details.</p>
   </div>
-  <a href="/dashboard.html" class="back">Back to Dashboard</a>
+  <a class="back" href="/dashboard.html">Back</a>
 </div>
 
 <div class="note">
-  Use Manual DO for direct delivery. Use Load From Quotation to copy quotation details and modify before saving.
+  Item can be typed manually or selected from item master. If item name exists, the document will save even if description is blank.
 </div>
 
-<form id="doForm">
+<form id="docForm" onsubmit="saveDoc(event)">
 
-<div class="card source-card">
+<div class="card editor">
   <h2>Delivery Order Source</h2>
 
   <div class="grid">
-    <div class="form-group">
+    <div>
       <label>Source Type</label>
       <select id="sourceType" onchange="sourceChanged()">
         <option>Manual Delivery Order</option>
@@ -87,93 +418,86 @@ td input,td select,td textarea{border:none;padding:8px;border-radius:8px;}
       </select>
     </div>
 
-    <div class="form-group" id="quotationBox" style="display:none;">
+    <div id="sourceBox" style="display:none;">
       <label>Select Quotation</label>
-      <select id="quotationSelect">
-        <option value="">Select Quotation</option>
-      </select>
+      <select id="sourceSelect"></select>
     </div>
   </div>
 
-  <div class="btn-row" id="loadQuotationButtonBox" style="display:none;">
-    <button type="button" class="btn" onclick="loadQuotationToDO()">Load Quotation Data</button>
-    <a href="/quotation.html" target="_blank" class="quick-create">+ New Quotation</a>
+  <div class="btn-row" id="loadBox" style="display:none;">
+    <button type="button" class="btn" onclick="loadSource()">Load Quotation Data</button>
   </div>
 </div>
 
-<div class="main-grid">
-  <div class="card">
+<div class="grid">
+  <div class="card editor">
     <h2>Customer Details</h2>
 
     <div class="grid">
-      <div class="form-group full">
+      <div class="full">
         <label>Customer Name</label>
-        <input type="text" id="customerName" placeholder="Customer name">
-        <a href="/customers.html" target="_blank" class="quick-create">+ New Customer</a>
+        <div class="search">
+          <input id="customerName" onfocus="customerSearch()" oninput="customerSearch()" placeholder="Search customer or type manually">
+          <div id="customerPanel" class="panel"></div>
+        </div>
+        <a class="quick" href="javascript:void(0)" onclick="openM('customerModal')">+ New Customer</a>
       </div>
 
-      <div class="form-group full">
+      <div class="full">
         <label>Address</label>
-        <textarea id="customerAddress" placeholder="Customer address"></textarea>
+        <textarea id="customerAddress"></textarea>
       </div>
 
-      <div class="form-group">
+      <div>
         <label>Attention</label>
-        <input type="text" id="attention" placeholder="-">
+        <input id="attention" placeholder="-">
       </div>
 
-      <div class="form-group">
+      <div>
         <label>Mobile Number</label>
-        <input type="text" id="mobile" placeholder="-">
+        <input id="mobile" placeholder="-">
       </div>
 
-      <div class="form-group full">
+      <div class="full">
         <label>Email ID</label>
-        <input type="email" id="email" placeholder="-">
+        <input id="email" placeholder="-">
       </div>
     </div>
   </div>
 
-  <div class="card">
+  <div class="card editor">
     <h2>Delivery Details</h2>
 
     <div class="grid">
-      <div class="form-group">
+      <div>
         <label>Delivery Order No</label>
-        <input type="text" id="doNo">
+        <input id="doNo">
       </div>
 
-      <div class="form-group">
-        <label>Delivery Date</label>
+      <div>
+        <label>DO Date</label>
         <input type="date" id="doDate">
       </div>
 
-      <div class="form-group">
+      <div>
         <label>Quotation Ref</label>
-        <input type="text" id="quotationRef" placeholder="Optional">
+        <input id="quotationRef" placeholder="-">
       </div>
 
-      <div class="form-group">
+      <div>
         <label>LPO / Work Order Ref</label>
-        <input type="text" id="workOrderRef" placeholder="Optional">
+        <input id="workOrderRef" placeholder="-">
       </div>
 
-      <div class="form-group">
-        <label>Delivered By</label>
-        <input type="text" id="deliveredBy" placeholder="Driver / staff name">
-      </div>
-
-      <div class="form-group">
+      <div>
         <label>Status</label>
-        <select id="status">
+        <select id="docStatus">
           <option>Draft</option>
-          <option>Delivered</option>
-          <option>Partially Delivered</option>
-          <option>Cancelled</option>
+          <option>Submitted</option>
         </select>
       </div>
 
-      <div class="form-group">
+      <div>
         <label>Print Mode</label>
         <select id="printMode" onchange="updatePreview()">
           <option>Without Price</option>
@@ -181,68 +505,111 @@ td input,td select,td textarea{border:none;padding:8px;border-radius:8px;}
         </select>
       </div>
 
-      <div class="form-group">
+      <div>
         <label>VAT Type</label>
-        <select id="doVatType" onchange="updatePreview()">
+        <select id="vatType" onchange="calc()">
           <option>VAT Exclusive</option>
           <option>VAT Inclusive</option>
-          <option>Non-VAT Sales</option>
-          <option>Zero Rated Sales</option>
-          <option>Exempt Sales</option>
+          <option>Non-VAT</option>
+          <option>Zero Rated</option>
+          <option>Exempt</option>
         </select>
       </div>
 
-      <div class="form-group">
+      <div>
         <label>VAT %</label>
-        <input type="number" id="vatPercent" value="5" oninput="updatePreview()">
+        <input type="number" id="vatPercent" value="5" oninput="calc()">
+      </div>
+
+      <div>
+        <label>Less Discount</label>
+        <input type="number" step="0.001" id="discount" value="0.000" oninput="calc()">
       </div>
     </div>
   </div>
 </div>
 
-<div class="card editor-card">
-  <h2>Job / Vehicle / Technical Reference</h2>
+<div class="card editor">
+  <h2>Pump / Vehicle / Technical Details</h2>
 
-  <div class="grid">
-    <div class="form-group">
+  <div class="grid3">
+    <div>
+      <label>Pump Type / Vehicle / Machine Type</label>
+      <input id="pumpType" list="typeList" placeholder="CR INJECTOR">
+    </div>
+
+    <div>
+      <label>Brand Name</label>
+      <input id="brandName" list="brandList" placeholder="DENSO">
+    </div>
+
+    <div>
+      <label>Cylinder No</label>
+      <input id="cylinderNo" placeholder="SIX">
+    </div>
+
+    <div>
+      <label>No of Nozzles</label>
+      <input id="noOfNozzles" placeholder="SIX">
+    </div>
+
+    <div>
+      <label>Pump No</label>
+      <input id="pumpNo" placeholder="DENSO-5226">
+    </div>
+
+    <div>
       <label>Job No</label>
-      <input type="text" id="jobNo" placeholder="-">
+      <input id="jobNo" placeholder="-">
     </div>
 
-    <div class="form-group">
-      <label>Vehicle / Machine / Pump Type</label>
-      <input type="text" id="machineType" placeholder="-">
+    <div>
+      <label>Gov No</label>
+      <input id="govNo" placeholder="-">
     </div>
 
-    <div class="form-group">
+    <div>
+      <label>Work Order No</label>
+      <input id="workOrderNo" placeholder="-">
+    </div>
+
+    <div>
       <label>Serial No</label>
-      <input type="text" id="serialNo" placeholder="-">
-    </div>
-
-    <div class="form-group">
-      <label>Remarks Ref</label>
-      <input type="text" id="remarksRef" placeholder="-">
+      <input id="serialNo" placeholder="-">
     </div>
   </div>
 </div>
 
-<div class="card editor-card">
+<div class="card editor">
   <h2>Delivery Items</h2>
 
-  <div style="margin-bottom:15px;">
-    <a href="/items.html" target="_blank" class="quick-create">+ New Item / Service</a>
+  <div class="grid">
+    <div>
+      <label>Filter Vehicle / Machine / Pump Type</label>
+      <input id="filterType" list="typeList">
+    </div>
+
+    <div>
+      <label>Filter Brand</label>
+      <input id="filterBrand" list="brandList">
+    </div>
   </div>
+
+  <br>
+  <a class="quick" href="javascript:void(0)" onclick="openM('itemModal')">+ New Item / Category / Brand</a>
+  <br><br>
 
   <table>
     <thead>
       <tr>
-        <th style="width:70px;">SR.NO</th>
-        <th>DESCRIPTION</th>
-        <th style="width:100px;">QTY</th>
-        <th style="width:120px;">UNIT</th>
-        <th class="price-col" style="width:130px;">UNIT PRICE</th>
-        <th class="price-col" style="width:140px;">AMOUNT</th>
-        <th style="width:90px;">ACTION</th>
+        <th style="width:60px;">SR</th>
+        <th style="width:230px;">Item</th>
+        <th>Description</th>
+        <th style="width:90px;">Qty</th>
+        <th style="width:90px;">Unit</th>
+        <th class="priceCol" style="width:120px;">Rate</th>
+        <th class="priceCol" style="width:130px;">Amount</th>
+        <th style="width:80px;">Action</th>
       </tr>
     </thead>
     <tbody id="itemsBody"></tbody>
@@ -252,426 +619,903 @@ td input,td select,td textarea{border:none;padding:8px;border-radius:8px;}
     <button type="button" class="btn btn-light" onclick="addRow()">+ Add Item</button>
   </div>
 
-  <div class="grid" style="margin-top:20px;">
-    <div class="form-group full">
-      <label>Delivery Note / Remarks</label>
-      <textarea id="deliveryNote">Received the above listed materials/services in good condition.</textarea>
-    </div>
+  <div class="total-box priceBlock">
+    <div class="total-row"><span>Total</span><span id="totalText">OMR 0.000</span></div>
+    <div class="total-row"><span>Less Discount</span><span id="discountText">OMR 0.000</span></div>
+    <div class="total-row"><span>Total Before VAT</span><span id="beforeText">OMR 0.000</span></div>
+    <div class="total-row"><span>VAT</span><span id="vatText">OMR 0.000</span></div>
+    <div class="total-row grand"><span>Grand Total</span><span id="grandText">OMR 0.000</span></div>
+  </div>
 
-    <div class="form-group">
+  <br>
+
+  <label>Delivery Note / Remarks</label>
+  <textarea id="terms">Received the above listed materials/services in good condition.</textarea>
+
+  <div class="grid">
+    <div>
       <label>Company Signature Text</label>
-      <input type="text" id="signatureText" value="For Company">
+      <input id="signatureText" value="For Company">
     </div>
 
-    <div class="form-group">
+    <div>
       <label>Company Email</label>
-      <input type="email" id="companyEmail" value="">
+      <input id="companyEmail">
     </div>
   </div>
 
   <div class="btn-row">
-    <button type="submit" class="btn">Save Delivery Order</button>
-    <button type="button" class="btn btn-light" onclick="updatePreview()">Refresh Preview</button>
-    <button type="button" class="btn btn-light" onclick="window.print()">Print / Save PDF</button>
-    <button type="button" class="btn btn-light" onclick="resetForm()">Clear</button>
+    <button class="btn">Save</button>
+    <button type="button" class="btn btn-light" onclick="window.print()">Print</button>
+    <button type="button" class="btn btn-light" onclick="setDefaults()">Clear</button>
   </div>
 </div>
 
 </form>
 
-<div class="preview-wrap">
-  <h2 style="margin-bottom:18px;color:#0d6efd;">Print Preview</h2>
+<div class="card">
+  <h2 class="screen-title">Delivery Order Output</h2>
 
   <div class="paper">
-    <div class="print-top">
-      <div>E-Mail: <span id="pCompanyEmail">-</span></div>
+
+    <div class="doc-letterhead-space">
+      <img id="pLetterhead" class="letterhead-img" alt="">
+      <div id="pCompanyHeader" class="company-header-fallback"></div>
+    </div>
+
+    <div class="print-title-box">
       <div class="print-title">DELIVERY ORDER</div>
-      <div></div>
     </div>
 
-    <div class="print-section">
-      <div class="print-row"><div class="print-label">Customer Name:</div><div id="pCustomerName">-</div><div class="print-label">DO No:</div><div id="pDoNo">-</div></div>
-      <div class="print-row"><div class="print-label">Address:</div><div id="pAddress">-</div><div class="print-label">Date:</div><div id="pDate">-</div></div>
-      <div class="print-row"><div class="print-label">Attention:</div><div id="pAttention">-</div><div class="print-label">Quotation Ref:</div><div id="pQuotationRef">-</div></div>
-      <div class="print-row"><div class="print-label">Mobile Number:</div><div id="pMobile">-</div><div class="print-label">Email ID:</div><div id="pEmail">-</div></div>
-      <div class="print-row"><div class="print-label">Work Order Ref:</div><div id="pWorkOrderRef">-</div><div class="print-label">Delivered By:</div><div id="pDeliveredBy">-</div></div>
+    <div class="print-box">
+      <div class="print-row">
+        <div class="print-label">Customer Name:</div>
+        <div class="print-value" id="pCustomer">-</div>
+        <div class="print-label">DO No:</div>
+        <div class="print-value" id="pNo">-</div>
+      </div>
+
+      <div class="print-row">
+        <div class="print-label">Address:</div>
+        <div class="print-value" id="pAddress">-</div>
+        <div class="print-label">DO Date:</div>
+        <div class="print-value" id="pDate">-</div>
+      </div>
+
+      <div class="print-row">
+        <div class="print-label">Attention:</div>
+        <div class="print-value" id="pAttention">-</div>
+        <div class="print-label">Quotation Ref:</div>
+        <div class="print-value" id="pQuotationRef">-</div>
+      </div>
+
+      <div class="print-row">
+        <div class="print-label">Mobile Number:</div>
+        <div class="print-value" id="pMobile">-</div>
+        <div class="print-label">Email ID:</div>
+        <div class="print-value" id="pEmail">-</div>
+      </div>
+
+      <div class="print-row">
+        <div class="print-label">Work Order Ref:</div>
+        <div class="print-value" id="pWorkOrderRef">-</div>
+        <div></div><div></div>
+      </div>
     </div>
 
-    <div class="print-section">
-      <div class="print-row"><div class="print-label">Job No:</div><div id="pJobNo">-</div><div class="print-label">Machine / Vehicle:</div><div id="pMachineType">-</div></div>
-      <div class="print-row"><div class="print-label">Serial No:</div><div id="pSerialNo">-</div><div class="print-label">Remarks Ref:</div><div id="pRemarksRef">-</div></div>
+    <div class="tech-grid">
+      <div class="tech-label">PUMP TYPE:</div>
+      <div class="tech-value" id="pPumpType">-</div>
+      <div class="tech-label">CYLINDER.NO:</div>
+      <div class="tech-value" id="pCylinderNo">-</div>
+      <div class="tech-label">NO OF NOZZLES:</div>
+      <div class="tech-value" id="pNoOfNozzles">-</div>
+
+      <div class="tech-label">PUMP.NO:</div>
+      <div class="tech-value" id="pPumpNo">-</div>
+      <div class="tech-label">JOB.NO:</div>
+      <div class="tech-value" id="pJobNo">-</div>
+      <div class="tech-label">GOV.NO:</div>
+      <div class="tech-value" id="pGovNo">-</div>
+
+      <div class="tech-label">WORK ORDER.NO:</div>
+      <div class="tech-value" id="pWorkOrderNo">-</div>
+      <div class="tech-label">Serial No.</div>
+      <div class="tech-value" id="pSerialNo">-</div>
+      <div></div><div></div>
     </div>
 
     <table class="print-items">
-      <thead>
-        <tr>
-          <th style="width:80px;">SR.NO</th>
-          <th>DESCRIPTION</th>
-          <th style="width:120px;">QTY</th>
-          <th style="width:120px;">UNIT</th>
-          <th class="price-col" style="width:150px;">UNIT PRICE</th>
-          <th class="price-col" style="width:150px;">AMOUNT</th>
-        </tr>
-      </thead>
-      <tbody id="pItemsBody"></tbody>
-    </table>
+  <thead>
+    <tr>
+      <th style="width:55px;">SR.NO</th>
+      <th>DESCRIPTION</th>
+      <th style="width:70px;">QTY</th>
+      <th style="width:70px;">UNIT</th>
+      <th class="priceCol" style="width:95px;">UNIT PRICE</th>
+      <th class="priceCol" style="width:95px;">AMOUNT</th>
+    </tr>
+  </thead>
+  <tbody id="pItems"></tbody>
+</table>
 
-    <div class="print-note" id="pDeliveryNote">-</div>
+    <div class="print-total-area priceBlock">
+      <div></div>
+      <div class="print-totals">
+        <div class="print-total-row"><div>Total</div><div id="pTotal">0.000</div></div>
+        <div class="print-total-row"><div>Less Discount</div><div id="pDisc">0.000</div></div>
+        <div class="print-total-row"><div>Total Before VAT</div><div id="pBefore">0.000</div></div>
+        <div class="print-total-row" id="pVatRow"><div>VAT@<span id="pVatP">5</span>%</div><div id="pVat">0.000</div></div>
+        <div class="print-total-row"><div>Grand Total</div><div id="pGrand">0.000</div></div>
+      </div>
+    </div>
 
-    <div class="print-sign">
-      <div><span id="pSignatureText">For Company</span><br><br>Authorized Signatory</div>
+    <div class="print-note" id="pTerms">-</div>
+
+    <div class="footer-sign">
+      <div><span id="pSignature">For Company</span><br><br>Authorized Signatory</div>
       <div>Received By:<br><br>Signature:</div>
       <div>Date:<br><br>Stamp:</div>
     </div>
+
   </div>
 </div>
 
-<div class="card saved-card">
+<div class="card saved">
   <h2>Saved Delivery Orders</h2>
+  <input id="savedSearch" placeholder="Search saved delivery orders..." oninput="loadSaved()">
+  <br><br>
+
   <table>
     <thead>
       <tr>
         <th>DO No</th>
         <th>Date</th>
         <th>Customer</th>
-        <th>Quotation Ref</th>
-        <th>VAT Type</th>
+        <th>Total</th>
         <th>Status</th>
         <th>Action</th>
       </tr>
     </thead>
-    <tbody id="savedTable"></tbody>
+    <tbody id="savedBody"></tbody>
   </table>
 </div>
 
+<div class="modal" id="customerModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2>Create Customer</h2>
+      <button class="x" onclick="closeM('customerModal')">X</button>
+    </div>
+
+    <div class="grid">
+      <div><label>Customer Name *</label><input id="qcName"></div>
+      <div><label>Contact Person / Attention</label><input id="qcContactPerson"></div>
+      <div><label>Mobile</label><input id="qcMobile"></div>
+      <div><label>Email</label><input id="qcEmail"></div>
+      <div><label>VAT No Optional</label><input id="qcVat"></div>
+      <div><label>Credit Period</label><input id="qcCredit"></div>
+      <div class="full"><label>Address</label><textarea id="qcAddress"></textarea></div>
+    </div>
+
+    <div class="btn-row">
+      <button type="button" class="btn" onclick="saveQuickCustomer()">Save Customer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="itemModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2>Create Item / Category / Brand</h2>
+      <button class="x" onclick="closeM('itemModal')">X</button>
+    </div>
+
+    <div class="grid">
+      <div><label>Item Name *</label><input id="qiName"></div>
+      <div><label>Vehicle / Machine / Pump Type</label><input id="qiType" list="typeList"></div>
+      <div><label>Category</label><input id="qiCategory" list="catList"></div>
+      <div><label>Brand</label><input id="qiBrand" list="brandList"></div>
+      <div><label>Sub Category</label><input id="qiSub"></div>
+      <div><label>Unit</label><select id="qiUnit"><option>PCS</option><option>SET</option><option>NOS</option><option>JOB</option><option>SERVICE</option></select></div>
+      <div><label>Part No</label><input id="qiPart"></div>
+      <div><label>OEM No</label><input id="qiOem"></div>
+      <div><label>Selling Price</label><input type="number" step=".001" id="qiSell" value="0.000"></div>
+      <div><label>Purchase Price</label><input type="number" step=".001" id="qiPur" value="0.000"></div>
+    </div>
+
+    <div class="btn-row">
+      <button type="button" class="btn" onclick="saveQuickItem()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<datalist id="typeList"></datalist>
+<datalist id="brandList"></datalist>
+<datalist id="catList"></datalist>
+
 <script>
-function getQuotations(){
-  return JSON.parse(localStorage.getItem("post91Quotations") || "[]");
+const STORE = "post91DeliveryOrders";
+let EDIT = "";
+
+function gd(k){return JSON.parse(localStorage.getItem(k)||"[]")}
+function sd(k,d){localStorage.setItem(k,JSON.stringify(d))}
+function today(){return new Date().toISOString().split("T")[0]}
+function mv(n){return Number(n||0).toFixed(3)}
+function mt(n){return "OMR "+mv(n)}
+
+function nm(c){return c.customerName||c.name||""}
+function addr(c){return c.address||c.customerAddress||""}
+function mob(c){return c.mobile||c.phone||""}
+function em(c){return c.email||""}
+
+function itn(i){return i.itemName||""}
+function ity(i){return i.machineType||i.vehicleMachinePumpType||""}
+function ibr(i){return i.brandName||i.mainCategoryBrand||i.subCategoryBrand||""}
+function icat(i){return i.category||i.mainCategory||""}
+function iprice(i){return i.sellingPrice||0}
+function iunit(i){return i.unit||"PCS"}
+
+function isub(i){
+  let a=[];
+  if(i.partNumber)a.push("Part No: "+i.partNumber);
+  if(i.oemNumber)a.push("OEM: "+i.oemNumber);
+  return a.join(" | ");
 }
 
-function getDOs(){
-  return JSON.parse(localStorage.getItem("post91DeliveryOrders") || "[]");
+function uq(a){
+  return [...new Set(a.map(x=>(x||"").trim()).filter(Boolean))]
 }
 
-function saveDOs(data){
-  localStorage.setItem("post91DeliveryOrders", JSON.stringify(data));
+function dl(id,a){
+  let d=document.getElementById(id);
+  d.innerHTML="";
+  uq(a).forEach(v=>{
+    let o=document.createElement("option");
+    o.value=v;
+    d.appendChild(o);
+  });
 }
 
-function today(){
-  return new Date().toISOString().split("T")[0];
+function refreshLists(){
+  let items=gd("post91Items");
+  dl("typeList",[...gd("post91MachineTypes").map(x=>x.name),...items.map(ity)]);
+  dl("brandList",[...gd("post91Brands").map(x=>x.name),...items.map(ibr)]);
+  dl("catList",[...gd("post91Categories").map(x=>x.name),...items.map(icat)]);
 }
 
-function moneyValue(num){
-  return Number(num || 0).toFixed(3);
+function openM(id){document.getElementById(id).classList.add("show")}
+function closeM(id){document.getElementById(id).classList.remove("show")}
+
+function saveQuickCustomer(){
+  let a=gd("post91Customers");
+
+  let c={
+    customerName:qcName.value.trim(),
+    contactPerson:qcContactPerson.value.trim(),
+    attention:qcContactPerson.value.trim(),
+    address:qcAddress.value.trim(),
+    mobile:qcMobile.value.trim(),
+    email:qcEmail.value.trim(),
+    vatNumber:qcVat.value.trim(),
+    creditPeriod:qcCredit.value.trim()
+  };
+
+  if(!c.customerName)return alert("Customer name required");
+
+  a.push(c);
+  sd("post91Customers",a);
+  closeM("customerModal");
+  fillCustomer(c);
+}
+
+function saveQuickItem(){
+  let a=gd("post91Items");
+
+  let i={
+    itemName:qiName.value.trim(),
+    machineType:qiType.value.trim(),
+    category:qiCategory.value.trim(),
+    brandName:qiBrand.value.trim(),
+    subCategory:qiSub.value.trim(),
+    unit:qiUnit.value,
+    partNumber:qiPart.value.trim(),
+    oemNumber:qiOem.value.trim(),
+    sellingPrice:qiSell.value||"0.000",
+    purchasePrice:qiPur.value||"0.000",
+    status:"Active"
+  };
+
+  i.mainCategory=i.category;
+  i.mainCategoryBrand=i.brandName;
+  i.subCategoryBrand=i.brandName;
+
+  if(!i.itemName)return alert("Item name required");
+
+  a.push(i);
+  sd("post91Items",a);
+  refreshLists();
+  closeM("itemModal");
+}
+
+function customerSearch(){
+  let input=customerName;
+  let p=customerPanel;
+  let q=input.value.toLowerCase();
+
+  let list=gd("post91Customers")
+    .filter(c=>JSON.stringify(c).toLowerCase().includes(q))
+    .slice(0,40);
+
+  p.innerHTML=list.map((c,i)=>`
+    <div class="opt" data-i="${i}">
+      <b>${nm(c)||"-"}</b>
+      <span>${mob(c)||""} ${em(c)||""}</span>
+    </div>
+  `).join("") || "<div class='opt'>No customer found</div>";
+
+  p.classList.add("show");
+
+  [...p.querySelectorAll("[data-i]")].forEach((e,i)=>{
+    e.onclick=()=>{
+      fillCustomer(list[i]);
+      p.classList.remove("show");
+    };
+  });
+}
+
+function fillCustomer(c){
+  customerName.value=nm(c);
+  customerAddress.value=addr(c);
+  attention.value=c.contactPerson || c.attention || c.contactName || "-";
+  mobile.value=mob(c);
+  email.value=em(c);
+  updatePreview();
 }
 
 function sourceChanged(){
-  const sourceType = document.getElementById("sourceType").value;
-  const showQuotation = sourceType === "Load From Quotation";
-
-  document.getElementById("quotationBox").style.display = showQuotation ? "block" : "none";
-  document.getElementById("loadQuotationButtonBox").style.display = showQuotation ? "flex" : "none";
-
-  if(!showQuotation){
-    document.getElementById("quotationSelect").value = "";
-    document.getElementById("quotationRef").value = "";
-  }
-
-  updatePreview();
+  const show = sourceType.value === "Load From Quotation";
+  sourceBox.style.display = show ? "block" : "none";
+  loadBox.style.display = show ? "flex" : "none";
+  loadSourceDropdown();
 }
 
-function loadQuotationDropdown(){
-  const select = document.getElementById("quotationSelect");
-  const quotations = getQuotations();
+function loadSourceDropdown(){
+  sourceSelect.innerHTML = `<option value="">Select Quotation</option>`;
 
-  select.innerHTML = `<option value="">Select Quotation</option>`;
-
-  quotations.forEach((q,index)=>{
-    const opt = document.createElement("option");
-    opt.value = index;
-    opt.textContent = `${q.quotationNo || "QT"} - ${q.customerName || "Customer"}`;
-    select.appendChild(opt);
+  gd("post91Quotations").forEach((q,i)=>{
+    let o=document.createElement("option");
+    o.value=i;
+    o.textContent=`${q.quotationNo || "QT"} - ${q.customerName || "Customer"}`;
+    sourceSelect.appendChild(o);
   });
 }
 
-function loadQuotationToDO(){
-  const index = document.getElementById("quotationSelect").value;
+function loadSource(){
+  if(sourceSelect.value==="")return alert("Select quotation first.");
 
-  if(index === ""){
-    alert("Please select quotation first.");
-    return;
-  }
+  const q = gd("post91Quotations")[sourceSelect.value];
 
-  const q = getQuotations()[index];
+  customerName.value=q.customerName||"";
+  customerAddress.value=q.customerAddress||"";
+  attention.value=q.attention||q.contactPerson||q.contactName||"-";
+  mobile.value=q.mobile||"";
+  email.value=q.email||"";
 
-  document.getElementById("customerName").value = q.customerName || "";
-  document.getElementById("customerAddress").value = q.customerAddress || "";
-  document.getElementById("attention").value = q.attention || "";
-  document.getElementById("mobile").value = q.mobile || "";
-  document.getElementById("email").value = q.email || "";
+  quotationRef.value=q.quotationNo||"";
+  workOrderRef.value=q.workOrderNo||q.referenceNo||"";
 
-  document.getElementById("quotationRef").value = q.quotationNo || "";
+  pumpType.value=q.pumpType||q.machineType||"";
+  brandName.value=q.brandName||"";
+  cylinderNo.value=q.cylinderNo||"";
+  noOfNozzles.value=q.noOfNozzles||"";
+  pumpNo.value=q.pumpNo||"";
+  jobNo.value=q.jobNo||"";
+  govNo.value=q.govNo||"";
+  workOrderNo.value=q.workOrderNo||"";
+  serialNo.value=q.serialNo||"";
 
-  document.getElementById("doVatType").value =
-    q.vatType === "Non-VAT Invoice" ? "Non-VAT Sales" :
-    q.vatType === "Zero Rated" ? "Zero Rated Sales" :
-    q.vatType === "Exempt Supply" ? "Exempt Sales" :
-    q.vatType || "VAT Exclusive";
+  vatType.value=q.vatType||"VAT Exclusive";
+  vatPercent.value=q.vatPercent||5;
+  discount.value=q.discountAmount||"0.000";
 
-  document.getElementById("vatPercent").value = q.vatPercent || 5;
+  itemsBody.innerHTML="";
+  (q.items||[]).forEach(item=>addRow(item));
+  if((q.items||[]).length===0)addRow();
 
-  document.getElementById("jobNo").value = q.jobNo || "";
-  document.getElementById("machineType").value = q.pumpType || q.selectedCategory || "";
-  document.getElementById("serialNo").value = q.serialNo || "";
-  document.getElementById("remarksRef").value = q.workOrderNo || "";
-
-  document.getElementById("itemsBody").innerHTML = "";
-
-  if(q.items && q.items.length > 0){
-    q.items.forEach(item=>{
-      addRow({
-        description: item.description || "",
-        qty: item.qty || 1,
-        unit: item.unit || "PCS",
-        rate: item.rate || "0.000",
-        amount: item.amount || "0.000"
-      });
-    });
-  } else {
-    addRow();
-  }
-
-  updatePreview();
-  alert("Quotation data loaded. You can modify Delivery Order before saving.");
+  calc();
+  alert("Quotation loaded. You can modify before saving DO.");
 }
 
-function addRow(data = null){
-  const tbody = document.getElementById("itemsBody");
-  const tr = document.createElement("tr");
+function addRow(d=null){
+  let tr=document.createElement("tr");
 
-  tr.innerHTML = `
-    <td><input type="number" class="sr" value="${tbody.children.length + 1}" readonly></td>
-    <td><textarea class="desc" placeholder="Item / service description"></textarea></td>
-    <td><input type="number" step="0.001" class="qty" value="1" oninput="updatePreview()"></td>
-    <td><input type="text" class="unit" value="PCS" oninput="updatePreview()"></td>
-    <td class="price-col"><input type="number" step="0.001" class="rate" value="0.000" oninput="updatePreview()"></td>
-    <td class="price-col"><input type="text" class="amount" value="0.000" readonly></td>
-    <td><button type="button" class="btn btn-danger" onclick="removeRow(this)">X</button></td>
+  tr.innerHTML=`
+    <td><input class="sr" value="${itemsBody.children.length+1}" readonly></td>
+
+    <td>
+      <div class="search">
+        <input class="itemSearch" onfocus="itemSearch(this)" oninput="itemSearch(this)" placeholder="Search item or type manually">
+        <div class="panel itemPanel"></div>
+      </div>
+      <div class="small itemMeta"></div>
+    </td>
+
+    <td><textarea class="desc"></textarea></td>
+    <td><input type="number" step=".001" class="qty" value="1" oninput="calc()"></td>
+    <td><input class="unit" value="PCS"></td>
+    <td class="priceCol"><input type="number" step=".001" class="rate" value="0.000" oninput="calc()"></td>
+    <td class="priceCol"><input class="amount" value="0.000" readonly></td>
+    <td><button type="button" class="btn btn-danger" onclick="remRow(this)">X</button></td>
   `;
 
-  tbody.appendChild(tr);
+  itemsBody.appendChild(tr);
 
-  if(data){
-    tr.querySelector(".desc").value = data.description || "";
-    tr.querySelector(".qty").value = data.qty || 1;
-    tr.querySelector(".unit").value = data.unit || "PCS";
-    tr.querySelector(".rate").value = data.rate || "0.000";
-    tr.querySelector(".amount").value = data.amount || "0.000";
+  if(d){
+    tr.querySelector(".itemSearch").value=d.itemName||d.description?.split("\\n")[0]||"";
+    tr.querySelector(".desc").value=d.description||"";
+    tr.querySelector(".qty").value=d.qty||1;
+    tr.querySelector(".unit").value=d.unit||"PCS";
+    tr.querySelector(".rate").value=d.rate||"0.000";
+    tr.querySelector(".amount").value=d.amount||"0.000";
+    tr.querySelector(".itemMeta").innerHTML=d.partNumber||d.oemNumber?`Part No: ${d.partNumber||"-"} | OEM: ${d.oemNumber||"-"}`:"";
   }
 
-  updatePreview();
+  calc();
 }
 
-function removeRow(btn){
-  btn.closest("tr").remove();
-  refreshSrNo();
-  updatePreview();
-}
+function itemSearch(inp){
+  let row=inp.closest("tr");
+  let p=row.querySelector(".itemPanel");
+  let q=inp.value.toLowerCase();
 
-function refreshSrNo(){
-  document.querySelectorAll("#itemsBody tr").forEach((row,index)=>{
-    row.querySelector(".sr").value = index + 1;
+  let list=gd("post91Items").filter(i=>(i.status||"Active")!=="Inactive");
+
+  if(filterType.value) list=list.filter(i=>ity(i)===filterType.value);
+  if(filterBrand.value) list=list.filter(i=>ibr(i)===filterBrand.value);
+
+  list=list.filter(i=>
+    (itn(i)+" "+isub(i)+" "+ity(i)+" "+ibr(i)+" "+icat(i)).toLowerCase().includes(q)
+  ).slice(0,40);
+
+  p.innerHTML=list.map((i,x)=>`
+    <div class="opt" data-i="${x}">
+      <b>${itn(i)}</b>
+      <span>${isub(i)||"No Part/OEM"}</span>
+    </div>
+  `).join("") || "<div class='opt'>No item found</div>";
+
+  p.classList.add("show");
+
+  [...p.querySelectorAll("[data-i]")].forEach((e,x)=>{
+    e.onclick=()=>{
+      selectItem(row,list[x]);
+      p.classList.remove("show");
+    };
   });
+}
+
+function selectItem(r,i){
+  r.querySelector(".itemSearch").value=itn(i);
+  r.querySelector(".itemMeta").innerHTML=isub(i);
+
+  let desc=itn(i);
+  if(i.partNumber)desc+="\\nPart No: "+i.partNumber;
+  if(i.oemNumber)desc+="\\nOEM: "+i.oemNumber;
+
+  r.querySelector(".desc").value=desc;
+  r.querySelector(".unit").value=iunit(i);
+  r.querySelector(".rate").value=mv(iprice(i));
+
+  if(!filterType.value&&ity(i))filterType.value=ity(i);
+  if(!filterBrand.value&&ibr(i))filterBrand.value=ibr(i);
+
+  if(!pumpType.value&&ity(i))pumpType.value=ity(i);
+  if(!brandName.value&&ibr(i))brandName.value=ibr(i);
+
+  calc();
+}
+
+function remRow(b){
+  b.closest("tr").remove();
+
+  [...document.querySelectorAll("#itemsBody tr")].forEach((r,i)=>{
+    r.querySelector(".sr").value=i+1;
+  });
+
+  calc();
+}
+
+function calc(){
+  let total=0;
+
+  document.querySelectorAll("#itemsBody tr").forEach(r=>{
+    let q=+r.querySelector(".qty").value||0;
+    let rate=+r.querySelector(".rate").value||0;
+    let am=q*rate;
+
+    r.querySelector(".amount").value=mv(am);
+    total+=am;
+  });
+
+  let disc=+discount.value||0;
+  let after=Math.max(total-disc,0);
+  let v=+vatPercent.value||0;
+  let type=vatType.value;
+
+  let vat=0,before=after,grand=after;
+
+  if(type==="VAT Exclusive"){
+    vat=before*v/100;
+    grand=before+vat;
+  }
+
+  if(type==="VAT Inclusive"){
+    vat=after-(after/(1+v/100));
+    before=after-vat;
+    grand=after;
+  }
+
+  if(["Non-VAT","Zero Rated","Exempt"].includes(type)){
+    vat=0;
+    before=after;
+    grand=after;
+  }
+
+  totalText.textContent=mt(total);
+  discountText.textContent=mt(disc);
+  beforeText.textContent=mt(before);
+  vatText.textContent=mt(vat);
+  grandText.textContent=mt(grand);
+
+  updatePreview();
+
+  return {total,discountAmount:disc,beforeTax:before,vatAmount:vat,grandTotal:grand};
+}
+
+function silent(){
+  let total=0;
+
+  document.querySelectorAll("#itemsBody tr").forEach(r=>{
+    total+=+(r.querySelector(".amount").value)||0;
+  });
+
+  let disc=+discount.value||0;
+  let after=Math.max(total-disc,0);
+  let v=+vatPercent.value||0;
+  let type=vatType.value;
+
+  let vat=0,before=after,grand=after;
+
+  if(type==="VAT Exclusive"){
+    vat=before*v/100;
+    grand=before+vat;
+  }
+
+  if(type==="VAT Inclusive"){
+    vat=after-(after/(1+v/100));
+    before=after-vat;
+    grand=after;
+  }
+
+  if(["Non-VAT","Zero Rated","Exempt"].includes(type)){
+    vat=0;
+    before=after;
+    grand=after;
+  }
+
+  return {total,discountAmount:disc,beforeTax:before,vatAmount:vat,grandTotal:grand};
+}
+
+function pumpTypeDisplay(){
+  let type=pumpType.value||"-";
+  let brand=brandName.value||"";
+  return brand ? `${type} (${brand})` : type;
 }
 
 function updatePreview(){
-  document.getElementById("pCompanyEmail").textContent = document.getElementById("companyEmail").value || "-";
-  document.getElementById("pCustomerName").textContent = document.getElementById("customerName").value || "-";
-  document.getElementById("pAddress").textContent = document.getElementById("customerAddress").value || "-";
-  document.getElementById("pAttention").textContent = document.getElementById("attention").value || "-";
-  document.getElementById("pMobile").textContent = document.getElementById("mobile").value || "-";
-  document.getElementById("pEmail").textContent = document.getElementById("email").value || "-";
+  let company = JSON.parse(localStorage.getItem("post91CompanyProfile") || "{}");
 
-  document.getElementById("pDoNo").textContent = document.getElementById("doNo").value || "-";
-  document.getElementById("pDate").textContent = document.getElementById("doDate").value || "-";
-  document.getElementById("pQuotationRef").textContent = document.getElementById("quotationRef").value || "-";
-  document.getElementById("pWorkOrderRef").textContent = document.getElementById("workOrderRef").value || "-";
-  document.getElementById("pDeliveredBy").textContent = document.getElementById("deliveredBy").value || "-";
+  if(company.letterhead){
+    pLetterhead.src = company.letterhead;
+    pLetterhead.style.display = "block";
+    pCompanyHeader.style.display = "none";
+  }else{
+    pLetterhead.removeAttribute("src");
+    pLetterhead.style.display = "none";
+    pCompanyHeader.style.display = "flex";
 
-  document.getElementById("pJobNo").textContent = document.getElementById("jobNo").value || "-";
-  document.getElementById("pMachineType").textContent = document.getElementById("machineType").value || "-";
-  document.getElementById("pSerialNo").textContent = document.getElementById("serialNo").value || "-";
-  document.getElementById("pRemarksRef").textContent = document.getElementById("remarksRef").value || "-";
-
-  const pItemsBody = document.getElementById("pItemsBody");
-  pItemsBody.innerHTML = "";
-
-  document.querySelectorAll("#itemsBody tr").forEach(row=>{
-    const qty = Number(row.querySelector(".qty").value || 0);
-    const rate = Number(row.querySelector(".rate").value || 0);
-    const amount = qty * rate;
-
-    row.querySelector(".amount").value = moneyValue(amount);
-
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td style="text-align:center;">${row.querySelector(".sr").value}</td>
-      <td style="white-space:pre-line;">${row.querySelector(".desc").value || "-"}</td>
-      <td style="text-align:center;">${qty}</td>
-      <td style="text-align:center;">${row.querySelector(".unit").value || "-"}</td>
-      <td class="price-col" style="text-align:right;">${moneyValue(rate)}</td>
-      <td class="price-col" style="text-align:right;">${moneyValue(amount)}</td>
+    pCompanyHeader.innerHTML = `
+      <div>
+        <div class="company-name">${company.companyName || company.name || "Company Name"}</div>
+        <div class="company-line">${company.address || ""}</div>
+        <div class="company-line">
+          ${company.phone ? "Tel: " + company.phone : ""}
+          ${company.mobile ? " | Mobile: " + company.mobile : ""}
+          ${company.email ? " | Email: " + company.email : ""}
+        </div>
+        <div class="company-line">
+          ${company.vatNumber ? "VAT IN: " + company.vatNumber : ""}
+          ${company.crNumber ? " | C.R. No: " + company.crNumber : ""}
+        </div>
+      </div>
     `;
-
-    pItemsBody.appendChild(tr);
-  });
-
-  for(let i = pItemsBody.children.length; i < 10; i++){
-    const blank = document.createElement("tr");
-    blank.innerHTML = `
-      <td style="height:28px;"></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td class="price-col"></td>
-      <td class="price-col"></td>
-    `;
-    pItemsBody.appendChild(blank);
   }
 
-  document.getElementById("pDeliveryNote").textContent = document.getElementById("deliveryNote").value || "-";
-  document.getElementById("pSignatureText").textContent = document.getElementById("signatureText").value || "-";
+  pCustomer.textContent=customerName.value||"-";
+  pAddress.textContent=customerAddress.value||"-";
+  pAttention.textContent=attention.value||"-";
+  pMobile.textContent=mobile.value||"-";
+  pEmail.textContent=email.value||"-";
 
-  const printMode = document.getElementById("printMode").value;
-  const showPrice = printMode === "With Price";
+  pNo.textContent=doNo.value||"-";
+  pDate.textContent=doDate.value||"-";
+  pQuotationRef.textContent=quotationRef.value||"-";
+  pWorkOrderRef.textContent=workOrderRef.value||"-";
 
-  document.querySelectorAll(".price-col").forEach(col=>{
-    col.style.display = showPrice ? "" : "none";
+  pPumpType.textContent=pumpTypeDisplay();
+  pCylinderNo.textContent=cylinderNo.value||"-";
+  pNoOfNozzles.textContent=noOfNozzles.value||"-";
+  pPumpNo.textContent=pumpNo.value||"-";
+  pJobNo.textContent=jobNo.value||"-";
+  pGovNo.textContent=govNo.value||"-";
+  pWorkOrderNo.textContent=workOrderNo.value||"-";
+  pSerialNo.textContent=serialNo.value||"-";
+
+  pItems.innerHTML="";
+
+  let printedRows = 0;
+
+  document.querySelectorAll("#itemsBody tr").forEach(r=>{
+    let itemName = r.querySelector(".itemSearch").value.trim();
+    let desc = r.querySelector(".desc").value.trim();
+    let printDesc = desc || itemName || "-";
+
+    let tr=document.createElement("tr");
+
+    tr.innerHTML=`
+      <td style="text-align:center;">${r.querySelector(".sr").value}</td>
+      <td style="white-space:pre-line;">${printDesc}</td>
+      <td style="text-align:center;">${r.querySelector(".qty").value||0}</td>
+      <td style="text-align:center;">${r.querySelector(".unit").value||"-"}</td>
+      <td class="priceCol" style="text-align:right;">${mv(r.querySelector(".rate").value)}</td>
+      <td class="priceCol" style="text-align:right;">${mv(r.querySelector(".amount").value)}</td>
+    `;
+
+    pItems.appendChild(tr);
+    printedRows++;
+  });
+
+  let minimumRows = 14;
+
+for(let i = printedRows + 1; i <= minimumRows; i++){
+  let tr=document.createElement("tr");
+
+  tr.innerHTML=`
+    <td style="text-align:center;"></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="priceCol"></td>
+    <td class="priceCol"></td>
+  `;
+
+  pItems.appendChild(tr);
+}
+
+  let t=silent();
+
+  pTotal.textContent=mv(t.total);
+  pDisc.textContent=mv(t.discountAmount);
+  pBefore.textContent=mv(t.beforeTax);
+  pVatP.textContent=vatPercent.value||0;
+  pVat.textContent=mv(t.vatAmount);
+  pGrand.textContent=mv(t.grandTotal);
+
+  pVatRow.style.display=["Non-VAT","Zero Rated","Exempt"].includes(vatType.value)?"none":"grid";
+
+  pTerms.textContent=terms.value||"-";
+  pSignature.textContent=signatureText.value||"For Company";
+
+  let show=printMode.value==="With Price";
+
+  document.querySelectorAll(".priceCol,.priceBlock").forEach(e=>{
+    e.style.display=show?"":"none";
   });
 }
 
-document.getElementById("doForm").addEventListener("input", function(){
-  updatePreview();
-});
-
-document.getElementById("doForm").addEventListener("submit", function(e){
+function saveDoc(e){
   e.preventDefault();
 
-  const deliveryOrders = getDOs();
-  const items = [];
+  let a=gd(STORE);
+  let t=silent();
+  let items=[];
 
-  document.querySelectorAll("#itemsBody tr").forEach(row=>{
-    const desc = row.querySelector(".desc").value;
+  document.querySelectorAll("#itemsBody tr").forEach(r=>{
+    let itemName=r.querySelector(".itemSearch").value.trim();
+    let desc=r.querySelector(".desc").value.trim();
 
-    if(desc.trim() !== ""){
-      const qty = Number(row.querySelector(".qty").value || 0);
-      const rate = Number(row.querySelector(".rate").value || 0);
-      const amount = qty * rate;
-
+    if(itemName || desc){
       items.push({
-        sr: row.querySelector(".sr").value,
-        description: desc,
-        qty: row.querySelector(".qty").value,
-        unit: row.querySelector(".unit").value,
-        rate: moneyValue(rate),
-        amount: moneyValue(amount)
+        itemName:itemName,
+        description:desc || itemName,
+        qty:r.querySelector(".qty").value,
+        unit:r.querySelector(".unit").value,
+        rate:r.querySelector(".rate").value,
+        amount:r.querySelector(".amount").value
       });
     }
   });
 
-  if(items.length === 0){
+  if(items.length===0){
     alert("Please add at least one item.");
     return;
   }
 
-  const deliveryOrder = {
-    sourceType: document.getElementById("sourceType").value,
-    doNo: document.getElementById("doNo").value,
-    doDate: document.getElementById("doDate").value,
-    customerName: document.getElementById("customerName").value,
-    customerAddress: document.getElementById("customerAddress").value,
-    attention: document.getElementById("attention").value,
-    mobile: document.getElementById("mobile").value,
-    email: document.getElementById("email").value,
-    quotationRef: document.getElementById("quotationRef").value,
-    workOrderRef: document.getElementById("workOrderRef").value,
-    deliveredBy: document.getElementById("deliveredBy").value,
-    jobNo: document.getElementById("jobNo").value,
-    machineType: document.getElementById("machineType").value,
-    serialNo: document.getElementById("serialNo").value,
-    remarksRef: document.getElementById("remarksRef").value,
-    status: document.getElementById("status").value,
-    printMode: document.getElementById("printMode").value,
-    vatType: document.getElementById("doVatType").value,
-    vatPercent: document.getElementById("vatPercent").value,
-    deliveryNote: document.getElementById("deliveryNote").value,
-    items
+  let rec={
+    doNo:doNo.value,
+    doDate:doDate.value,
+    sourceType:sourceType.value,
+    customerName:customerName.value,
+    customerAddress:customerAddress.value,
+    attention:attention.value,
+    mobile:mobile.value,
+    email:email.value,
+    quotationRef:quotationRef.value,
+    workOrderRef:workOrderRef.value,
+    docStatus:docStatus.value,
+    printMode:printMode.value,
+    vatType:vatType.value,
+    vatPercent:vatPercent.value,
+    discountAmount:discount.value,
+
+    pumpType:pumpType.value,
+    brandName:brandName.value,
+    cylinderNo:cylinderNo.value,
+    noOfNozzles:noOfNozzles.value,
+    pumpNo:pumpNo.value,
+    jobNo:jobNo.value,
+    govNo:govNo.value,
+    workOrderNo:workOrderNo.value,
+    serialNo:serialNo.value,
+
+    terms:terms.value,
+    signatureText:signatureText.value,
+    companyEmail:companyEmail.value,
+
+    items,
+    ...t,
+    updatedAt:new Date().toISOString()
   };
 
-  deliveryOrders.push(deliveryOrder);
-  saveDOs(deliveryOrders);
+  if(EDIT===""){
+    a.push(rec);
+    alert("Delivery Order saved successfully.");
+  }else{
+    a[EDIT]={...a[EDIT],...rec};
+    alert("Delivery Order updated successfully.");
+  }
 
-  alert("Delivery Order saved successfully.");
-  loadSavedDOs();
-});
+  sd(STORE,a);
+  EDIT="";
+  loadSaved();
+}
 
-function loadSavedDOs(){
-  const tbody = document.getElementById("savedTable");
-  tbody.innerHTML = "";
+function statusBadge(s){
+  return `<span class="badge ${(s||"Draft")==="Submitted"?"submitted":"draft"}">${s||"Draft"}</span>`;
+}
 
-  getDOs().forEach((d,index)=>{
-    const tr = document.createElement("tr");
+function loadSaved(){
+  let q=(savedSearch.value||"").toLowerCase();
+  savedBody.innerHTML="";
 
-    tr.innerHTML = `
-      <td>${d.doNo || "-"}</td>
-      <td>${d.doDate || "-"}</td>
-      <td>${d.customerName || "-"}</td>
-      <td>${d.quotationRef || "-"}</td>
-      <td>${d.vatType || "-"}</td>
-      <td>${d.status || "Draft"}</td>
-      <td><button class="btn btn-danger" type="button" onclick="deleteDO(${index})">Delete</button></td>
+  gd(STORE).forEach((d,i)=>{
+    if(q && !JSON.stringify(d).toLowerCase().includes(q))return;
+
+    let tr=document.createElement("tr");
+
+    tr.innerHTML=`
+      <td>${d.doNo||"-"}</td>
+      <td>${d.doDate||"-"}</td>
+      <td>${d.customerName||"-"}</td>
+      <td>${mt(d.grandTotal)}</td>
+      <td>${statusBadge(d.docStatus)}</td>
+      <td>
+        <button class="btn btn-light" onclick="editDoc(${i})">Edit/Open</button>
+        <button class="btn btn-danger" onclick="delDoc(${i})">Delete</button>
+      </td>
     `;
 
-    tbody.appendChild(tr);
+    savedBody.appendChild(tr);
   });
 }
 
-function deleteDO(index){
+function editDoc(i){
+  let d=gd(STORE)[i];
+  EDIT=i;
+
+  doNo.value=d.doNo||"";
+  doDate.value=d.doDate||today();
+  sourceType.value=d.sourceType||"Manual Delivery Order";
+
+  customerName.value=d.customerName||"";
+  customerAddress.value=d.customerAddress||"";
+  attention.value=d.attention||"";
+  mobile.value=d.mobile||"";
+  email.value=d.email||"";
+
+  quotationRef.value=d.quotationRef||"";
+  workOrderRef.value=d.workOrderRef||"";
+  docStatus.value=d.docStatus||"Draft";
+  printMode.value=d.printMode||"Without Price";
+  vatType.value=d.vatType||"VAT Exclusive";
+  vatPercent.value=d.vatPercent||5;
+  discount.value=d.discountAmount||"0.000";
+
+  pumpType.value=d.pumpType||"";
+  brandName.value=d.brandName||"";
+  cylinderNo.value=d.cylinderNo||"";
+  noOfNozzles.value=d.noOfNozzles||"";
+  pumpNo.value=d.pumpNo||"";
+  jobNo.value=d.jobNo||"";
+  govNo.value=d.govNo||"";
+  workOrderNo.value=d.workOrderNo||"";
+  serialNo.value=d.serialNo||"";
+
+  terms.value=d.terms||"";
+  signatureText.value=d.signatureText||"For Company";
+  companyEmail.value=d.companyEmail||"";
+
+  itemsBody.innerHTML="";
+  (d.items||[]).forEach(item=>addRow(item));
+
+  if((d.items||[]).length===0)addRow();
+
+  sourceChanged();
+  calc();
+  scrollTo({top:0,behavior:"smooth"});
+}
+
+function delDoc(i){
   if(confirm("Delete this delivery order?")){
-    const deliveryOrders = getDOs();
-    deliveryOrders.splice(index,1);
-    saveDOs(deliveryOrders);
-    loadSavedDOs();
+    let a=gd(STORE);
+    a.splice(i,1);
+    sd(STORE,a);
+    loadSaved();
   }
 }
 
-function resetForm(){
-  document.getElementById("doForm").reset();
-  document.getElementById("itemsBody").innerHTML = "";
-  setDefaults();
-  addRow();
-  sourceChanged();
-  updatePreview();
-}
-
 function setDefaults(){
-  document.getElementById("doDate").value = today();
-  document.getElementById("doNo").value = "DO-" + (1001 + getDOs().length);
-  document.getElementById("sourceType").value = "Manual Delivery Order";
-  document.getElementById("printMode").value = "Without Price";
-  document.getElementById("doVatType").value = "VAT Exclusive";
-  document.getElementById("vatPercent").value = 5;
-  document.getElementById("deliveryNote").value = "Received the above listed materials/services in good condition.";
-  document.getElementById("signatureText").value = "For Company";
+  EDIT="";
+  docForm.reset();
+  itemsBody.innerHTML="";
+
+  doNo.value="DO-"+(1001+gd(STORE).length);
+  doDate.value=today();
+  sourceType.value="Manual Delivery Order";
+  printMode.value="Without Price";
+  vatType.value="VAT Exclusive";
+  vatPercent.value=5;
+  discount.value="0.000";
+  docStatus.value="Draft";
+  terms.value="Received the above listed materials/services in good condition.";
+  signatureText.value="For Company";
+
+  sourceChanged();
+  addRow();
+  calc();
 }
 
-loadQuotationDropdown();
+document.addEventListener("click",e=>{
+  document.querySelectorAll(".panel").forEach(p=>{
+    if(!p.parentElement.contains(e.target))p.classList.remove("show");
+  });
+});
+
+refreshLists();
+loadSourceDropdown();
 setDefaults();
-addRow();
-sourceChanged();
-loadSavedDOs();
-updatePreview();
+loadSaved();
 </script>
 
 </body>
