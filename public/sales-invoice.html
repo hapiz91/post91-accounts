@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Invoice | Post91 Accounts</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
+body{background:#eef3f8;color:#061833;padding:28px;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.header h1{font-size:34px}.header p{color:#64748b;margin-top:6px}
+.back,.quick-create{background:white;color:#0d6efd;text-decoration:none;padding:12px 16px;border-radius:13px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);display:inline-block;}
+.quick-create{font-size:13px;margin-top:8px;}
+.card{background:white;border-radius:22px;padding:26px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:22px;}
+.card h2{margin-bottom:18px;font-size:22px;color:#0d6efd;}
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-group{margin-bottom:16px;}
+label{display:block;margin-bottom:7px;font-weight:800;color:#0f172a;}
+input,select,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #dbe4f0;font-size:15px;outline:none;background:white;}
+textarea{min-height:80px;resize:vertical;}
+input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4px rgba(13,110,253,.1);}
+.full{grid-column:1/-1;}
+.note{background:#e0f2fe;border:1px solid #bae6fd;color:#075985;padding:16px;border-radius:16px;margin-bottom:18px;line-height:1.6;font-weight:700;}
+.btn{border:none;background:#0d6efd;color:white;padding:13px 19px;border-radius:13px;font-weight:900;cursor:pointer;font-size:14px;box-shadow:0 14px 30px rgba(13,110,253,.22);}
+.btn-light{background:#e2e8f0;color:#0f172a;box-shadow:none;}
+.btn-danger{background:#ef4444;color:white;box-shadow:none;}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;}
+table{width:100%;border-collapse:collapse;}
+th{background:#f8fbff;color:#061833;text-align:left;padding:12px;border:1px solid #dbe4f0;font-size:14px;}
+td{border:1px solid #dbe4f0;padding:8px;vertical-align:top;}
+td input,td select,td textarea{border:none;padding:8px;border-radius:8px;}
+.total-box{max-width:430px;margin-left:auto;margin-top:20px;background:#f8fbff;border:1px solid #dbe4f0;border-radius:18px;padding:18px;}
+.total-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #dbe4f0;font-weight:900;}
+.total-row.grand{color:#0d6efd;font-size:22px;border-bottom:none;}
+.preview-wrap{background:white;border-radius:22px;padding:24px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;}
+.paper{background:white;border:1px solid #111;max-width:1050px;margin:auto;color:#000;}
+.print-top{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #111;}
+.print-top div{padding:8px;font-weight:800;font-size:16px;}
+.print-title{text-align:center;font-size:24px;text-decoration:underline;}
+.print-section{border-bottom:1px solid #111;}
+.print-row{display:grid;grid-template-columns:160px 1fr 160px 1fr;border-bottom:1px solid #ddd;}
+.print-row:last-child{border-bottom:none;}
+.print-row div{padding:7px;min-height:31px;}
+.print-label{font-weight:900;}
+.print-items th,.print-items td{border:1px solid #111;padding:7px;font-size:15px;}
+.print-items th{background:white;text-align:center;}
+.print-total-area{display:grid;grid-template-columns:1fr 430px;min-height:150px;}
+.signature{padding:12px;}
+.print-totals{border-left:1px solid #111;}
+.print-total-row{display:grid;grid-template-columns:1fr 140px;border-bottom:1px solid #111;}
+.print-total-row div{padding:8px;font-weight:900;}
+.print-terms{border-top:1px solid #111;padding:10px;font-size:14px;}
+.print-footer{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid #111;}
+.print-footer div{padding:12px;min-height:55px;}
+.saved-card{margin-top:22px;}
+.small{font-size:12px;color:#64748b;font-weight:700;margin-top:4px;line-height:1.4;}
+@media(max-width:1000px){.main-grid,.grid{grid-template-columns:1fr;}table{display:block;overflow-x:auto;white-space:nowrap;}}
+@media print{
+  body{background:white;padding:0;}
+  .header,.source-card,.main-grid,.editor-card,.btn-row,.saved-card,.note{display:none!important;}
+  .preview-wrap{box-shadow:none;border:none;padding:0;}
+  .preview-wrap h2{display:none;}
+  .paper{border:1px solid #000;max-width:100%;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Sales Invoice</h1>
+    <p>Create manually or load from Delivery Order. VAT, totals, receipt tracking and reports are connected.</p>
+  </div>
+  <a href="/dashboard.html" class="back">Back to Dashboard</a>
+</div>
+
+<div class="note">
+  Use Manual Sales Invoice for direct billing. Use Load From Delivery Order to copy DO details and modify before saving invoice.
+</div>
+
+<form id="invoiceForm">
+
+<div class="card source-card">
+  <h2>Sales Invoice Source</h2>
+
+  <div class="grid">
+    <div class="form-group">
+      <label>Source Type</label>
+      <select id="sourceType" onchange="sourceChanged()">
+        <option>Manual Sales Invoice</option>
+        <option>Load From Delivery Order</option>
+      </select>
+    </div>
+
+    <div class="form-group" id="doBox" style="display:none;">
+      <label>Select Delivery Order</label>
+      <select id="doSelect">
+        <option value="">Select Delivery Order</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="btn-row" id="loadDOButtonBox" style="display:none;">
+    <button type="button" class="btn" onclick="loadDOToInvoice()">Load DO Data</button>
+    <a href="/delivery-order.html" target="_blank" class="quick-create">+ New Delivery Order</a>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="card">
+    <h2>Customer Details</h2>
+
+    <div class="grid">
+      <div class="form-group full">
+        <label>Customer Name</label>
+        <input type="text" id="customerName" placeholder="Customer name">
+        <a href="/customers.html" target="_blank" class="quick-create">+ New Customer</a>
+      </div>
+
+      <div class="form-group full">
+        <label>Address</label>
+        <textarea id="customerAddress" placeholder="Customer address"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Mobile Number</label>
+        <input type="text" id="mobile" placeholder="-">
+      </div>
+
+      <div class="form-group">
+        <label>Email ID</label>
+        <input type="email" id="email" placeholder="-">
+      </div>
+
+      <div class="form-group">
+        <label>Customer VAT No Optional</label>
+        <input type="text" id="customerVatNo" placeholder="Optional">
+      </div>
+
+      <div class="form-group">
+        <label>Payment Terms</label>
+        <input type="text" id="paymentTerms" placeholder="Cash / 30 Days / Manual">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Invoice Details</h2>
+
+    <div class="grid">
+      <div class="form-group">
+        <label>Invoice No</label>
+        <input type="text" id="invoiceNo">
+      </div>
+
+      <div class="form-group">
+        <label>Invoice Date</label>
+        <input type="date" id="invoiceDate">
+      </div>
+
+      <div class="form-group">
+        <label>Due Date</label>
+        <input type="date" id="dueDate">
+      </div>
+
+      <div class="form-group">
+        <label>DO / Reference No</label>
+        <input type="text" id="referenceNo" placeholder="Optional">
+      </div>
+
+      <div class="form-group">
+        <label>Invoice Type</label>
+        <select id="invoiceType" onchange="calculateTotals()">
+          <option>VAT Exclusive</option>
+          <option>VAT Inclusive</option>
+          <option>Non-VAT Sales</option>
+          <option>Zero Rated Sales</option>
+          <option>Exempt Sales</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>VAT %</label>
+        <input type="number" id="vatPercent" value="5" oninput="calculateTotals()">
+      </div>
+
+      <div class="form-group">
+        <label>Payment Status</label>
+        <select id="paymentStatus">
+          <option>Unpaid</option>
+          <option>Partial</option>
+          <option>Paid</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Status</label>
+        <select id="status">
+          <option>Draft</option>
+          <option>Issued</option>
+          <option>Cancelled</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card editor-card">
+  <h2>Invoice Items</h2>
+
+  <div style="margin-bottom:15px;">
+    <a href="/items.html" target="_blank" class="quick-create">+ New Item / Service</a>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:70px;">SR.NO</th>
+        <th>DESCRIPTION</th>
+        <th style="width:100px;">QTY</th>
+        <th style="width:130px;">UNIT PRICE</th>
+        <th style="width:140px;">AMOUNT</th>
+        <th style="width:90px;">ACTION</th>
+      </tr>
+    </thead>
+    <tbody id="itemsBody"></tbody>
+  </table>
+
+  <div class="btn-row">
+    <button type="button" class="btn btn-light" onclick="addRow()">+ Add Item</button>
+  </div>
+
+  <div class="total-box">
+    <div class="total-row"><span>Total Before Tax</span><span id="subtotalText">OMR 0.000</span></div>
+    <div class="total-row"><span>VAT Amount</span><span id="vatText">OMR 0.000</span></div>
+    <div class="total-row grand"><span>Grand Total</span><span id="grandText">OMR 0.000</span></div>
+  </div>
+
+  <div class="grid" style="margin-top:20px;">
+    <div class="form-group full">
+      <label>Terms / Notes</label>
+      <textarea id="terms">Thank you for your business.</textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Company Signature Text</label>
+      <input type="text" id="signatureText" value="For Company">
+    </div>
+
+    <div class="form-group">
+      <label>Company Email</label>
+      <input type="email" id="companyEmail" value="">
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button type="submit" class="btn">Save Sales Invoice</button>
+    <button type="button" class="btn btn-light" onclick="updatePreview()">Refresh Preview</button>
+    <button type="button" class="btn btn-light" onclick="window.print()">Print / Save PDF</button>
+    <button type="button" class="btn btn-light" onclick="resetForm()">Clear</button>
+  </div>
+</div>
+
+</form>
+
+<div class="preview-wrap">
+  <h2 style="margin-bottom:18px;color:#0d6efd;">Print Preview</h2>
+
+  <div class="paper">
+    <div class="print-top">
+      <div>E-Mail: <span id="pCompanyEmail">-</span></div>
+      <div class="print-title" id="pTitle">TAX INVOICE</div>
+      <div></div>
+    </div>
+
+    <div class="print-section">
+      <div class="print-row"><div class="print-label">Customer Name:</div><div id="pCustomerName">-</div><div class="print-label">Invoice No:</div><div id="pInvoiceNo">-</div></div>
+      <div class="print-row"><div class="print-label">Address:</div><div id="pAddress">-</div><div class="print-label">Date:</div><div id="pDate">-</div></div>
+      <div class="print-row"><div class="print-label">Mobile Number:</div><div id="pMobile">-</div><div class="print-label">Due Date:</div><div id="pDueDate">-</div></div>
+      <div class="print-row"><div class="print-label">Email ID:</div><div id="pEmail">-</div><div class="print-label">Reference:</div><div id="pReference">-</div></div>
+      <div class="print-row"><div class="print-label">Customer VAT No:</div><div id="pCustomerVatNo">-</div><div class="print-label">Payment Terms:</div><div id="pPaymentTerms">-</div></div>
+    </div>
+
+    <table class="print-items">
+      <thead>
+        <tr>
+          <th style="width:80px;">SR.NO</th>
+          <th>DESCRIPTION</th>
+          <th style="width:120px;">QTY</th>
+          <th style="width:150px;">UNIT PRICE</th>
+          <th style="width:150px;">AMOUNT</th>
+        </tr>
+      </thead>
+      <tbody id="pItemsBody"></tbody>
+    </table>
+
+    <div class="print-total-area">
+      <div class="signature"><br><br><span id="pSignatureText">For Company</span></div>
+      <div class="print-totals">
+        <div class="print-total-row"><div>Total Before Tax</div><div id="pBeforeTax">0.000</div></div>
+        <div class="print-total-row" id="pVatRow"><div>VAT@<span id="pVatPercent">5</span>%</div><div id="pVatAmount">0.000</div></div>
+        <div class="print-total-row"><div>Grand Total</div><div id="pGrandTotal">0.000</div></div>
+      </div>
+    </div>
+
+    <div class="print-terms" id="pTerms">-</div>
+    <div class="print-footer"><div>Received by:</div><div>Date:</div><div>Stamp:</div></div>
+  </div>
+</div>
+
+<div class="card saved-card">
+  <h2>Saved Sales Invoices</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Invoice No</th>
+        <th>Date</th>
+        <th>Customer</th>
+        <th>Total</th>
+        <th>Payment</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="savedTable"></tbody>
+  </table>
+</div>
+
+<script>
+function getDOs(){
+  return JSON.parse(localStorage.getItem("post91DeliveryOrders") || "[]");
+}
+
+function getInvoices(){
+  return JSON.parse(localStorage.getItem("post91SalesInvoices") || "[]");
+}
+
+function saveInvoices(data){
+  localStorage.setItem("post91SalesInvoices", JSON.stringify(data));
+}
+
+function today(){
+  return new Date().toISOString().split("T")[0];
+}
+
+function moneyValue(num){
+  return Number(num || 0).toFixed(3);
+}
+
+function moneyText(num){
+  return "OMR " + Number(num || 0).toFixed(3);
+}
+
+function sourceChanged(){
+  const sourceType = document.getElementById("sourceType").value;
+  const showDO = sourceType === "Load From Delivery Order";
+
+  document.getElementById("doBox").style.display = showDO ? "block" : "none";
+  document.getElementById("loadDOButtonBox").style.display = showDO ? "flex" : "none";
+
+  if(!showDO){
+    document.getElementById("doSelect").value = "";
+    document.getElementById("referenceNo").value = "";
+  }
+
+  updatePreview();
+}
+
+function loadDODropdown(){
+  const select = document.getElementById("doSelect");
+  const dos = getDOs();
+
+  select.innerHTML = `<option value="">Select Delivery Order</option>`;
+
+  dos.forEach((d,index)=>{
+    const opt = document.createElement("option");
+    opt.value = index;
+    opt.textContent = `${d.doNo || "DO"} - ${d.customerName || "Customer"}`;
+    select.appendChild(opt);
+  });
+}
+
+function loadDOToInvoice(){
+  const index = document.getElementById("doSelect").value;
+
+  if(index === ""){
+    alert("Please select Delivery Order first.");
+    return;
+  }
+
+  const d = getDOs()[index];
+
+  document.getElementById("customerName").value = d.customerName || "";
+  document.getElementById("customerAddress").value = d.customerAddress || "";
+  document.getElementById("mobile").value = d.mobile || "";
+  document.getElementById("email").value = d.email || "";
+  document.getElementById("referenceNo").value = d.doNo || "";
+
+  document.getElementById("invoiceType").value = d.vatType || "VAT Exclusive";
+  document.getElementById("vatPercent").value = d.vatPercent || 5;
+
+  document.getElementById("itemsBody").innerHTML = "";
+
+  if(d.items && d.items.length > 0){
+    d.items.forEach(item=>{
+      addRow({
+        description: item.description || "",
+        qty: item.qty || 1,
+        rate: item.rate || "0.000",
+        amount: item.amount || "0.000"
+      });
+    });
+  } else {
+    addRow();
+  }
+
+  calculateTotals();
+  alert("Delivery Order data loaded. You can modify Sales Invoice before saving.");
+}
+
+function addRow(data = null){
+  const tbody = document.getElementById("itemsBody");
+  const tr = document.createElement("tr");
+
+  tr.innerHTML = `
+    <td><input type="number" class="sr" value="${tbody.children.length + 1}" readonly></td>
+    <td><textarea class="desc" placeholder="Item / service description"></textarea></td>
+    <td><input type="number" step="0.001" class="qty" value="1" oninput="calculateTotals()"></td>
+    <td><input type="number" step="0.001" class="rate" value="0.000" oninput="calculateTotals()"></td>
+    <td><input type="text" class="amount" value="0.000" readonly></td>
+    <td><button type="button" class="btn btn-danger" onclick="removeRow(this)">X</button></td>
+  `;
+
+  tbody.appendChild(tr);
+
+  if(data){
+    tr.querySelector(".desc").value = data.description || "";
+    tr.querySelector(".qty").value = data.qty || 1;
+    tr.querySelector(".rate").value = data.rate || "0.000";
+    tr.querySelector(".amount").value = data.amount || "0.000";
+  }
+
+  calculateTotals();
+}
+
+function removeRow(btn){
+  btn.closest("tr").remove();
+  refreshSrNo();
+  calculateTotals();
+}
+
+function refreshSrNo(){
+  document.querySelectorAll("#itemsBody tr").forEach((row,index)=>{
+    row.querySelector(".sr").value = index + 1;
+  });
+}
+
+function calculateTotals(){
+  let total = 0;
+
+  document.querySelectorAll("#itemsBody tr").forEach(row=>{
+    const qty = Number(row.querySelector(".qty").value || 0);
+    const rate = Number(row.querySelector(".rate").value || 0);
+    const amount = qty * rate;
+
+    row.querySelector(".amount").value = moneyValue(amount);
+    total += amount;
+  });
+
+  const type = document.getElementById("invoiceType").value;
+  const vatPercent = Number(document.getElementById("vatPercent").value || 0);
+
+  let beforeTax = total;
+  let vatAmount = 0;
+  let grandTotal = total;
+
+  if(type === "VAT Exclusive"){
+    vatAmount = beforeTax * vatPercent / 100;
+    grandTotal = beforeTax + vatAmount;
+  }
+
+  if(type === "VAT Inclusive"){
+    vatAmount = total - (total / (1 + vatPercent / 100));
+    beforeTax = total - vatAmount;
+    grandTotal = total;
+  }
+
+  if(type === "Non-VAT Sales" || type === "Zero Rated Sales" || type === "Exempt Sales"){
+    beforeTax = total;
+    vatAmount = 0;
+    grandTotal = total;
+  }
+
+  document.getElementById("subtotalText").textContent = moneyText(beforeTax);
+  document.getElementById("vatText").textContent = moneyText(vatAmount);
+  document.getElementById("grandText").textContent = moneyText(grandTotal);
+
+  updatePreview();
+
+  return { total, beforeTax, vatAmount, grandTotal };
+}
+
+function calculateTotalsSilent(){
+  let total = 0;
+
+  document.querySelectorAll("#itemsBody tr").forEach(row=>{
+    total += Number(row.querySelector(".amount").value || 0);
+  });
+
+  const type = document.getElementById("invoiceType").value;
+  const vatPercent = Number(document.getElementById("vatPercent").value || 0);
+
+  let beforeTax = total;
+  let vatAmount = 0;
+  let grandTotal = total;
+
+  if(type === "VAT Exclusive"){
+    vatAmount = beforeTax * vatPercent / 100;
+    grandTotal = beforeTax + vatAmount;
+  }
+
+  if(type === "VAT Inclusive"){
+    vatAmount = total - (total / (1 + vatPercent / 100));
+    beforeTax = total - vatAmount;
+    grandTotal = total;
+  }
+
+  if(type === "Non-VAT Sales" || type === "Zero Rated Sales" || type === "Exempt Sales"){
+    beforeTax = total;
+    vatAmount = 0;
+    grandTotal = total;
+  }
+
+  return { total, beforeTax, vatAmount, grandTotal };
+}
+
+function updatePreview(){
+  const type = document.getElementById("invoiceType").value;
+
+  document.getElementById("pTitle").textContent =
+    type === "VAT Exclusive" || type === "VAT Inclusive"
+      ? "TAX INVOICE"
+      : type.toUpperCase();
+
+  document.getElementById("pCompanyEmail").textContent = document.getElementById("companyEmail").value || "-";
+  document.getElementById("pCustomerName").textContent = document.getElementById("customerName").value || "-";
+  document.getElementById("pAddress").textContent = document.getElementById("customerAddress").value || "-";
+  document.getElementById("pMobile").textContent = document.getElementById("mobile").value || "-";
+  document.getElementById("pEmail").textContent = document.getElementById("email").value || "-";
+  document.getElementById("pCustomerVatNo").textContent = document.getElementById("customerVatNo").value || "-";
+  document.getElementById("pPaymentTerms").textContent = document.getElementById("paymentTerms").value || "-";
+
+  document.getElementById("pInvoiceNo").textContent = document.getElementById("invoiceNo").value || "-";
+  document.getElementById("pDate").textContent = document.getElementById("invoiceDate").value || "-";
+  document.getElementById("pDueDate").textContent = document.getElementById("dueDate").value || "-";
+  document.getElementById("pReference").textContent = document.getElementById("referenceNo").value || "-";
+
+  const pItemsBody = document.getElementById("pItemsBody");
+  pItemsBody.innerHTML = "";
+
+  document.querySelectorAll("#itemsBody tr").forEach(row=>{
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td style="text-align:center;">${row.querySelector(".sr").value}</td>
+      <td style="white-space:pre-line;">${row.querySelector(".desc").value || "-"}</td>
+      <td style="text-align:center;">${row.querySelector(".qty").value || "0"}</td>
+      <td style="text-align:right;">${moneyValue(row.querySelector(".rate").value)}</td>
+      <td style="text-align:right;">${moneyValue(row.querySelector(".amount").value)}</td>
+    `;
+
+    pItemsBody.appendChild(tr);
+  });
+
+  for(let i = pItemsBody.children.length; i < 10; i++){
+    const blank = document.createElement("tr");
+    blank.innerHTML = `<td style="height:28px;"></td><td></td><td></td><td></td><td></td>`;
+    pItemsBody.appendChild(blank);
+  }
+
+  const totals = calculateTotalsSilent();
+
+  document.getElementById("pBeforeTax").textContent = moneyValue(totals.beforeTax);
+  document.getElementById("pVatPercent").textContent = document.getElementById("vatPercent").value || "0";
+  document.getElementById("pVatAmount").textContent = moneyValue(totals.vatAmount);
+  document.getElementById("pGrandTotal").textContent = moneyValue(totals.grandTotal);
+
+  document.getElementById("pVatRow").style.display =
+    type === "Non-VAT Sales" || type === "Zero Rated Sales" || type === "Exempt Sales" ? "none" : "grid";
+
+  document.getElementById("pTerms").textContent = document.getElementById("terms").value || "-";
+  document.getElementById("pSignatureText").textContent = document.getElementById("signatureText").value || "-";
+}
+
+document.getElementById("invoiceForm").addEventListener("input", function(){
+  calculateTotals();
+});
+
+document.getElementById("invoiceForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  const invoices = getInvoices();
+  const totals = calculateTotalsSilent();
+  const items = [];
+
+  document.querySelectorAll("#itemsBody tr").forEach(row=>{
+    const desc = row.querySelector(".desc").value;
+
+    if(desc.trim() !== ""){
+      const qty = Number(row.querySelector(".qty").value || 0);
+      const rate = Number(row.querySelector(".rate").value || 0);
+      const amount = qty * rate;
+
+      items.push({
+        sr: row.querySelector(".sr").value,
+        description: desc,
+        qty: row.querySelector(".qty").value,
+        rate: moneyValue(rate),
+        amount: moneyValue(amount)
+      });
+    }
+  });
+
+  if(items.length === 0){
+    alert("Please add at least one item.");
+    return;
+  }
+
+  const invoice = {
+    sourceType: document.getElementById("sourceType").value,
+    invoiceNo: document.getElementById("invoiceNo").value,
+    invoiceDate: document.getElementById("invoiceDate").value,
+    dueDate: document.getElementById("dueDate").value,
+    customerName: document.getElementById("customerName").value,
+    customerAddress: document.getElementById("customerAddress").value,
+    mobile: document.getElementById("mobile").value,
+    email: document.getElementById("email").value,
+    customerVatNo: document.getElementById("customerVatNo").value,
+    paymentTerms: document.getElementById("paymentTerms").value,
+    referenceNo: document.getElementById("referenceNo").value,
+    invoiceType: document.getElementById("invoiceType").value,
+    vatPercent: document.getElementById("vatPercent").value,
+    paymentStatus: document.getElementById("paymentStatus").value,
+    status: document.getElementById("status").value,
+    terms: document.getElementById("terms").value,
+    items,
+    total: totals.total,
+    beforeTax: totals.beforeTax,
+    vatAmount: totals.vatAmount,
+    grandTotal: totals.grandTotal,
+    receivedAmount: 0
+  };
+
+  invoices.push(invoice);
+  saveInvoices(invoices);
+
+  alert("Sales Invoice saved successfully.");
+  loadSavedInvoices();
+});
+
+function loadSavedInvoices(){
+  const tbody = document.getElementById("savedTable");
+  tbody.innerHTML = "";
+
+  getInvoices().forEach((inv,index)=>{
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${inv.invoiceNo || "-"}</td>
+      <td>${inv.invoiceDate || "-"}</td>
+      <td>${inv.customerName || "-"}</td>
+      <td>${moneyText(inv.grandTotal)}</td>
+      <td>${inv.paymentStatus || "Unpaid"}</td>
+      <td><button class="btn btn-danger" type="button" onclick="deleteInvoice(${index})">Delete</button></td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
+
+function deleteInvoice(index){
+  if(confirm("Delete this sales invoice?")){
+    const invoices = getInvoices();
+    invoices.splice(index,1);
+    saveInvoices(invoices);
+    loadSavedInvoices();
+  }
+}
+
+function resetForm(){
+  document.getElementById("invoiceForm").reset();
+  document.getElementById("itemsBody").innerHTML = "";
+  setDefaults();
+  addRow();
+  sourceChanged();
+  calculateTotals();
+}
+
+function setDefaults(){
+  document.getElementById("invoiceDate").value = today();
+  document.getElementById("dueDate").value = today();
+  document.getElementById("invoiceNo").value = "INV-" + (1001 + getInvoices().length);
+  document.getElementById("sourceType").value = "Manual Sales Invoice";
+  document.getElementById("vatPercent").value = 5;
+  document.getElementById("invoiceType").value = "VAT Exclusive";
+  document.getElementById("paymentStatus").value = "Unpaid";
+  document.getElementById("terms").value = "Thank you for your business.";
+  document.getElementById("signatureText").value = "For Company";
+}
+
+loadDODropdown();
+setDefaults();
+addRow();
+sourceChanged();
+loadSavedInvoices();
+calculateTotals();
+</script>
+
+</body>
+</html>

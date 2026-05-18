@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stock Ledger | Post91 Accounts</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Segoe UI,Arial,sans-serif;
+}
+
+body{
+  background:#eef3f8;
+  color:#061833;
+  padding:28px;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:24px;
+}
+
+.header h1{
+  font-size:34px;
+}
+
+.header p{
+  color:#64748b;
+  margin-top:6px;
+}
+
+.back{
+  background:white;
+  color:#0d6efd;
+  text-decoration:none;
+  padding:12px 16px;
+  border-radius:13px;
+  font-weight:900;
+  box-shadow:0 10px 25px rgba(15,23,42,.08);
+}
+
+.card{
+  background:white;
+  border-radius:22px;
+  padding:26px;
+  box-shadow:0 16px 38px rgba(15,23,42,.08);
+  border:1px solid #e5edf7;
+  margin-bottom:22px;
+}
+
+.card h2{
+  margin-bottom:18px;
+  font-size:22px;
+  color:#0d6efd;
+}
+
+.note{
+  background:#e0f2fe;
+  border:1px solid #bae6fd;
+  color:#075985;
+  padding:16px;
+  border-radius:16px;
+  margin-bottom:18px;
+  line-height:1.6;
+  font-weight:700;
+}
+
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  margin-bottom:22px;
+}
+
+.summary{
+  background:white;
+  border-radius:22px;
+  padding:20px;
+  border:1px solid #e5edf7;
+  box-shadow:0 12px 28px rgba(15,23,42,.06);
+}
+
+.summary span{
+  color:#64748b;
+  font-size:13px;
+  font-weight:800;
+}
+
+.summary h2{
+  margin-top:8px;
+  color:#0d6efd;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+}
+
+.form-group{
+  margin-bottom:16px;
+}
+
+label{
+  display:block;
+  margin-bottom:7px;
+  font-weight:800;
+}
+
+input,select{
+  width:100%;
+  padding:13px 14px;
+  border-radius:12px;
+  border:1px solid #dbe4f0;
+  font-size:15px;
+  outline:none;
+  background:white;
+}
+
+input:focus,select:focus{
+  border-color:#0d6efd;
+  box-shadow:0 0 0 4px rgba(13,110,253,.1);
+}
+
+.btn{
+  border:none;
+  background:#0d6efd;
+  color:white;
+  padding:13px 19px;
+  border-radius:13px;
+  font-weight:900;
+  cursor:pointer;
+  font-size:14px;
+  box-shadow:0 14px 30px rgba(13,110,253,.22);
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th{
+  text-align:left;
+  color:#64748b;
+  padding:12px;
+  border-bottom:1px solid #e5edf7;
+  font-size:14px;
+}
+
+td{
+  padding:12px;
+  border-bottom:1px solid #eef2f7;
+  font-weight:700;
+  vertical-align:top;
+}
+
+.badge{
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  display:inline-block;
+}
+
+.in{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.out{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.low{
+  background:#fef3c7;
+  color:#92400e;
+}
+
+.ok{
+  background:#dbeafe;
+  color:#1d4ed8;
+}
+
+.small{
+  font-size:13px;
+  color:#64748b;
+  font-weight:700;
+  margin-top:4px;
+}
+
+@media(max-width:1100px){
+
+  .summary-grid,.grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  table{
+    display:block;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+
+}
+
+@media(max-width:650px){
+
+  .summary-grid,.grid{
+    grid-template-columns:1fr;
+  }
+
+  .header{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:15px;
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+
+  <div>
+    <h1>Stock Ledger</h1>
+    <p>Track stock IN, stock OUT, balances and inventory valuation.</p>
+  </div>
+
+  <a href="/dashboard.html" class="back">
+    Back to Dashboard
+  </a>
+
+</div>
+
+<div class="note">
+
+  Stock calculation is automatically generated from:
+  Purchase Invoices (Stock IN)
+  and
+  Sales Invoices (Stock OUT)
+
+</div>
+
+<div class="summary-grid">
+
+  <div class="summary">
+    <span>Total Items</span>
+    <h2 id="totalItems">0</h2>
+  </div>
+
+  <div class="summary">
+    <span>Total Stock Qty</span>
+    <h2 id="totalQty">0</h2>
+  </div>
+
+  <div class="summary">
+    <span>Inventory Value</span>
+    <h2 id="inventoryValue">OMR 0.000</h2>
+  </div>
+
+  <div class="summary">
+    <span>Low Stock Items</span>
+    <h2 id="lowStock">0</h2>
+  </div>
+
+</div>
+
+<div class="card">
+
+  <h2>Filters</h2>
+
+  <div class="grid">
+
+    <div class="form-group">
+      <label>Search Item</label>
+      <input type="text" id="searchBox"
+        placeholder="Item / OEM / Part Number"
+        onkeyup="loadLedger()">
+    </div>
+
+    <div class="form-group">
+      <label>Stock Status</label>
+
+      <select id="stockFilter" onchange="loadLedger()">
+        <option>All</option>
+        <option>Available</option>
+        <option>Low Stock</option>
+        <option>Out of Stock</option>
+      </select>
+
+    </div>
+
+    <div class="form-group">
+      <label>Sort By</label>
+
+      <select id="sortBy" onchange="loadLedger()">
+        <option>Item Name</option>
+        <option>Highest Qty</option>
+        <option>Lowest Qty</option>
+        <option>Highest Value</option>
+      </select>
+
+    </div>
+
+    <div class="form-group">
+      <label>Minimum Stock Level</label>
+
+      <input type="number"
+        id="minimumStock"
+        value="5"
+        oninput="loadLedger()">
+
+    </div>
+
+  </div>
+
+</div>
+
+<div class="card">
+
+  <h2>Current Stock Position</h2>
+
+  <table>
+
+    <thead>
+
+      <tr>
+        <th>Item</th>
+        <th>Category</th>
+        <th>Stock IN</th>
+        <th>Stock OUT</th>
+        <th>Balance</th>
+        <th>Avg Cost</th>
+        <th>Stock Value</th>
+        <th>Status</th>
+      </tr>
+
+    </thead>
+
+    <tbody id="ledgerTable"></tbody>
+
+  </table>
+
+</div>
+
+<div class="card">
+
+  <h2>Stock Movement Ledger</h2>
+
+  <table>
+
+    <thead>
+
+      <tr>
+        <th>Date</th>
+        <th>Document</th>
+        <th>Type</th>
+        <th>Item</th>
+        <th>Qty</th>
+        <th>Rate</th>
+        <th>Total</th>
+      </tr>
+
+    </thead>
+
+    <tbody id="movementTable"></tbody>
+
+  </table>
+
+</div>
+
+<script>
+
+function getPurchases(){
+  return JSON.parse(localStorage.getItem("post91PurchaseInvoices") || "[]");
+}
+
+function getSales(){
+  return JSON.parse(localStorage.getItem("post91SalesInvoices") || "[]");
+}
+
+function money(num){
+  return "OMR " + Number(num || 0).toFixed(3);
+}
+
+function buildInventory(){
+
+  const purchases = getPurchases();
+  const sales = getSales();
+
+  const inventory = {};
+  const movements = [];
+
+  purchases.forEach(p=>{
+
+    (p.items || []).forEach(item=>{
+
+      const key = item.description || "Unknown Item";
+
+      if(!inventory[key]){
+
+        inventory[key] = {
+
+          itemName:key,
+          category:item.category || "-",
+
+          stockIn:0,
+          stockOut:0,
+
+          qty:0,
+
+          totalCost:0,
+          avgCost:0,
+
+          value:0
+
+        };
+
+      }
+
+      const qty = Number(item.qty || 0);
+      const rate = Number(item.rate || 0);
+
+      inventory[key].stockIn += qty;
+      inventory[key].qty += qty;
+
+      inventory[key].totalCost += qty * rate;
+
+      movements.push({
+
+        date:p.purchaseDate || "-",
+        doc:p.purchaseNo || "-",
+        type:"IN",
+        item:key,
+        qty:qty,
+        rate:rate,
+        total:qty * rate
+
+      });
+
+    });
+
+  });
+
+  sales.forEach(s=>{
+
+    (s.items || []).forEach(item=>{
+
+      const key = item.description || "Unknown Item";
+
+      if(!inventory[key]){
+
+        inventory[key] = {
+
+          itemName:key,
+          category:item.category || "-",
+
+          stockIn:0,
+          stockOut:0,
+
+          qty:0,
+
+          totalCost:0,
+          avgCost:0,
+
+          value:0
+
+        };
+
+      }
+
+      const qty = Number(item.qty || 0);
+      const rate = Number(item.rate || 0);
+
+      inventory[key].stockOut += qty;
+      inventory[key].qty -= qty;
+
+      movements.push({
+
+        date:s.invoiceDate || "-",
+        doc:s.invoiceNo || "-",
+        type:"OUT",
+        item:key,
+        qty:qty,
+        rate:rate,
+        total:qty * rate
+
+      });
+
+    });
+
+  });
+
+  Object.values(inventory).forEach(i=>{
+
+    const purchasedQty = i.stockIn || 1;
+
+    i.avgCost = i.totalCost / purchasedQty;
+
+    i.value = i.qty * i.avgCost;
+
+  });
+
+  return {inventory,movements};
+
+}
+
+function loadLedger(){
+
+  const result = buildInventory();
+
+  let items = Object.values(result.inventory);
+
+  const search =
+    document.getElementById("searchBox").value.toLowerCase();
+
+  const stockFilter =
+    document.getElementById("stockFilter").value;
+
+  const sortBy =
+    document.getElementById("sortBy").value;
+
+  const minimumStock =
+    Number(document.getElementById("minimumStock").value || 5);
+
+  items = items.filter(i=>{
+
+    const text =
+      `${i.itemName} ${i.category}`.toLowerCase();
+
+    if(search && !text.includes(search)){
+      return false;
+    }
+
+    if(stockFilter === "Available" && i.qty <= 0){
+      return false;
+    }
+
+    if(stockFilter === "Low Stock" &&
+      !(i.qty > 0 && i.qty <= minimumStock)){
+      return false;
+    }
+
+    if(stockFilter === "Out of Stock" &&
+      i.qty > 0){
+      return false;
+    }
+
+    return true;
+
+  });
+
+  if(sortBy === "Highest Qty"){
+    items.sort((a,b)=>b.qty - a.qty);
+  }
+
+  if(sortBy === "Lowest Qty"){
+    items.sort((a,b)=>a.qty - b.qty);
+  }
+
+  if(sortBy === "Highest Value"){
+    items.sort((a,b)=>b.value - a.value);
+  }
+
+  if(sortBy === "Item Name"){
+    items.sort((a,b)=>
+      a.itemName.localeCompare(b.itemName));
+  }
+
+  renderSummary(items,minimumStock);
+  renderLedger(items);
+  renderMovements(result.movements);
+
+}
+
+function renderSummary(items,minimumStock){
+
+  let totalQty = 0;
+  let totalValue = 0;
+  let lowStock = 0;
+
+  items.forEach(i=>{
+
+    totalQty += Number(i.qty || 0);
+    totalValue += Number(i.value || 0);
+
+    if(i.qty > 0 && i.qty <= minimumStock){
+      lowStock++;
+    }
+
+  });
+
+  document.getElementById("totalItems").textContent =
+    items.length;
+
+  document.getElementById("totalQty").textContent =
+    totalQty.toFixed(3);
+
+  document.getElementById("inventoryValue").textContent =
+    money(totalValue);
+
+  document.getElementById("lowStock").textContent =
+    lowStock;
+
+}
+
+function renderLedger(items){
+
+  const tbody =
+    document.getElementById("ledgerTable");
+
+  tbody.innerHTML = "";
+
+  const minimumStock =
+    Number(document.getElementById("minimumStock").value || 5);
+
+  items.forEach(i=>{
+
+    let status = "";
+    let statusClass = "";
+
+    if(i.qty <= 0){
+
+      status = "Out of Stock";
+      statusClass = "out";
+
+    }else if(i.qty <= minimumStock){
+
+      status = "Low Stock";
+      statusClass = "low";
+
+    }else{
+
+      status = "Available";
+      statusClass = "ok";
+
+    }
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+
+      <td>
+
+        ${i.itemName}
+
+      </td>
+
+      <td>
+
+        ${i.category || "-"}
+
+      </td>
+
+      <td>
+
+        <span class="badge in">
+          ${i.stockIn.toFixed(3)}
+        </span>
+
+      </td>
+
+      <td>
+
+        <span class="badge out">
+          ${i.stockOut.toFixed(3)}
+        </span>
+
+      </td>
+
+      <td>
+
+        ${i.qty.toFixed(3)}
+
+      </td>
+
+      <td>
+
+        ${money(i.avgCost)}
+
+      </td>
+
+      <td>
+
+        ${money(i.value)}
+
+      </td>
+
+      <td>
+
+        <span class="badge ${statusClass}">
+          ${status}
+        </span>
+
+      </td>
+
+    `;
+
+    tbody.appendChild(tr);
+
+  });
+
+}
+
+function renderMovements(movements){
+
+  const tbody =
+    document.getElementById("movementTable");
+
+  tbody.innerHTML = "";
+
+  movements.sort((a,b)=>
+    new Date(b.date) - new Date(a.date));
+
+  movements.forEach(m=>{
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+
+      <td>${m.date}</td>
+
+      <td>${m.doc}</td>
+
+      <td>
+
+        <span class="badge ${m.type === "IN" ? "in" : "out"}">
+          ${m.type}
+        </span>
+
+      </td>
+
+      <td>${m.item}</td>
+
+      <td>${Number(m.qty).toFixed(3)}</td>
+
+      <td>${money(m.rate)}</td>
+
+      <td>${money(m.total)}</td>
+
+    `;
+
+    tbody.appendChild(tr);
+
+  });
+
+}
+
+loadLedger();
+
+</script>
+
+</body>
+</html>

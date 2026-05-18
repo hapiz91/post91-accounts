@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profit & Loss | Post91 Accounts</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
+body{background:#eef3f8;color:#061833;padding:28px;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.header h1{font-size:34px}.header p{color:#64748b;margin-top:6px}
+.back{background:white;color:#0d6efd;text-decoration:none;padding:12px 16px;border-radius:13px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);}
+.card{background:white;border-radius:22px;padding:26px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:22px;}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+label{display:block;margin-bottom:7px;font-weight:800;}
+input,select{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #dbe4f0;font-size:15px;}
+.btn{border:none;background:#0d6efd;color:white;padding:13px 19px;border-radius:13px;font-weight:900;cursor:pointer;}
+.btn-light{background:#e2e8f0;color:#0f172a;margin-left:8px;}
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+.summary{background:white;border-radius:22px;padding:20px;border:1px solid #e5edf7;box-shadow:0 12px 28px rgba(15,23,42,.06);}
+.summary span{color:#64748b;font-size:13px;font-weight:800;}
+.summary h2{margin-top:8px;color:#0d6efd;}
+table{width:100%;border-collapse:collapse;margin-top:12px;}
+th{text-align:left;color:#64748b;padding:12px;border-bottom:1px solid #e5edf7;font-size:14px;}
+td{padding:13px 12px;border-bottom:1px solid #eef2f7;font-weight:700;}
+.amount{text-align:right;}
+.profit{color:#166534;}
+.loss{color:#991b1b;}
+.section-title{font-size:22px;color:#0d6efd;margin-bottom:12px;}
+.total-row{background:#f8fbff;font-weight:900;}
+.net-row{background:#e0f2fe;font-size:18px;font-weight:900;}
+@media(max-width:1000px){.grid,.summary-grid{grid-template-columns:1fr 1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
+@media(max-width:650px){.grid,.summary-grid{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}}
+@media print{.header,.filter-card,.btn{display:none!important}body{background:white;padding:10px}.card{box-shadow:none;border:none}.summary-grid{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Profit & Loss</h1>
+    <p>Revenue, purchases, expenses and estimated net profit report.</p>
+  </div>
+  <a href="/dashboard.html" class="back">Back to Dashboard</a>
+</div>
+
+<div class="card filter-card">
+  <div class="grid">
+    <div>
+      <label>From Date</label>
+      <input type="date" id="fromDate">
+    </div>
+
+    <div>
+      <label>To Date</label>
+      <input type="date" id="toDate">
+    </div>
+
+    <div>
+      <label>Report Basis</label>
+      <select id="reportBasis">
+        <option>Invoice Basis</option>
+        <option>Paid/Received Basis</option>
+      </select>
+    </div>
+
+    <div>
+      <label>&nbsp;</label>
+      <button class="btn" onclick="generatePL()">Generate</button>
+      <button class="btn btn-light" onclick="window.print()">Print</button>
+    </div>
+  </div>
+</div>
+
+<div class="summary-grid">
+  <div class="summary">
+    <span>Total Revenue</span>
+    <h2 id="totalRevenue">OMR 0.000</h2>
+  </div>
+
+  <div class="summary">
+    <span>Total Purchases</span>
+    <h2 id="totalPurchases">OMR 0.000</h2>
+  </div>
+
+  <div class="summary">
+    <span>Total Expenses</span>
+    <h2 id="totalExpenses">OMR 0.000</h2>
+  </div>
+
+  <div class="summary">
+    <span>Net Profit / Loss</span>
+    <h2 id="netProfit">OMR 0.000</h2>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-title">Profit & Loss Summary</div>
+
+  <table>
+    <tbody id="plTable"></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <div class="section-title">Expense Category Breakdown</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Expense Category</th>
+        <th class="amount">Amount</th>
+      </tr>
+    </thead>
+    <tbody id="expenseBreakdown"></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <div class="section-title">Purchase Category Breakdown</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Purchase Category</th>
+        <th class="amount">Amount</th>
+      </tr>
+    </thead>
+    <tbody id="purchaseBreakdown"></tbody>
+  </table>
+</div>
+
+<script>
+function getSales(){return JSON.parse(localStorage.getItem("post91SalesInvoices") || "[]");}
+function getPurchases(){return JSON.parse(localStorage.getItem("post91PurchaseInvoices") || "[]");}
+function getExpenses(){return JSON.parse(localStorage.getItem("post91Expenses") || "[]");}
+function getReceipts(){return JSON.parse(localStorage.getItem("post91Receipts") || "[]");}
+function getPayments(){return JSON.parse(localStorage.getItem("post91SupplierPayments") || "[]");}
+
+function money(n){
+  return "OMR " + Number(n || 0).toFixed(3);
+}
+
+function inDate(date,from,to){
+  if(!date) return true;
+  const d = new Date(date);
+  if(from && d < new Date(from)) return false;
+  if(to && d > new Date(to)) return false;
+  return true;
+}
+
+function sum(arr,field){
+  return arr.reduce((s,row)=>s + Number(row[field] || 0),0);
+}
+
+function groupSum(arr,keyField,amountField){
+  const map = {};
+
+  arr.forEach(row=>{
+    const key = row[keyField] || "Unclassified";
+    if(!map[key]) map[key] = 0;
+    map[key] += Number(row[amountField] || 0);
+  });
+
+  return map;
+}
+
+function generatePL(){
+  const from = document.getElementById("fromDate").value;
+  const to = document.getElementById("toDate").value;
+  const basis = document.getElementById("reportBasis").value;
+
+  const sales = getSales().filter(s=>inDate(s.invoiceDate,from,to));
+  const purchases = getPurchases().filter(p=>inDate(p.purchaseDate,from,to));
+  const expenses = getExpenses().filter(e=>inDate(e.expenseDate,from,to));
+
+  const receipts = getReceipts().filter(r=>inDate(r.receiptDate,from,to));
+  const supplierPayments = getPayments().filter(p=>inDate(p.paymentDate,from,to));
+
+  let revenue = 0;
+  let purchaseCost = 0;
+  let expenseCost = 0;
+
+  if(basis === "Invoice Basis"){
+    revenue = sum(sales,"beforeTax");
+    purchaseCost = sum(purchases,"beforeTax");
+    expenseCost = sum(expenses,"beforeTax");
+  } else {
+    revenue = sum(receipts,"receiptAmount");
+    purchaseCost = sum(supplierPayments,"paymentAmount");
+    expenseCost = expenses
+      .filter(e=>e.paymentStatus === "Paid")
+      .reduce((s,e)=>s + Number(e.beforeTax || 0),0);
+  }
+
+  const grossProfit = revenue - purchaseCost;
+  const netProfit = grossProfit - expenseCost;
+
+  document.getElementById("totalRevenue").textContent = money(revenue);
+  document.getElementById("totalPurchases").textContent = money(purchaseCost);
+  document.getElementById("totalExpenses").textContent = money(expenseCost);
+  document.getElementById("netProfit").textContent = money(netProfit);
+  document.getElementById("netProfit").className = netProfit >= 0 ? "profit" : "loss";
+
+  renderPL(revenue,purchaseCost,grossProfit,expenseCost,netProfit);
+  renderExpenseBreakdown(expenses);
+  renderPurchaseBreakdown(purchases);
+}
+
+function renderPL(revenue,purchaseCost,grossProfit,expenseCost,netProfit){
+  const tbody = document.getElementById("plTable");
+
+  tbody.innerHTML = `
+    <tr>
+      <td><strong>Revenue / Sales Before VAT</strong></td>
+      <td class="amount profit">${money(revenue)}</td>
+    </tr>
+
+    <tr>
+      <td>Less: Purchases / Cost Before VAT</td>
+      <td class="amount loss">${money(purchaseCost)}</td>
+    </tr>
+
+    <tr class="total-row">
+      <td>Gross Profit</td>
+      <td class="amount ${grossProfit >= 0 ? "profit" : "loss"}">${money(grossProfit)}</td>
+    </tr>
+
+    <tr>
+      <td>Less: Operating Expenses Before VAT</td>
+      <td class="amount loss">${money(expenseCost)}</td>
+    </tr>
+
+    <tr class="net-row">
+      <td>Net Profit / Loss</td>
+      <td class="amount ${netProfit >= 0 ? "profit" : "loss"}">${money(netProfit)}</td>
+    </tr>
+  `;
+}
+
+function renderExpenseBreakdown(expenses){
+  const tbody = document.getElementById("expenseBreakdown");
+  const map = groupSum(expenses,"expenseCategory","beforeTax");
+
+  tbody.innerHTML = "";
+
+  const keys = Object.keys(map);
+
+  if(keys.length === 0){
+    tbody.innerHTML = `<tr><td colspan="2">No expenses found.</td></tr>`;
+    return;
+  }
+
+  keys.forEach(k=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${k}</td>
+      <td class="amount">${money(map[k])}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderPurchaseBreakdown(purchases){
+  const tbody = document.getElementById("purchaseBreakdown");
+  const map = groupSum(purchases,"purchaseCategory","beforeTax");
+
+  tbody.innerHTML = "";
+
+  const keys = Object.keys(map);
+
+  if(keys.length === 0){
+    tbody.innerHTML = `<tr><td colspan="2">No purchases found.</td></tr>`;
+    return;
+  }
+
+  keys.forEach(k=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${k}</td>
+      <td class="amount">${money(map[k])}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+generatePL();
+</script>
+
+</body>
+</html>

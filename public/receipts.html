@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Receipts | Post91 Accounts</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
+body{background:#eef3f8;color:#061833;padding:28px;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.header h1{font-size:34px}.header p{color:#64748b;margin-top:6px}
+.back,.quick-create{background:white;color:#0d6efd;text-decoration:none;padding:12px 16px;border-radius:13px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);display:inline-block;}
+.quick-create{font-size:13px;margin-top:8px;}
+.card{background:white;border-radius:22px;padding:26px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:22px;}
+.card h2{margin-bottom:18px;font-size:22px;color:#0d6efd;}
+.note{background:#e0f2fe;border:1px solid #bae6fd;color:#075985;padding:16px;border-radius:16px;margin-bottom:18px;line-height:1.6;font-weight:700;}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.form-group{margin-bottom:16px;}
+label{display:block;margin-bottom:7px;font-weight:800;color:#0f172a;}
+input,select,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #dbe4f0;font-size:15px;outline:none;background:white;}
+textarea{min-height:80px;resize:vertical;}
+input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4px rgba(13,110,253,.1);}
+.full{grid-column:1/-1;}
+.btn{border:none;background:#0d6efd;color:white;padding:13px 19px;border-radius:13px;font-weight:900;cursor:pointer;font-size:14px;box-shadow:0 14px 30px rgba(13,110,253,.22);}
+.btn-light{background:#e2e8f0;color:#0f172a;box-shadow:none;margin-left:8px;}
+.btn-danger{background:#ef4444;color:white;box-shadow:none;}
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+.summary{background:white;border-radius:22px;padding:20px;border:1px solid #e5edf7;box-shadow:0 12px 28px rgba(15,23,42,.06);}
+.summary span{color:#64748b;font-size:13px;font-weight:800;}
+.summary h2{margin-top:8px;color:#0d6efd;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;color:#64748b;padding:12px;border-bottom:1px solid #e5edf7;font-size:14px;}
+td{padding:12px;border-bottom:1px solid #eef2f7;font-weight:700;vertical-align:top;}
+.badge{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:900;display:inline-block;}
+.cash{background:#dcfce7;color:#166534;}
+.bank{background:#dbeafe;color:#1d4ed8;}
+.partial{background:#fef3c7;color:#92400e;}
+.small{font-size:13px;color:#64748b;font-weight:700;margin-top:4px;line-height:1.5;}
+.action-btn{border:none;padding:8px 12px;border-radius:10px;font-weight:900;cursor:pointer;margin-right:6px;}
+.delete{background:#fee2e2;color:#991b1b;}
+@media(max-width:1000px){.grid,.summary-grid{grid-template-columns:1fr 1fr;}table{display:block;overflow-x:auto;white-space:nowrap;}}
+@media(max-width:650px){.grid,.summary-grid{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Customer Receipts</h1>
+    <p>Receive customer payments against invoices and update outstanding balances.</p>
+  </div>
+  <a href="/dashboard.html" class="back">Back to Dashboard</a>
+</div>
+
+<div class="note">
+  Customer receipts will later update:
+  Customer Ledger, Outstanding Report, Cash/Bank Book and Profit Dashboard.
+</div>
+
+<div class="summary-grid">
+  <div class="summary">
+    <span>Total Receipts</span>
+    <h2 id="totalReceipts">OMR 0.000</h2>
+  </div>
+
+  <div class="summary">
+    <span>Cash Collection</span>
+    <h2 id="cashReceipts">OMR 0.000</h2>
+  </div>
+
+  <div class="summary">
+    <span>Bank Collection</span>
+    <h2 id="bankReceipts">OMR 0.000</h2>
+  </div>
+
+  <div class="summary">
+    <span>Pending Balance</span>
+    <h2 id="pendingBalance">OMR 0.000</h2>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Receipt Entry</h2>
+
+  <form id="receiptForm">
+
+    <input type="hidden" id="editIndex">
+
+    <div class="grid">
+
+      <div class="form-group">
+        <label>Receipt No</label>
+        <input type="text" id="receiptNo">
+      </div>
+
+      <div class="form-group">
+        <label>Receipt Date</label>
+        <input type="date" id="receiptDate">
+      </div>
+
+      <div class="form-group">
+        <label>Select Invoice</label>
+        <select id="invoiceSelect" onchange="loadInvoiceData()">
+          <option value="">Select Invoice</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Customer Name</label>
+        <input type="text" id="customerName" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>Invoice No</label>
+        <input type="text" id="invoiceNo" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>Invoice Date</label>
+        <input type="text" id="invoiceDate" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>Invoice Amount</label>
+        <input type="text" id="invoiceAmount" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>Already Received</label>
+        <input type="text" id="alreadyReceived" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>Pending Amount</label>
+        <input type="text" id="pendingAmount" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>Receipt Amount</label>
+        <input type="number" step="0.001" id="receiptAmount" placeholder="0.000">
+      </div>
+
+      <div class="form-group">
+        <label>Payment Mode</label>
+        <select id="paymentMode" onchange="toggleBankBox()">
+          <option>Cash</option>
+          <option>Bank Transfer</option>
+          <option>Card</option>
+          <option>Cheque</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="bankBox" style="display:none;">
+        <label>Select Bank Account</label>
+        <select id="bankAccount">
+          <option value="">Select Bank Account</option>
+        </select>
+        <a href="/banks.html" target="_blank" class="quick-create">+ New Bank</a>
+      </div>
+
+      <div class="form-group">
+        <label>Reference No</label>
+        <input type="text" id="referenceNo" placeholder="Cheque no / transfer ref">
+      </div>
+
+      <div class="form-group">
+        <label>Status</label>
+        <select id="status">
+          <option>Received</option>
+          <option>Pending Clearance</option>
+          <option>Bounced</option>
+        </select>
+      </div>
+
+      <div class="form-group full">
+        <label>Remarks</label>
+        <textarea id="remarks" placeholder="Receipt remarks"></textarea>
+      </div>
+
+    </div>
+
+    <button class="btn" type="submit">Save Receipt</button>
+    <button class="btn btn-light" type="button" onclick="resetForm()">Clear</button>
+
+  </form>
+</div>
+
+<div class="card">
+  <h2>Saved Receipts</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Receipt</th>
+        <th>Date</th>
+        <th>Customer</th>
+        <th>Invoice</th>
+        <th>Amount</th>
+        <th>Payment</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody id="receiptTable"></tbody>
+  </table>
+</div>
+
+<script>
+function getSalesInvoices(){
+  return JSON.parse(localStorage.getItem("post91SalesInvoices") || "[]");
+}
+
+function saveSalesInvoices(data){
+  localStorage.setItem("post91SalesInvoices", JSON.stringify(data));
+}
+
+function getReceipts(){
+  return JSON.parse(localStorage.getItem("post91Receipts") || "[]");
+}
+
+function saveReceipts(data){
+  localStorage.setItem("post91Receipts", JSON.stringify(data));
+}
+
+function getBanks(){
+  return JSON.parse(localStorage.getItem("post91Banks") || "[]");
+}
+
+function today(){
+  return new Date().toISOString().split("T")[0];
+}
+
+function money(num){
+  return "OMR " + Number(num || 0).toFixed(3);
+}
+
+function loadInvoices(){
+  const select = document.getElementById("invoiceSelect");
+  select.innerHTML = `<option value="">Select Invoice</option>`;
+
+  getSalesInvoices().forEach((inv,index)=>{
+    const opt = document.createElement("option");
+    opt.value = index;
+    opt.textContent = `${inv.invoiceNo || "INV"} - ${inv.customerName || "Customer"}`;
+    select.appendChild(opt);
+  });
+}
+
+function loadBanks(){
+  const select = document.getElementById("bankAccount");
+
+  select.innerHTML = `<option value="">Select Bank Account</option>`;
+
+  getBanks()
+    .filter(b => b.status !== "Inactive")
+    .forEach((b,index)=>{
+      const opt = document.createElement("option");
+      opt.value = index;
+      opt.textContent = `${b.bankName} (${b.accountNumber})`;
+      select.appendChild(opt);
+    });
+}
+
+function toggleBankBox(){
+  const mode = document.getElementById("paymentMode").value;
+  const show = mode === "Bank Transfer" || mode === "Card" || mode === "Cheque";
+
+  document.getElementById("bankBox").style.display = show ? "block" : "none";
+  document.getElementById("bankAccount").required = show;
+}
+
+function loadInvoiceData(){
+  const index = document.getElementById("invoiceSelect").value;
+
+  if(index === "") return;
+
+  const inv = getSalesInvoices()[index];
+
+  const total = Number(inv.grandTotal || 0);
+  const received = Number(inv.receivedAmount || 0);
+  const pending = total - received;
+
+  document.getElementById("customerName").value = inv.customerName || "";
+  document.getElementById("invoiceNo").value = inv.invoiceNo || "";
+  document.getElementById("invoiceDate").value = inv.invoiceDate || "";
+  document.getElementById("invoiceAmount").value = money(total);
+  document.getElementById("alreadyReceived").value = money(received);
+  document.getElementById("pendingAmount").value = money(pending);
+  document.getElementById("receiptAmount").value = pending.toFixed(3);
+}
+
+document.getElementById("receiptForm").addEventListener("submit", function(e){
+
+  e.preventDefault();
+
+  const invoiceIndex = document.getElementById("invoiceSelect").value;
+
+  if(invoiceIndex === ""){
+    alert("Please select invoice.");
+    return;
+  }
+
+  const invoices = getSalesInvoices();
+  const receipts = getReceipts();
+
+  const inv = invoices[invoiceIndex];
+
+  const total = Number(inv.grandTotal || 0);
+  const alreadyReceived = Number(inv.receivedAmount || 0);
+  const receiptAmount = Number(document.getElementById("receiptAmount").value || 0);
+
+  if(receiptAmount <= 0){
+    alert("Invalid receipt amount.");
+    return;
+  }
+
+  const newReceived = alreadyReceived + receiptAmount;
+
+  if(newReceived > total){
+    alert("Receipt exceeds invoice amount.");
+    return;
+  }
+
+  const bankIndex = document.getElementById("bankAccount").value;
+  const bank = bankIndex !== "" ? getBanks()[bankIndex] : null;
+
+  const receipt = {
+
+    receiptNo: document.getElementById("receiptNo").value,
+    receiptDate: document.getElementById("receiptDate").value,
+
+    invoiceNo: inv.invoiceNo,
+    invoiceDate: inv.invoiceDate,
+
+    customerName: inv.customerName,
+
+    invoiceAmount: total,
+    receiptAmount: receiptAmount,
+
+    paymentMode: document.getElementById("paymentMode").value,
+
+    bankName: bank ? bank.bankName : "",
+    bankAccountNumber: bank ? bank.accountNumber : "",
+    bankDisplayName: bank ? `${bank.bankName} (${bank.accountNumber})` : "",
+
+    referenceNo: document.getElementById("referenceNo").value,
+    status: document.getElementById("status").value,
+    remarks: document.getElementById("remarks").value
+
+  };
+
+  receipts.push(receipt);
+
+  inv.receivedAmount = newReceived;
+
+  if(newReceived === total){
+    inv.paymentStatus = "Paid";
+  }else if(newReceived > 0){
+    inv.paymentStatus = "Partial";
+  }else{
+    inv.paymentStatus = "Unpaid";
+  }
+
+  saveSalesInvoices(invoices);
+  saveReceipts(receipts);
+
+  alert("Receipt saved successfully.");
+
+  resetForm();
+  loadInvoices();
+  loadReceipts();
+
+});
+
+function loadReceipts(){
+
+  const receipts = getReceipts();
+  const tbody = document.getElementById("receiptTable");
+
+  tbody.innerHTML = "";
+
+  let total = 0;
+  let cash = 0;
+  let bank = 0;
+
+  receipts.forEach((r,index)=>{
+
+    const amount = Number(r.receiptAmount || 0);
+
+    total += amount;
+
+    if(r.paymentMode === "Cash"){
+      cash += amount;
+    }else{
+      bank += amount;
+    }
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+
+      <td>
+        ${r.receiptNo || "-"}
+        <div class="small">${r.referenceNo || "-"}</div>
+      </td>
+
+      <td>${r.receiptDate || "-"}</td>
+
+      <td>${r.customerName || "-"}</td>
+
+      <td>
+        ${r.invoiceNo || "-"}
+        <div class="small">${r.invoiceDate || "-"}</div>
+      </td>
+
+      <td>${money(r.receiptAmount)}</td>
+
+      <td>
+        <span class="badge ${r.paymentMode === "Cash" ? "cash" : "bank"}">
+          ${r.paymentMode}
+        </span>
+
+        ${r.bankDisplayName
+          ? `<div class="small">${r.bankDisplayName}</div>`
+          : ""}
+      </td>
+
+      <td>
+        <span class="badge ${r.status === "Received" ? "cash" : "partial"}">
+          ${r.status}
+        </span>
+      </td>
+
+      <td>
+        <button class="action-btn delete" onclick="deleteReceipt(${index})">
+          Delete
+        </button>
+      </td>
+
+    `;
+
+    tbody.appendChild(tr);
+
+  });
+
+  updateSummary(total,cash,bank);
+
+}
+
+function updateSummary(total,cash,bank){
+
+  const invoices = getSalesInvoices();
+
+  const pending = invoices.reduce((sum,inv)=>{
+
+    const totalInv = Number(inv.grandTotal || 0);
+    const received = Number(inv.receivedAmount || 0);
+
+    return sum + (totalInv - received);
+
+  },0);
+
+  document.getElementById("totalReceipts").textContent = money(total);
+  document.getElementById("cashReceipts").textContent = money(cash);
+  document.getElementById("bankReceipts").textContent = money(bank);
+  document.getElementById("pendingBalance").textContent = money(pending);
+
+}
+
+function deleteReceipt(index){
+
+  if(!confirm("Delete this receipt?")) return;
+
+  const receipts = getReceipts();
+  const invoices = getSalesInvoices();
+
+  const r = receipts[index];
+
+  const inv = invoices.find(i => i.invoiceNo === r.invoiceNo);
+
+  if(inv){
+
+    inv.receivedAmount =
+      Number(inv.receivedAmount || 0) - Number(r.receiptAmount || 0);
+
+    if(inv.receivedAmount <= 0){
+      inv.paymentStatus = "Unpaid";
+      inv.receivedAmount = 0;
+    }else if(inv.receivedAmount < Number(inv.grandTotal || 0)){
+      inv.paymentStatus = "Partial";
+    }else{
+      inv.paymentStatus = "Paid";
+    }
+
+  }
+
+  receipts.splice(index,1);
+
+  saveSalesInvoices(invoices);
+  saveReceipts(receipts);
+
+  loadReceipts();
+
+}
+
+function resetForm(){
+
+  document.getElementById("receiptForm").reset();
+
+  document.getElementById("receiptDate").value = today();
+
+  document.getElementById("receiptNo").value =
+    "RCPT-" + (1001 + getReceipts().length);
+
+  toggleBankBox();
+
+}
+
+loadInvoices();
+loadBanks();
+resetForm();
+loadReceipts();
+
+</script>
+
+</body>
+</html>

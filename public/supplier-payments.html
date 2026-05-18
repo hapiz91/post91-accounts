@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supplier Payments | Post91 Accounts</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Segoe UI,Arial,sans-serif;
+}
+
+body{
+  background:#eef3f8;
+  color:#061833;
+  padding:28px;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:24px;
+}
+
+.header h1{
+  font-size:34px;
+}
+
+.header p{
+  color:#64748b;
+  margin-top:6px;
+}
+
+.back,.quick-create{
+  background:white;
+  color:#0d6efd;
+  text-decoration:none;
+  padding:12px 16px;
+  border-radius:13px;
+  font-weight:900;
+  box-shadow:0 10px 25px rgba(15,23,42,.08);
+  display:inline-block;
+}
+
+.quick-create{
+  font-size:13px;
+  margin-top:8px;
+}
+
+.card{
+  background:white;
+  border-radius:22px;
+  padding:26px;
+  box-shadow:0 16px 38px rgba(15,23,42,.08);
+  border:1px solid #e5edf7;
+  margin-bottom:22px;
+}
+
+.card h2{
+  margin-bottom:18px;
+  font-size:22px;
+  color:#0d6efd;
+}
+
+.note{
+  background:#e0f2fe;
+  border:1px solid #bae6fd;
+  color:#075985;
+  padding:16px;
+  border-radius:16px;
+  margin-bottom:18px;
+  line-height:1.6;
+  font-weight:700;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
+}
+
+.form-group{
+  margin-bottom:16px;
+}
+
+label{
+  display:block;
+  margin-bottom:7px;
+  font-weight:800;
+  color:#0f172a;
+}
+
+input,select,textarea{
+  width:100%;
+  padding:13px 14px;
+  border-radius:12px;
+  border:1px solid #dbe4f0;
+  font-size:15px;
+  outline:none;
+  background:white;
+}
+
+textarea{
+  min-height:80px;
+  resize:vertical;
+}
+
+input:focus,select:focus,textarea:focus{
+  border-color:#0d6efd;
+  box-shadow:0 0 0 4px rgba(13,110,253,.1);
+}
+
+.full{
+  grid-column:1/-1;
+}
+
+.btn{
+  border:none;
+  background:#0d6efd;
+  color:white;
+  padding:13px 19px;
+  border-radius:13px;
+  font-weight:900;
+  cursor:pointer;
+  font-size:14px;
+  box-shadow:0 14px 30px rgba(13,110,253,.22);
+}
+
+.btn-light{
+  background:#e2e8f0;
+  color:#0f172a;
+  box-shadow:none;
+  margin-left:8px;
+}
+
+.btn-danger{
+  background:#ef4444;
+  color:white;
+  box-shadow:none;
+}
+
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  margin-bottom:22px;
+}
+
+.summary{
+  background:white;
+  border-radius:22px;
+  padding:20px;
+  border:1px solid #e5edf7;
+  box-shadow:0 12px 28px rgba(15,23,42,.06);
+}
+
+.summary span{
+  color:#64748b;
+  font-size:13px;
+  font-weight:800;
+}
+
+.summary h2{
+  margin-top:8px;
+  color:#0d6efd;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th{
+  text-align:left;
+  color:#64748b;
+  padding:12px;
+  border-bottom:1px solid #e5edf7;
+  font-size:14px;
+}
+
+td{
+  padding:12px;
+  border-bottom:1px solid #eef2f7;
+  font-weight:700;
+  vertical-align:top;
+}
+
+.badge{
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  display:inline-block;
+}
+
+.cash{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.bank{
+  background:#dbeafe;
+  color:#1d4ed8;
+}
+
+.partial{
+  background:#fef3c7;
+  color:#92400e;
+}
+
+.small{
+  font-size:13px;
+  color:#64748b;
+  font-weight:700;
+  margin-top:4px;
+  line-height:1.5;
+}
+
+.action-btn{
+  border:none;
+  padding:8px 12px;
+  border-radius:10px;
+  font-weight:900;
+  cursor:pointer;
+  margin-right:6px;
+}
+
+.delete{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+@media(max-width:1000px){
+
+  .grid,.summary-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  table{
+    display:block;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+
+}
+
+@media(max-width:650px){
+
+  .grid,.summary-grid{
+    grid-template-columns:1fr;
+  }
+
+  .header{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:15px;
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+
+  <div>
+    <h1>Supplier Payments</h1>
+    <p>Pay suppliers against purchase invoices and reduce payable balances.</p>
+  </div>
+
+  <a href="/dashboard.html" class="back">Back to Dashboard</a>
+
+</div>
+
+<div class="note">
+  Supplier payments will update:
+  Payables Report, Supplier Ledger, Cash/Bank Book and Purchase Analytics.
+</div>
+
+<div class="summary-grid">
+
+  <div class="summary">
+    <span>Total Payments</span>
+    <h2 id="totalPayments">OMR 0.000</h2>
+  </div>
+
+  <div class="summary">
+    <span>Cash Payments</span>
+    <h2 id="cashPayments">OMR 0.000</h2>
+  </div>
+
+  <div class="summary">
+    <span>Bank Payments</span>
+    <h2 id="bankPayments">OMR 0.000</h2>
+  </div>
+
+  <div class="summary">
+    <span>Total Payables</span>
+    <h2 id="pendingPayables">OMR 0.000</h2>
+  </div>
+
+</div>
+
+<div class="card">
+
+  <h2>Payment Entry</h2>
+
+  <form id="paymentForm">
+
+    <div class="grid">
+
+      <div class="form-group">
+        <label>Payment No</label>
+        <input type="text" id="paymentNo">
+      </div>
+
+      <div class="form-group">
+        <label>Payment Date</label>
+        <input type="date" id="paymentDate">
+      </div>
+
+      <div class="form-group">
+        <label>Select Purchase Invoice</label>
+        <select id="purchaseSelect" onchange="loadPurchaseData()">
+          <option value="">Select Purchase Invoice</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Supplier Name</label>
+        <input type="text" id="supplierName" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>Purchase No</label>
+        <input type="text" id="purchaseNo" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>Purchase Date</label>
+        <input type="text" id="purchaseDate" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>Invoice Amount</label>
+        <input type="text" id="invoiceAmount" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>Already Paid</label>
+        <input type="text" id="alreadyPaid" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>Pending Amount</label>
+        <input type="text" id="pendingAmount" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>Payment Amount</label>
+        <input type="number" step="0.001" id="paymentAmount">
+      </div>
+
+      <div class="form-group">
+        <label>Payment Mode</label>
+        <select id="paymentMode" onchange="toggleBankBox()">
+          <option>Cash</option>
+          <option>Bank Transfer</option>
+          <option>Card</option>
+          <option>Cheque</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="bankBox" style="display:none;">
+        <label>Select Bank Account</label>
+        <select id="bankAccount">
+          <option value="">Select Bank Account</option>
+        </select>
+
+        <a href="/banks.html" target="_blank" class="quick-create">
+          + New Bank
+        </a>
+      </div>
+
+      <div class="form-group">
+        <label>Reference No</label>
+        <input type="text" id="referenceNo" placeholder="Cheque no / transfer ref">
+      </div>
+
+      <div class="form-group">
+        <label>Status</label>
+        <select id="status">
+          <option>Paid</option>
+          <option>Pending Clearance</option>
+          <option>Bounced</option>
+        </select>
+      </div>
+
+      <div class="form-group full">
+        <label>Remarks</label>
+        <textarea id="remarks" placeholder="Payment remarks"></textarea>
+      </div>
+
+    </div>
+
+    <button class="btn" type="submit">Save Payment</button>
+
+    <button class="btn btn-light" type="button" onclick="resetForm()">
+      Clear
+    </button>
+
+  </form>
+
+</div>
+
+<div class="card">
+
+  <h2>Saved Supplier Payments</h2>
+
+  <table>
+
+    <thead>
+      <tr>
+        <th>Payment</th>
+        <th>Date</th>
+        <th>Supplier</th>
+        <th>Purchase</th>
+        <th>Amount</th>
+        <th>Payment</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody id="paymentTable"></tbody>
+
+  </table>
+
+</div>
+
+<script>
+
+function getPurchases(){
+  return JSON.parse(localStorage.getItem("post91PurchaseInvoices") || "[]");
+}
+
+function savePurchases(data){
+  localStorage.setItem("post91PurchaseInvoices", JSON.stringify(data));
+}
+
+function getPayments(){
+  return JSON.parse(localStorage.getItem("post91SupplierPayments") || "[]");
+}
+
+function savePayments(data){
+  localStorage.setItem("post91SupplierPayments", JSON.stringify(data));
+}
+
+function getBanks(){
+  return JSON.parse(localStorage.getItem("post91Banks") || "[]");
+}
+
+function today(){
+  return new Date().toISOString().split("T")[0];
+}
+
+function money(num){
+  return "OMR " + Number(num || 0).toFixed(3);
+}
+
+function loadPurchases(){
+
+  const select = document.getElementById("purchaseSelect");
+
+  select.innerHTML = `<option value="">Select Purchase Invoice</option>`;
+
+  getPurchases().forEach((p,index)=>{
+
+    const opt = document.createElement("option");
+
+    opt.value = index;
+
+    opt.textContent =
+      `${p.purchaseNo || "PUR"} - ${p.supplierName || "Supplier"}`;
+
+    select.appendChild(opt);
+
+  });
+
+}
+
+function loadBanks(){
+
+  const select = document.getElementById("bankAccount");
+
+  select.innerHTML = `<option value="">Select Bank Account</option>`;
+
+  getBanks()
+    .filter(b => b.status !== "Inactive")
+    .forEach((b,index)=>{
+
+      const opt = document.createElement("option");
+
+      opt.value = index;
+
+      opt.textContent =
+        `${b.bankName} (${b.accountNumber})`;
+
+      select.appendChild(opt);
+
+    });
+
+}
+
+function toggleBankBox(){
+
+  const mode = document.getElementById("paymentMode").value;
+
+  const show =
+    mode === "Bank Transfer" ||
+    mode === "Card" ||
+    mode === "Cheque";
+
+  document.getElementById("bankBox").style.display =
+    show ? "block" : "none";
+
+  document.getElementById("bankAccount").required = show;
+
+}
+
+function loadPurchaseData(){
+
+  const index = document.getElementById("purchaseSelect").value;
+
+  if(index === "") return;
+
+  const p = getPurchases()[index];
+
+  const total = Number(p.grandTotal || 0);
+  const paid = Number(p.paidAmount || 0);
+  const pending = total - paid;
+
+  document.getElementById("supplierName").value =
+    p.supplierName || "";
+
+  document.getElementById("purchaseNo").value =
+    p.purchaseNo || "";
+
+  document.getElementById("purchaseDate").value =
+    p.purchaseDate || "";
+
+  document.getElementById("invoiceAmount").value =
+    money(total);
+
+  document.getElementById("alreadyPaid").value =
+    money(paid);
+
+  document.getElementById("pendingAmount").value =
+    money(pending);
+
+  document.getElementById("paymentAmount").value =
+    pending.toFixed(3);
+
+}
+
+document.getElementById("paymentForm")
+.addEventListener("submit", function(e){
+
+  e.preventDefault();
+
+  const purchaseIndex =
+    document.getElementById("purchaseSelect").value;
+
+  if(purchaseIndex === ""){
+    alert("Please select purchase invoice.");
+    return;
+  }
+
+  const purchases = getPurchases();
+  const payments = getPayments();
+
+  const p = purchases[purchaseIndex];
+
+  const total = Number(p.grandTotal || 0);
+  const alreadyPaid = Number(p.paidAmount || 0);
+
+  const paymentAmount =
+    Number(document.getElementById("paymentAmount").value || 0);
+
+  if(paymentAmount <= 0){
+    alert("Invalid payment amount.");
+    return;
+  }
+
+  const newPaid = alreadyPaid + paymentAmount;
+
+  if(newPaid > total){
+    alert("Payment exceeds invoice amount.");
+    return;
+  }
+
+  const bankIndex =
+    document.getElementById("bankAccount").value;
+
+  const bank =
+    bankIndex !== ""
+      ? getBanks()[bankIndex]
+      : null;
+
+  const payment = {
+
+    paymentNo:
+      document.getElementById("paymentNo").value,
+
+    paymentDate:
+      document.getElementById("paymentDate").value,
+
+    purchaseNo: p.purchaseNo,
+    purchaseDate: p.purchaseDate,
+
+    supplierName: p.supplierName,
+
+    invoiceAmount: total,
+    paymentAmount: paymentAmount,
+
+    paymentMode:
+      document.getElementById("paymentMode").value,
+
+    bankName:
+      bank ? bank.bankName : "",
+
+    bankAccountNumber:
+      bank ? bank.accountNumber : "",
+
+    bankDisplayName:
+      bank
+        ? `${bank.bankName} (${bank.accountNumber})`
+        : "",
+
+    referenceNo:
+      document.getElementById("referenceNo").value,
+
+    status:
+      document.getElementById("status").value,
+
+    remarks:
+      document.getElementById("remarks").value
+
+  };
+
+  payments.push(payment);
+
+  p.paidAmount = newPaid;
+
+  if(newPaid === total){
+
+    p.paymentStatus = "Paid";
+
+  }else if(newPaid > 0){
+
+    p.paymentStatus = "Partial";
+
+  }else{
+
+    p.paymentStatus = "Unpaid";
+
+  }
+
+  savePurchases(purchases);
+  savePayments(payments);
+
+  alert("Supplier payment saved successfully.");
+
+  resetForm();
+  loadPurchases();
+  loadPayments();
+
+});
+
+function loadPayments(){
+
+  const payments = getPayments();
+
+  const tbody = document.getElementById("paymentTable");
+
+  tbody.innerHTML = "";
+
+  let total = 0;
+  let cash = 0;
+  let bank = 0;
+
+  payments.forEach((p,index)=>{
+
+    const amount = Number(p.paymentAmount || 0);
+
+    total += amount;
+
+    if(p.paymentMode === "Cash"){
+      cash += amount;
+    }else{
+      bank += amount;
+    }
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+
+      <td>
+        ${p.paymentNo || "-"}
+        <div class="small">${p.referenceNo || "-"}</div>
+      </td>
+
+      <td>${p.paymentDate || "-"}</td>
+
+      <td>${p.supplierName || "-"}</td>
+
+      <td>
+        ${p.purchaseNo || "-"}
+        <div class="small">${p.purchaseDate || "-"}</div>
+      </td>
+
+      <td>${money(p.paymentAmount)}</td>
+
+      <td>
+
+        <span class="badge ${p.paymentMode === "Cash" ? "cash" : "bank"}">
+          ${p.paymentMode}
+        </span>
+
+        ${p.bankDisplayName
+          ? `<div class="small">${p.bankDisplayName}</div>`
+          : ""}
+
+      </td>
+
+      <td>
+
+        <span class="badge ${p.status === "Paid" ? "cash" : "partial"}">
+          ${p.status}
+        </span>
+
+      </td>
+
+      <td>
+
+        <button class="action-btn delete"
+          onclick="deletePayment(${index})">
+
+          Delete
+
+        </button>
+
+      </td>
+
+    `;
+
+    tbody.appendChild(tr);
+
+  });
+
+  updateSummary(total,cash,bank);
+
+}
+
+function updateSummary(total,cash,bank){
+
+  const purchases = getPurchases();
+
+  const pending = purchases.reduce((sum,p)=>{
+
+    const totalInv = Number(p.grandTotal || 0);
+    const paid = Number(p.paidAmount || 0);
+
+    return sum + (totalInv - paid);
+
+  },0);
+
+  document.getElementById("totalPayments").textContent =
+    money(total);
+
+  document.getElementById("cashPayments").textContent =
+    money(cash);
+
+  document.getElementById("bankPayments").textContent =
+    money(bank);
+
+  document.getElementById("pendingPayables").textContent =
+    money(pending);
+
+}
+
+function deletePayment(index){
+
+  if(!confirm("Delete this payment?")) return;
+
+  const payments = getPayments();
+  const purchases = getPurchases();
+
+  const p = payments[index];
+
+  const inv =
+    purchases.find(i => i.purchaseNo === p.purchaseNo);
+
+  if(inv){
+
+    inv.paidAmount =
+      Number(inv.paidAmount || 0)
+      - Number(p.paymentAmount || 0);
+
+    if(inv.paidAmount <= 0){
+
+      inv.paymentStatus = "Unpaid";
+      inv.paidAmount = 0;
+
+    }else if(
+      inv.paidAmount < Number(inv.grandTotal || 0)
+    ){
+
+      inv.paymentStatus = "Partial";
+
+    }else{
+
+      inv.paymentStatus = "Paid";
+
+    }
+
+  }
+
+  payments.splice(index,1);
+
+  savePurchases(purchases);
+  savePayments(payments);
+
+  loadPayments();
+
+}
+
+function resetForm(){
+
+  document.getElementById("paymentForm").reset();
+
+  document.getElementById("paymentDate").value =
+    today();
+
+  document.getElementById("paymentNo").value =
+    "SPAY-" + (1001 + getPayments().length);
+
+  toggleBankBox();
+
+}
+
+loadPurchases();
+loadBanks();
+resetForm();
+loadPayments();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports Center | Post91 Accounts</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
+body{background:#eef3f8;color:#061833;padding:28px;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.header h1{font-size:34px}.header p{color:#64748b;margin-top:6px}
+.back{background:white;color:#0d6efd;text-decoration:none;padding:12px 16px;border-radius:13px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);}
+.card{background:white;border-radius:24px;padding:24px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:22px;}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+.report-card{text-decoration:none;color:#061833;background:#f8fbff;border:1px solid #e5edf7;border-radius:20px;padding:20px;transition:.25s;}
+.report-card:hover{transform:translateY(-4px);border-color:#0d6efd;box-shadow:0 16px 34px rgba(15,23,42,.1);}
+.icon{font-size:30px;margin-bottom:10px;}
+.report-card h3{font-size:18px;margin-bottom:8px;color:#0d6efd;}
+.report-card p{font-size:14px;color:#64748b;line-height:1.5;}
+.section-title{font-size:24px;color:#0d6efd;margin-bottom:16px;}
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+.summary{background:white;border-radius:22px;padding:20px;border:1px solid #e5edf7;box-shadow:0 12px 28px rgba(15,23,42,.06);}
+.summary span{color:#64748b;font-size:13px;font-weight:800;}
+.summary h2{margin-top:8px;color:#0d6efd;}
+table{width:100%;border-collapse:collapse;margin-top:12px;}
+th{text-align:left;color:#64748b;padding:12px;border-bottom:1px solid #e5edf7;font-size:14px;}
+td{padding:12px;border-bottom:1px solid #eef2f7;font-weight:700;}
+.badge{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:900;}
+.paid{background:#dcfce7;color:#166534;}
+.pending{background:#fef3c7;color:#92400e;}
+@media(max-width:1100px){.grid,.summary-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:650px){.grid,.summary-grid{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Reports Center</h1>
+    <p>Complete reporting hub for sales, purchase, VAT, bank, inventory and financial reports.</p>
+  </div>
+  <a href="/dashboard.html" class="back">Back to Dashboard</a>
+</div>
+
+<div class="summary-grid">
+  <div class="summary"><span>Total Sales</span><h2 id="totalSales">OMR 0.000</h2></div>
+  <div class="summary"><span>Total Purchases</span><h2 id="totalPurchases">OMR 0.000</h2></div>
+  <div class="summary"><span>Receivables</span><h2 id="receivables">OMR 0.000</h2></div>
+  <div class="summary"><span>Payables</span><h2 id="payables">OMR 0.000</h2></div>
+</div>
+
+<div class="card">
+  <div class="section-title">Sales Reports</div>
+  <div class="grid">
+    <a class="report-card" href="/reports.html#sales-summary" onclick="showSalesSummary()">
+      <div class="icon">📈</div><h3>Sales Summary</h3><p>Sales total, VAT sales, non-VAT sales and customer-wise sales.</p>
+    </a>
+    <a class="report-card" href="/sales-invoice.html">
+      <div class="icon">🧾</div><h3>Sales Invoice List</h3><p>View and manage saved sales invoices.</p>
+    </a>
+    <a class="report-card" href="/soa.html">
+      <div class="icon">📄</div><h3>Customer SOA</h3><p>Customer ledger and statement of account.</p>
+    </a>
+    <a class="report-card" href="#outstanding" onclick="showOutstanding()">
+      <div class="icon">⏳</div><h3>Outstanding Sales</h3><p>Pending and partial customer invoice balances.</p>
+    </a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-title">Purchase Reports</div>
+  <div class="grid">
+    <a class="report-card" href="#purchase-summary" onclick="showPurchaseSummary()">
+      <div class="icon">📦</div><h3>Purchase Summary</h3><p>Purchase totals, VAT purchase and supplier-wise purchase.</p>
+    </a>
+    <a class="report-card" href="/purchase-invoice.html">
+      <div class="icon">🧾</div><h3>Purchase Invoice List</h3><p>View and manage saved purchase invoices.</p>
+    </a>
+    <a class="report-card" href="/supplier-soa.html">
+      <div class="icon">🏭</div><h3>Supplier SOA</h3><p>Supplier ledger and payable statement.</p>
+    </a>
+    <a class="report-card" href="#payables" onclick="showPayables()">
+      <div class="icon">⏰</div><h3>Payables Report</h3><p>Pending and partial supplier purchase balances.</p>
+    </a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-title">Accounting & Bank Reports</div>
+  <div class="grid">
+    <a class="report-card" href="/cash-bank-book.html">
+      <div class="icon">📒</div><h3>Cash & Bank Book</h3><p>Day-wise cash and bank receipt/payment report.</p>
+    </a>
+    <a class="report-card" href="/expenses.html">
+      <div class="icon">💸</div><h3>Expense Report</h3><p>Expense category, VAT expense, payment mode and vendor reports.</p>
+    </a>
+    <a class="report-card" href="/profit-loss.html">
+      <div class="icon">📊</div><h3>Profit & Loss</h3><p>Revenue, purchase cost, expenses and net profit/loss.</p>
+    </a>
+    <a class="report-card" href="/vat-report.html">
+      <div class="icon">🧮</div><h3>VAT Report</h3><p>Output VAT, input VAT, zero-rated, exempt and non-VAT reports.</p>
+    </a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-title">Inventory Reports</div>
+  <div class="grid">
+    <a class="report-card" href="/stock-ledger.html">
+      <div class="icon">📦</div><h3>Stock Ledger</h3><p>Stock IN, stock OUT, balance qty and stock valuation.</p>
+    </a>
+    <a class="report-card" href="/stock-ledger.html">
+      <div class="icon">⚠️</div><h3>Low Stock Report</h3><p>Items with low or negative stock balance.</p>
+    </a>
+    <a class="report-card" href="/items.html">
+      <div class="icon">📋</div><h3>Item Master Report</h3><p>Item, category, brand, part number and OEM master list.</p>
+    </a>
+    <a class="report-card" href="/stock-ledger.html">
+      <div class="icon">🔁</div><h3>Stock Movement</h3><p>Purchase IN and sales OUT item movement details.</p>
+    </a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-title" id="dynamicTitle">Quick Report Preview</div>
+  <div id="reportArea">
+    <p style="color:#64748b;font-weight:700;">Click Sales Summary, Purchase Summary, Outstanding Sales or Payables Report to preview here.</p>
+  </div>
+</div>
+
+<script>
+function getSales(){return JSON.parse(localStorage.getItem("post91SalesInvoices") || "[]");}
+function getPurchases(){return JSON.parse(localStorage.getItem("post91PurchaseInvoices") || "[]");}
+function money(n){return "OMR " + Number(n || 0).toFixed(3);}
+
+function loadSummary(){
+  const sales=getSales();
+  const purchases=getPurchases();
+
+  const totalSales=sales.reduce((s,i)=>s+Number(i.grandTotal||0),0);
+  const totalPurchases=purchases.reduce((s,i)=>s+Number(i.grandTotal||0),0);
+
+  const receivables=sales.reduce((s,i)=>s+(Number(i.grandTotal||0)-Number(i.receivedAmount||0)),0);
+  const payables=purchases.reduce((s,i)=>s+(Number(i.grandTotal||0)-Number(i.paidAmount||0)),0);
+
+  document.getElementById("totalSales").textContent=money(totalSales);
+  document.getElementById("totalPurchases").textContent=money(totalPurchases);
+  document.getElementById("receivables").textContent=money(receivables);
+  document.getElementById("payables").textContent=money(payables);
+}
+
+function showSalesSummary(){
+  const sales=getSales();
+  document.getElementById("dynamicTitle").textContent="Sales Summary";
+
+  const vatSales=sales.filter(s=>s.invoiceType==="VAT Exclusive"||s.invoiceType==="VAT Inclusive");
+  const nonVat=sales.filter(s=>s.invoiceType==="Non-VAT Sales");
+  const zero=sales.filter(s=>s.invoiceType==="Zero Rated Sales");
+  const exempt=sales.filter(s=>s.invoiceType==="Exempt Sales");
+
+  document.getElementById("reportArea").innerHTML=`
+    <table>
+      <tr><th>Category</th><th>Count</th><th>Before VAT</th><th>VAT</th><th>Total</th></tr>
+      <tr><td>VAT Sales</td><td>${vatSales.length}</td><td>${money(sum(vatSales,"beforeTax"))}</td><td>${money(sum(vatSales,"vatAmount"))}</td><td>${money(sum(vatSales,"grandTotal"))}</td></tr>
+      <tr><td>Non-VAT Sales</td><td>${nonVat.length}</td><td>${money(sum(nonVat,"beforeTax"))}</td><td>${money(0)}</td><td>${money(sum(nonVat,"grandTotal"))}</td></tr>
+      <tr><td>Zero Rated Sales</td><td>${zero.length}</td><td>${money(sum(zero,"beforeTax"))}</td><td>${money(0)}</td><td>${money(sum(zero,"grandTotal"))}</td></tr>
+      <tr><td>Exempt Sales</td><td>${exempt.length}</td><td>${money(sum(exempt,"beforeTax"))}</td><td>${money(0)}</td><td>${money(sum(exempt,"grandTotal"))}</td></tr>
+    </table>
+  `;
+}
+
+function showPurchaseSummary(){
+  const purchases=getPurchases();
+  document.getElementById("dynamicTitle").textContent="Purchase Summary";
+
+  const vat=purchases.filter(p=>p.purchaseType==="VAT Exclusive"||p.purchaseType==="VAT Inclusive");
+  const nonVat=purchases.filter(p=>p.purchaseType==="Non-VAT Purchase");
+  const zero=purchases.filter(p=>p.purchaseType==="Zero Rated Purchase");
+  const exempt=purchases.filter(p=>p.purchaseType==="Exempt Purchase");
+
+  document.getElementById("reportArea").innerHTML=`
+    <table>
+      <tr><th>Category</th><th>Count</th><th>Before VAT</th><th>VAT</th><th>Total</th></tr>
+      <tr><td>VAT Purchase</td><td>${vat.length}</td><td>${money(sum(vat,"beforeTax"))}</td><td>${money(sum(vat,"vatAmount"))}</td><td>${money(sum(vat,"grandTotal"))}</td></tr>
+      <tr><td>Non-VAT Purchase</td><td>${nonVat.length}</td><td>${money(sum(nonVat,"beforeTax"))}</td><td>${money(0)}</td><td>${money(sum(nonVat,"grandTotal"))}</td></tr>
+      <tr><td>Zero Rated Purchase</td><td>${zero.length}</td><td>${money(sum(zero,"beforeTax"))}</td><td>${money(0)}</td><td>${money(sum(zero,"grandTotal"))}</td></tr>
+      <tr><td>Exempt Purchase</td><td>${exempt.length}</td><td>${money(sum(exempt,"beforeTax"))}</td><td>${money(0)}</td><td>${money(sum(exempt,"grandTotal"))}</td></tr>
+    </table>
+  `;
+}
+
+function showOutstanding(){
+  const rows=getSales().filter(s=>Number(s.grandTotal||0)-Number(s.receivedAmount||0)>0);
+  document.getElementById("dynamicTitle").textContent="Outstanding Sales";
+
+  document.getElementById("reportArea").innerHTML=`
+    <table>
+      <tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Total</th><th>Received</th><th>Pending</th><th>Status</th></tr>
+      ${rows.map(s=>{
+        const pending=Number(s.grandTotal||0)-Number(s.receivedAmount||0);
+        return `<tr>
+          <td>${s.invoiceNo||"-"}</td>
+          <td>${s.invoiceDate||"-"}</td>
+          <td>${s.customerName||"-"}</td>
+          <td>${money(s.grandTotal)}</td>
+          <td>${money(s.receivedAmount)}</td>
+          <td>${money(pending)}</td>
+          <td><span class="badge pending">${s.paymentStatus||"Unpaid"}</span></td>
+        </tr>`;
+      }).join("")}
+    </table>
+  `;
+}
+
+function showPayables(){
+  const rows=getPurchases().filter(p=>Number(p.grandTotal||0)-Number(p.paidAmount||0)>0);
+  document.getElementById("dynamicTitle").textContent="Payables Report";
+
+  document.getElementById("reportArea").innerHTML=`
+    <table>
+      <tr><th>Purchase</th><th>Date</th><th>Supplier</th><th>Total</th><th>Paid</th><th>Pending</th><th>Status</th></tr>
+      ${rows.map(p=>{
+        const pending=Number(p.grandTotal||0)-Number(p.paidAmount||0);
+        return `<tr>
+          <td>${p.purchaseNo||"-"}</td>
+          <td>${p.purchaseDate||"-"}</td>
+          <td>${p.supplierName||"-"}</td>
+          <td>${money(p.grandTotal)}</td>
+          <td>${money(p.paidAmount)}</td>
+          <td>${money(pending)}</td>
+          <td><span class="badge pending">${p.paymentStatus||"Unpaid"}</span></td>
+        </tr>`;
+      }).join("")}
+    </table>
+  `;
+}
+
+function sum(arr,field){
+  return arr.reduce((t,r)=>t+Number(r[field]||0),0);
+}
+
+loadSummary();
+</script>
+
+</body>
+</html>

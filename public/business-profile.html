@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Profile | Post91 Accounts</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
+body{background:#f4f8fc;color:#061833;display:flex;min-height:100vh;}
+.sidebar{width:300px;background:#020817;color:white;padding:24px 18px;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;}
+.logo{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+.logo img{height:52px;background:white;border-radius:12px;padding:5px;}
+.logo h2{font-size:22px}.logo p{font-size:12px;color:#7dd3fc}
+.menu-title{color:#7dd3fc;font-size:12px;font-weight:900;margin:22px 12px 8px;text-transform:uppercase;}
+.menu a{display:block;text-decoration:none;color:#cbd5e1;padding:12px 15px;border-radius:13px;font-weight:700;font-size:14px;margin-bottom:5px;}
+.menu a:hover,.menu a.active{background:#0d6efd;color:white;}
+.menu a span{margin-right:8px;}
+.main{margin-left:300px;width:calc(100% - 300px);padding:32px;}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px;}
+.topbar h1{font-size:34px}.topbar p{color:#64748b;margin-top:6px}
+.back{background:white;color:#0d6efd;text-decoration:none;padding:13px 18px;border-radius:14px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);}
+.form-card{background:white;border-radius:28px;padding:32px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;}
+.section-title{font-size:22px;margin:28px 0 18px;color:#0d6efd;}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+.form-group{margin-bottom:20px;}
+label{display:block;margin-bottom:8px;font-weight:800;color:#0f172a;}
+input,select,textarea{width:100%;padding:15px 16px;border-radius:14px;border:1px solid #dbe4f0;font-size:15px;outline:none;background:white;}
+textarea{min-height:95px;resize:vertical;}
+input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4px rgba(13,110,253,.1);}
+.full{grid-column:1/-1;}
+.note{background:#e0f2fe;border:1px solid #bae6fd;color:#075985;padding:18px;border-radius:18px;margin-bottom:22px;line-height:1.6;font-weight:700;}
+.btn-row{display:flex;gap:14px;margin-top:20px;flex-wrap:wrap;}
+.btn{border:none;padding:15px 24px;border-radius:14px;font-weight:900;cursor:pointer;font-size:15px;}
+.primary{background:#0d6efd;color:white;box-shadow:0 14px 30px rgba(13,110,253,.22);}
+.secondary{background:#e2e8f0;color:#0f172a;}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0;width:100%;padding:20px}.grid{grid-template-columns:1fr}.topbar{flex-direction:column;align-items:flex-start;gap:15px}}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <img src="/images/post91-logo.png">
+    <div><h2>Post91</h2><p>Accounts Platform</p></div>
+  </div>
+
+  <div class="menu">
+    <a href="/dashboard.html"><span>🏠</span>Dashboard</a>
+
+    <div class="menu-title">Sales</div>
+    <a href="/quotation.html"><span>📝</span>Quotation</a>
+    <a href="/delivery-order.html"><span>🚚</span>Delivery Order</a>
+    <a href="/sales-invoice.html"><span>🧾</span>Sales Invoice</a>
+    <a href="/customer-receipts.html"><span>💰</span>Customer Receipts</a>
+
+    <div class="menu-title">Purchases</div>
+    <a href="/purchase-invoice.html"><span>📦</span>Purchase Invoice</a>
+    <a href="/supplier-payments.html"><span>💳</span>Supplier Payments</a>
+
+    <div class="menu-title">Accounts</div>
+    <a href="/expenses.html"><span>💸</span>Expenses</a>
+    <a href="/bank-ledger.html"><span>🏦</span>Bank Ledger</a>
+    <a href="/petty-cash.html"><span>💵</span>Petty Cash</a>
+    <a href="/journal-entry.html"><span>📘</span>Journal Entry</a>
+
+    <div class="menu-title">Masters</div>
+    <a href="/customers.html"><span>👥</span>Customers</a>
+    <a href="/suppliers.html"><span>🏭</span>Suppliers</a>
+    <a href="/items.html"><span>📋</span>Items / Services</a>
+
+    <div class="menu-title">Reports</div>
+    <a href="/reports.html"><span>📊</span>Reports Center</a>
+    <a href="/vat-report.html"><span>🧮</span>VAT Report</a>
+    <a href="/soa.html"><span>📄</span>SOA</a>
+
+    <div class="menu-title">Admin</div>
+    <a href="/business-profile.html" class="active"><span>🏢</span>Business Profile</a>
+    <a href="/users.html"><span>🔐</span>User Creation</a>
+    <a href="/settings.html"><span>⚙️</span>Settings</a>
+    <a href="/"><span>🚪</span>Logout</a>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="topbar">
+    <div>
+      <h1>Business Profile</h1>
+      <p>Complete company details for invoices, reports and VAT settings.</p>
+    </div>
+    <a class="back" href="/dashboard.html">Back to Dashboard</a>
+  </div>
+
+  <div class="form-card">
+
+    <div class="note">
+      This profile will be used on quotations, delivery orders, sales invoices, statements and reports.
+    </div>
+
+    <form id="profileForm">
+
+      <div class="section-title">Company Details</div>
+
+      <div class="grid">
+        <div class="form-group">
+          <label>Business Name</label>
+          <input type="text" id="businessName" placeholder="Enter company name">
+        </div>
+
+        <div class="form-group">
+          <label>CR Number</label>
+          <input type="text" id="crNumber" placeholder="Enter CR number">
+        </div>
+
+        <div class="form-group">
+          <label>Owner / Contact Person</label>
+          <input type="text" id="ownerName" placeholder="Enter owner name">
+        </div>
+
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <input type="text" id="mobile" placeholder="+968 XXXXXXXX">
+        </div>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="email" placeholder="Enter email">
+        </div>
+
+        <div class="form-group">
+          <label>Business Type</label>
+          <select id="businessType">
+            <option value="">Select Type</option>
+            <option>Trading</option>
+            <option>Garage</option>
+            <option>Spare Parts</option>
+            <option>Transport</option>
+            <option>Services</option>
+            <option>Construction</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Governorate</label>
+          <select id="governorate">
+            <option value="">Select Governorate</option>
+            <option>Muscat</option>
+            <option>Dhofar</option>
+            <option>Musandam</option>
+            <option>Al Buraimi</option>
+            <option>Al Dakhiliyah</option>
+            <option>Al Dhahirah</option>
+            <option>North Al Batinah</option>
+            <option>South Al Batinah</option>
+            <option>North Al Sharqiyah</option>
+            <option>South Al Sharqiyah</option>
+            <option>Al Wusta</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Wilayat / Area</label>
+          <input type="text" id="wilayat" placeholder="Enter wilayat / area">
+        </div>
+
+        <div class="form-group full">
+          <label>Company Address</label>
+          <textarea id="address" placeholder="Enter full company address"></textarea>
+        </div>
+      </div>
+
+      <div class="section-title">VAT Settings</div>
+
+      <div class="grid">
+        <div class="form-group">
+          <label>VAT Registered?</label>
+          <select id="vatRegistered">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>VAT Number</label>
+          <input type="text" id="vatNumber" placeholder="Enter VAT number if registered">
+        </div>
+
+        <div class="form-group">
+          <label>Default Invoice VAT Type</label>
+          <select id="defaultVatType">
+            <option>Non-VAT Invoice</option>
+            <option>VAT Exclusive</option>
+            <option>VAT Inclusive</option>
+            <option>Zero Rated</option>
+            <option>Exempt Supply</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>VAT Percentage</label>
+          <input type="number" id="vatPercent" value="5">
+        </div>
+      </div>
+
+      <div class="section-title">Bank Details for Invoice Footer</div>
+
+      <div class="grid">
+        <div class="form-group">
+          <label>Bank Name</label>
+          <input type="text" id="bankName" placeholder="Enter bank name">
+        </div>
+
+        <div class="form-group">
+          <label>Account Name</label>
+          <input type="text" id="accountName" placeholder="Enter account name">
+        </div>
+
+        <div class="form-group">
+          <label>Account Number</label>
+          <input type="text" id="accountNumber" placeholder="Enter account number">
+        </div>
+
+        <div class="form-group">
+          <label>IBAN</label>
+          <input type="text" id="iban" placeholder="Enter IBAN">
+        </div>
+      </div>
+
+      <div class="section-title">Invoice Settings</div>
+
+      <div class="grid">
+        <div class="form-group">
+          <label>Sales Invoice Prefix</label>
+          <input type="text" id="invoicePrefix" value="INV">
+        </div>
+
+        <div class="form-group">
+          <label>Quotation Prefix</label>
+          <input type="text" id="quotationPrefix" value="QT">
+        </div>
+
+        <div class="form-group">
+          <label>Delivery Order Prefix</label>
+          <input type="text" id="doPrefix" value="DO">
+        </div>
+
+        <div class="form-group">
+          <label>Currency</label>
+          <select id="currency">
+            <option>OMR</option>
+            <option>USD</option>
+            <option>AED</option>
+            <option>INR</option>
+          </select>
+        </div>
+
+        <div class="form-group full">
+          <label>Default Invoice Terms</label>
+          <textarea id="invoiceTerms">Payment due as per agreed terms. Goods once sold will not be returned unless agreed in writing.</textarea>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button type="submit" class="btn primary">Save Business Profile</button>
+        <button type="button" class="btn secondary" onclick="window.location.href='/dashboard.html'">Cancel</button>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+<script>
+document.getElementById("profileForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  const profile = {
+    businessName: document.getElementById("businessName").value,
+    crNumber: document.getElementById("crNumber").value,
+    ownerName: document.getElementById("ownerName").value,
+    mobile: document.getElementById("mobile").value,
+    email: document.getElementById("email").value,
+    businessType: document.getElementById("businessType").value,
+    governorate: document.getElementById("governorate").value,
+    wilayat: document.getElementById("wilayat").value,
+    address: document.getElementById("address").value,
+    vatRegistered: document.getElementById("vatRegistered").value,
+    vatNumber: document.getElementById("vatNumber").value,
+    defaultVatType: document.getElementById("defaultVatType").value,
+    vatPercent: document.getElementById("vatPercent").value,
+    bankName: document.getElementById("bankName").value,
+    accountName: document.getElementById("accountName").value,
+    accountNumber: document.getElementById("accountNumber").value,
+    iban: document.getElementById("iban").value,
+    invoicePrefix: document.getElementById("invoicePrefix").value,
+    quotationPrefix: document.getElementById("quotationPrefix").value,
+    doPrefix: document.getElementById("doPrefix").value,
+    currency: document.getElementById("currency").value,
+    invoiceTerms: document.getElementById("invoiceTerms").value
+  };
+
+  localStorage.setItem("post91BusinessProfile", JSON.stringify(profile));
+  alert("Business profile saved successfully.");
+  window.location.href = "/dashboard.html";
+});
+</script>
+
+</body>
+</html>

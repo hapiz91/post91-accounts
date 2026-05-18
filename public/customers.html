@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customers | Post91 Accounts</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
+body{background:#f4f8fc;color:#061833;padding:32px;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;}
+.header h1{font-size:34px;}
+.header p{color:#64748b;margin-top:6px;}
+.back{background:white;color:#0d6efd;text-decoration:none;padding:13px 18px;border-radius:14px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);}
+.card{background:white;border-radius:28px;padding:30px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:25px;}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+.form-group{margin-bottom:18px;}
+label{display:block;margin-bottom:8px;font-weight:800;}
+input,select,textarea{width:100%;padding:15px 16px;border-radius:14px;border:1px solid #dbe4f0;font-size:15px;outline:none;background:white;}
+textarea{min-height:90px;resize:vertical;}
+input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4px rgba(13,110,253,.1);}
+.full{grid-column:1/-1;}
+.note{background:#e0f2fe;border:1px solid #bae6fd;color:#075985;padding:18px;border-radius:18px;margin-bottom:22px;line-height:1.6;font-weight:700;}
+.btn{border:none;background:#0d6efd;color:white;padding:15px 24px;border-radius:14px;font-weight:900;cursor:pointer;font-size:15px;box-shadow:0 14px 30px rgba(13,110,253,.22);}
+.btn-light{background:#e2e8f0;color:#0f172a;box-shadow:none;margin-left:10px;}
+.search{margin-bottom:18px;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;color:#64748b;padding-bottom:14px;font-size:14px;}
+td{padding:14px 0;border-top:1px solid #eef2f7;font-weight:700;vertical-align:top;}
+.badge{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:900;display:inline-block;}
+.yes{background:#dcfce7;color:#166534;}
+.no{background:#fee2e2;color:#991b1b;}
+.customer-type{background:#e0f2fe;color:#075985;}
+.small{font-size:13px;color:#64748b;font-weight:700;margin-top:4px;}
+.action-btn{border:none;padding:8px 12px;border-radius:10px;font-weight:900;cursor:pointer;margin-right:6px;}
+.edit{background:#dbeafe;color:#1d4ed8;}
+.delete{background:#fee2e2;color:#991b1b;}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}table{font-size:13px}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Customer Master</h1>
+    <p>Create customers with optional VAT number and customer-wise payment terms.</p>
+  </div>
+  <a class="back" href="/dashboard.html">Back to Dashboard</a>
+</div>
+
+<div class="card">
+
+  <div class="note">
+    Customer VAT number is optional. If VAT number is blank, it will be hidden from invoice print later.
+    Payment terms saved here will override default payment terms from Settings.
+  </div>
+
+  <form id="customerForm">
+
+    <input type="hidden" id="editIndex" value="">
+
+    <div class="grid">
+
+      <div class="form-group">
+        <label>Customer Name *</label>
+        <input type="text" id="customerName" placeholder="Enter customer name" required>
+      </div>
+
+      <div class="form-group">
+        <label>Customer Type</label>
+        <select id="customerType">
+          <option>Company Customer</option>
+          <option>Cash Customer</option>
+          <option>Walk-in Customer</option>
+          <option>Government Customer</option>
+          <option>Individual Customer</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Mobile Number</label>
+        <input type="text" id="mobile" placeholder="+968 XXXXXXXX">
+      </div>
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="customer@email.com">
+      </div>
+
+      <div class="form-group">
+        <label>VAT Registered?</label>
+        <select id="vatRegistered">
+          <option>No</option>
+          <option>Yes</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>VAT Number / TRN Optional</label>
+        <input type="text" id="vatNumber" placeholder="Enter only if available">
+      </div>
+
+      <div class="form-group">
+        <label>Payment Terms</label>
+        <select id="paymentTerms">
+          <option>Cash / Immediate</option>
+          <option>Advance Payment</option>
+          <option>7 Days Credit</option>
+          <option>15 Days Credit</option>
+          <option>30 Days Credit</option>
+          <option>45 Days Credit</option>
+          <option>60 Days Credit</option>
+          <option>90 Days Credit</option>
+          <option>120 Days Credit</option>
+          <option>Manual / Custom Terms</option>
+          <option>As Per Agreement</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Credit Limit</label>
+        <input type="number" id="creditLimit" placeholder="0.000">
+      </div>
+
+      <div class="form-group">
+        <label>Opening Balance</label>
+        <input type="number" id="openingBalance" placeholder="0.000">
+      </div>
+
+      <div class="form-group">
+        <label>Status</label>
+        <select id="status">
+          <option>Active</option>
+          <option>Inactive</option>
+        </select>
+      </div>
+
+      <div class="form-group full">
+        <label>Billing Address</label>
+        <textarea id="address" placeholder="Enter customer billing address"></textarea>
+      </div>
+
+      <div class="form-group full">
+        <label>Remarks</label>
+        <textarea id="remarks" placeholder="Internal note only"></textarea>
+      </div>
+
+    </div>
+
+    <button class="btn" type="submit">Save Customer</button>
+    <button class="btn btn-light" type="button" onclick="resetForm()">Clear</button>
+
+  </form>
+</div>
+
+<div class="card">
+  <h2 style="margin-bottom:18px;">Customer List</h2>
+
+  <input class="search" type="text" id="searchBox" placeholder="Search customer..." onkeyup="loadCustomers()">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Customer</th>
+        <th>Contact</th>
+        <th>VAT</th>
+        <th>Terms</th>
+        <th>Credit</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="customerTable"></tbody>
+  </table>
+</div>
+
+<script>
+function getCustomers(){
+  return JSON.parse(localStorage.getItem("post91Customers") || "[]");
+}
+
+function saveCustomers(customers){
+  localStorage.setItem("post91Customers", JSON.stringify(customers));
+}
+
+function loadCustomers(){
+  const customers = getCustomers();
+  const search = document.getElementById("searchBox").value.toLowerCase();
+  const tbody = document.getElementById("customerTable");
+
+  tbody.innerHTML = "";
+
+  customers
+    .filter(c =>
+      c.customerName.toLowerCase().includes(search) ||
+      c.mobile.toLowerCase().includes(search) ||
+      c.email.toLowerCase().includes(search)
+    )
+    .forEach((c, index) => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>
+          ${c.customerName}
+          <div class="small"><span class="badge customer-type">${c.customerType}</span></div>
+        </td>
+        <td>
+          ${c.mobile || "-"}
+          <div class="small">${c.email || ""}</div>
+        </td>
+        <td>
+          <span class="badge ${c.vatRegistered === "Yes" ? "yes" : "no"}">${c.vatRegistered}</span>
+          <div class="small">${c.vatNumber || "No VAT number"}</div>
+        </td>
+        <td>${c.paymentTerms}</td>
+        <td>OMR ${Number(c.creditLimit || 0).toFixed(3)}</td>
+        <td><span class="badge ${c.status === "Active" ? "yes" : "no"}">${c.status}</span></td>
+        <td>
+          <button class="action-btn edit" onclick="editCustomer(${index})">Edit</button>
+          <button class="action-btn delete" onclick="deleteCustomer(${index})">Delete</button>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+}
+
+document.getElementById("customerForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  const customers = getCustomers();
+  const editIndex = document.getElementById("editIndex").value;
+
+  const customer = {
+    customerName: document.getElementById("customerName").value,
+    customerType: document.getElementById("customerType").value,
+    mobile: document.getElementById("mobile").value,
+    email: document.getElementById("email").value,
+    vatRegistered: document.getElementById("vatRegistered").value,
+    vatNumber: document.getElementById("vatNumber").value,
+    paymentTerms: document.getElementById("paymentTerms").value,
+    creditLimit: document.getElementById("creditLimit").value,
+    openingBalance: document.getElementById("openingBalance").value,
+    status: document.getElementById("status").value,
+    address: document.getElementById("address").value,
+    remarks: document.getElementById("remarks").value
+  };
+
+  if(editIndex === ""){
+    customers.push(customer);
+    alert("Customer saved successfully.");
+  } else {
+    customers[editIndex] = customer;
+    alert("Customer updated successfully.");
+  }
+
+  saveCustomers(customers);
+  resetForm();
+  loadCustomers();
+});
+
+function editCustomer(index){
+  const c = getCustomers()[index];
+
+  document.getElementById("editIndex").value = index;
+  document.getElementById("customerName").value = c.customerName;
+  document.getElementById("customerType").value = c.customerType;
+  document.getElementById("mobile").value = c.mobile;
+  document.getElementById("email").value = c.email;
+  document.getElementById("vatRegistered").value = c.vatRegistered;
+  document.getElementById("vatNumber").value = c.vatNumber;
+  document.getElementById("paymentTerms").value = c.paymentTerms;
+  document.getElementById("creditLimit").value = c.creditLimit;
+  document.getElementById("openingBalance").value = c.openingBalance;
+  document.getElementById("status").value = c.status;
+  document.getElementById("address").value = c.address;
+  document.getElementById("remarks").value = c.remarks;
+
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function deleteCustomer(index){
+  if(confirm("Delete this customer?")){
+    const customers = getCustomers();
+    customers.splice(index,1);
+    saveCustomers(customers);
+    loadCustomers();
+  }
+}
+
+function resetForm(){
+  document.getElementById("customerForm").reset();
+  document.getElementById("editIndex").value = "";
+}
+
+loadCustomers();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quotation | Post91 Accounts</title><style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif}
+body{background:#eef3f8;color:#061833;padding:28px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.header h1{font-size:34px}.header p{color:#64748b;margin-top:6px}
+.back,.quick-create{background:white;color:#0d6efd;text-decoration:none;padding:11px 15px;border-radius:13px;font-weight:900;display:inline-block;box-shadow:0 10px 25px rgba(15,23,42,.08)}
+.quick-create{font-size:13px;margin-top:8px}
+.card{background:white;border-radius:22px;padding:24px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:22px}
+.card h2{margin-bottom:16px;color:#0d6efd}
+.note{background:#e0f2fe;border:1px solid #bae6fd;color:#075985;padding:15px;border-radius:16px;margin-bottom:18px;font-weight:700;line-height:1.6}
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.form-group{margin-bottom:15px}.full{grid-column:1/-1}
+label{display:block;margin-bottom:7px;font-weight:800}
+input,select,textarea{width:100%;padding:12px 13px;border-radius:12px;border:1px solid #dbe4f0;font-size:15px;background:white}
+textarea{min-height:75px;resize:vertical}
+.btn{border:none;background:#0d6efd;color:white;padding:12px 18px;border-radius:13px;font-weight:900;cursor:pointer;font-size:14px;box-shadow:0 12px 25px rgba(13,110,253,.22)}
+.btn-light{background:#e2e8f0;color:#0f172a;box-shadow:none}.btn-danger{background:#ef4444;color:white;box-shadow:none}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+table{width:100%;border-collapse:collapse}th{background:#f8fbff;text-align:left;padding:11px;border:1px solid #dbe4f0;font-size:14px}td{border:1px solid #dbe4f0;padding:8px;vertical-align:top}
+td input,td select,td textarea{border:none;padding:7px;border-radius:8px}
+.total-box{max-width:430px;margin-left:auto;margin-top:18px;background:#f8fbff;border:1px solid #dbe4f0;border-radius:18px;padding:16px}
+.total-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #dbe4f0;font-weight:900}.grand{color:#0d6efd;font-size:20px;border-bottom:none}
+.preview-wrap{background:white;border-radius:22px;padding:22px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7}
+.paper{background:white;border:1px solid #111;max-width:1050px;margin:auto;color:#000}
+.print-top{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #111}.print-top div{padding:8px;font-weight:800}.print-title{text-align:center;font-size:24px;text-decoration:underline}
+.print-row{display:grid;grid-template-columns:160px 1fr 160px 1fr;border-bottom:1px solid #ddd}.print-row div{padding:7px;min-height:31px}.print-label{font-weight:900}
+.tech-grid{display:grid;grid-template-columns:160px 1fr 160px 1fr;border-bottom:1px solid #111}.tech-grid div{padding:7px;border-bottom:1px solid #ddd}.tech-label{font-style:italic;font-weight:900}
+.print-items th,.print-items td{border:1px solid #111;padding:7px;font-size:15px}.print-items th{text-align:center;background:white}
+.print-total-area{display:grid;grid-template-columns:1fr 430px;min-height:135px}.signature{padding:12px}.print-totals{border-left:1px solid #111}.print-total-row{display:grid;grid-template-columns:1fr 140px;border-bottom:1px solid #111}.print-total-row div{padding:8px;font-weight:900}
+.print-note,.print-terms{border-top:1px solid #111;padding:10px;min-height:55px}.print-sign,.print-footer{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid #111}.print-sign div,.print-footer div{padding:12px;min-height:60px}
+.saved-card{margin-top:22px}.small{font-size:12px;color:#64748b;font-weight:700;margin-top:4px;line-height:1.4}
+@media(max-width:1000px){.main-grid,.grid{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
+@media print{body{background:white;padding:0}.header,.main-grid,.editor-card,.btn-row,.saved-card,.note{display:none!important}.preview-wrap{box-shadow:none;border:none;padding:0}.preview-wrap h2{display:none}.paper{max-width:100%;border:1px solid #000}}
+</style></head><body>
+<div class="header"><div><h1>Quotation</h1><p>Quotation with same workshop template, price mode and item/customer quick create.</p></div><a href="/dashboard.html" class="back">Back to Dashboard</a></div>
+<div class="note">This is the master commercial document. DO can load from this quotation, and sales invoice can load from DO.</div>
+<form id="quotationForm">
+<div class="main-grid">
+<div class="card"><h2>Customer Details</h2><div class="grid">
+<div class="form-group full"><label>Customer Name</label><select id="customerSelect" onchange="loadCustomerInfo()"><option value="">Select Customer</option></select><a href="/customers.html" target="_blank" class="quick-create">+ New Customer</a></div>
+<div class="form-group full"><label>Address</label><textarea id="customerAddress"></textarea></div>
+<div class="form-group"><label>Attention</label><input id="attention" placeholder="-"></div>
+<div class="form-group"><label>Mobile</label><input id="mobile" placeholder="-"></div>
+<div class="form-group full"><label>Email</label><input id="email" type="email" placeholder="-"></div>
+</div></div>
+<div class="card"><h2>Quotation Details</h2><div class="grid">
+<div class="form-group"><label>Quotation No</label><input id="quotationNo"></div>
+<div class="form-group"><label>Date</label><input id="quotationDate" type="date"></div>
+<div class="form-group"><label>VAT Type</label><select id="vatType" onchange="calculateTotals()"><option>VAT Exclusive</option><option>VAT Inclusive</option><option>Non-VAT Invoice</option><option>Zero Rated</option><option>Exempt Supply</option></select></div>
+<div class="form-group"><label>VAT %</label><input id="vatPercent" type="number" value="5" oninput="calculateTotals()"></div>
+<div class="form-group"><label>Status</label><select id="status"><option>Draft</option><option>Sent</option><option>Approved</option><option>Rejected</option></select></div>
+<div class="form-group"><label>Print Mode</label><select id="printMode" onchange="updatePreview()"><option>With Price</option><option>Without Price</option></select></div>
+</div></div>
+</div>
+<div class="card editor-card"><h2>Technical / Job Details</h2><div class="grid">
+<div class="form-group"><label>Pump Type</label><input id="pumpType" placeholder="CR-INJECTOR (DENSO)"></div>
+<div class="form-group"><label>Cylinder No</label><input id="cylinderNo" placeholder="Four"></div>
+<div class="form-group"><label>No of Nozzles</label><input id="noOfNozzles" placeholder="Four"></div>
+<div class="form-group"><label>Pump No</label><input id="pumpNo" placeholder="094000"></div>
+<div class="form-group"><label>Job No</label><input id="jobNo" placeholder="-"></div>
+<div class="form-group"><label>Serial No</label><input id="serialNo" placeholder="-"></div>
+<div class="form-group"><label>Work Order No</label><input id="workOrderNo" placeholder="-"></div>
+</div></div>
+<div class="card editor-card"><h2>Category & Items</h2><div class="grid">
+<div class="form-group"><label>Main Category</label><select id="selectedCategory" onchange="categoryChanged()"><option value="">Select Category</option></select></div>
+<div class="form-group"><label>Category Brand Optional</label><input id="selectedCategoryBrand" placeholder="Optional"></div>
+</div><div style="margin-bottom:15px"><a href="/items.html" target="_blank" class="quick-create">+ New Item / Service</a></div>
+<table><thead><tr><th style="width:70px">SR.NO</th><th style="width:260px">ITEM</th><th>DESCRIPTION</th><th style="width:90px">QTY</th><th class="price-col" style="width:130px">UNIT PRICE</th><th class="price-col" style="width:140px">AMOUNT</th><th style="width:90px">ACTION</th></tr></thead><tbody id="itemsBody"></tbody></table>
+<div class="btn-row"><button type="button" class="btn btn-light" onclick="addRow()">+ Add Item</button></div>
+<div class="total-box price-block"><div class="total-row"><span>Total Before Tax</span><span id="subtotalText">OMR 0.000</span></div><div class="total-row"><span>VAT Amount</span><span id="vatText">OMR 0.000</span></div><div class="total-row grand"><span>Total Including VAT</span><span id="grandText">OMR 0.000</span></div></div>
+<div class="grid" style="margin-top:20px"><div class="form-group full"><label>Terms</label><textarea id="terms">Validity of this quotation is for 90 days. If the quotation is not approved within 90 days MDPS is not responsible for the materials.</textarea></div><div class="form-group"><label>Signature Text</label><input id="signatureText" value="For Modern Diesel Pump Services"></div><div class="form-group"><label>Company Email</label><input id="companyEmail" type="email" value="moderndieselpumpservices@gmail.com"></div></div>
+<div class="btn-row"><button type="submit" class="btn">Save Quotation</button><button type="button" class="btn btn-light" onclick="updatePreview()">Refresh Preview</button><button type="button" class="btn btn-light" onclick="window.print()">Print / Save PDF</button><button type="button" class="btn btn-light" onclick="resetForm()">Clear</button></div>
+</div></form>
+<div class="preview-wrap"><h2 style="margin-bottom:18px;color:#0d6efd">Print Preview</h2><div class="paper">
+<div class="print-top"><div>E-Mail: <span id="pCompanyEmail">-</span></div><div class="print-title">QUOTATION</div><div></div></div>
+<div><div class="print-row"><div class="print-label">Customer Name:</div><div id="pCustomerName">-</div><div class="print-label">Quotation No:</div><div id="pDocNo">-</div></div><div class="print-row"><div class="print-label">Address:</div><div id="pAddress">-</div><div class="print-label">Date:</div><div id="pDate">-</div></div><div class="print-row"><div class="print-label">Attention:</div><div id="pAttention">-</div><div class="print-label">Email ID:</div><div id="pEmail">-</div></div><div class="print-row"><div class="print-label">Mobile Number:</div><div id="pMobile">-</div><div></div><div></div></div></div>
+<div class="tech-grid"><div class="tech-label">PUMP TYPE:</div><div id="pPumpType">-</div><div></div><div></div><div class="tech-label">CYLINDER.NO:</div><div id="pCylinderNo">-</div><div class="tech-label">NO OF NOZZLES:</div><div id="pNoOfNozzles">-</div><div class="tech-label">PUMP.NO:</div><div id="pPumpNo">-</div><div class="tech-label">JOB.NO:</div><div id="pJobNo">-</div><div class="tech-label">Serial No.</div><div id="pSerialNo">-</div><div class="tech-label">WORK ORDER.NO:</div><div id="pWorkOrderNo">-</div></div>
+<table class="print-items"><thead><tr><th style="width:80px">SR.NO</th><th>DESCRIPTION</th><th style="width:120px">QTY</th><th class="price-col" style="width:150px">UNIT PRICE</th><th class="price-col" style="width:150px">AMOUNT</th></tr></thead><tbody id="pItemsBody"></tbody></table>
+<div class="print-total-area price-block"><div class="signature"><br><br><span id="pSignatureText">For Company</span></div><div class="print-totals"><div class="print-total-row"><div>Total Before Tax</div><div id="pBeforeTax">0.000</div></div><div class="print-total-row" id="pVatRow"><div>VAT@<span id="pVatPercent">5</span>%</div><div id="pVatAmount">0.000</div></div><div class="print-total-row"><div>Total Including Vat</div><div id="pGrandTotal">0.000</div></div></div></div>
+<div class="print-terms" id="pTerms">-</div><div class="print-footer"><div>Received by:</div><div>Date:</div><div></div></div>
+</div></div>
+<div class="card saved-card"><h2>Saved Quotations</h2><table><thead><tr><th>Quotation No</th><th>Date</th><th>Customer</th><th>Total</th><th>Status</th><th>Action</th></tr></thead><tbody id="savedTable"></tbody></table></div>
+<script>
+function getCustomers(){return JSON.parse(localStorage.getItem("post91Customers")||"[]")}function getItems(){return JSON.parse(localStorage.getItem("post91Items")||"[]")}function getQuotations(){return JSON.parse(localStorage.getItem("post91Quotations")||"[]")}function saveQuotations(d){localStorage.setItem("post91Quotations",JSON.stringify(d))}function today(){return new Date().toISOString().split("T")[0]}function mv(n){return Number(n||0).toFixed(3)}function mt(n){return "OMR "+mv(n)}
+function loadCustomers(){let s=document.getElementById("customerSelect");s.innerHTML='<option value="">Select Customer</option>';getCustomers().forEach((c,i)=>{let o=document.createElement("option");o.value=i;o.textContent=c.customerName;s.appendChild(o)})}
+function loadCategories(){let s=document.getElementById("selectedCategory");let cats=[...new Set(getItems().map(i=>i.mainCategory).filter(Boolean))];s.innerHTML='<option value="">Select Category</option>';cats.forEach(c=>{let o=document.createElement("option");o.value=c;o.textContent=c;s.appendChild(o)})}
+function loadCustomerInfo(){let i=document.getElementById("customerSelect").value;if(i==="")return;let c=getCustomers()[i];customerAddress.value=c.address||"";mobile.value=c.mobile||"";email.value=c.email||"";updatePreview()}
+function categoryChanged(){let cat=selectedCategory.value;let item=getItems().find(i=>i.mainCategory===cat);selectedCategoryBrand.value=item?.mainCategoryBrand||"";itemsBody.innerHTML="";addRow();calculateTotals()}
+function itemOptions(){let cat=selectedCategory.value;let all=getItems();let items=all.filter(i=>i.status!=="Inactive"&&(!cat||i.mainCategory===cat));return '<option value="">Select Item</option>'+items.map(i=>`<option value="${all.indexOf(i)}">${i.itemName}</option>`).join("")}
+function addRow(data=null){let tr=document.createElement("tr");tr.innerHTML=`<td><input class="sr" value="${itemsBody.children.length+1}" readonly></td><td><select class="itemSelect" onchange="loadItemToRow(this)">${itemOptions()}</select><div class="small itemMeta"></div></td><td><textarea class="desc"></textarea></td><td><input type="number" step="0.001" class="qty" value="1" oninput="calculateTotals()"></td><td class="price-col"><input type="number" step="0.001" class="rate" value="0.000" oninput="calculateTotals()"></td><td class="price-col"><input class="amount" value="0.000" readonly></td><td><button type="button" class="btn btn-danger" onclick="removeRow(this)">X</button></td>`;itemsBody.appendChild(tr);if(data){tr.querySelector(".itemSelect").value=data.itemIndex||"";tr.querySelector(".desc").value=data.description||"";tr.querySelector(".qty").value=data.qty||1;tr.querySelector(".rate").value=data.rate||"0.000";tr.querySelector(".amount").value=data.amount||"0.000"}calculateTotals()}
+function loadItemToRow(s){if(s.value==="")return;let item=getItems()[s.value],r=s.closest("tr");let d=item.itemName||"";if(item.partNumber)d+=`\nPart No: ${item.partNumber}`;if(item.oemNumber)d+=`\nOEM No: ${item.oemNumber}`;r.querySelector(".desc").value=d;r.querySelector(".rate").value=mv(item.sellingPrice||0);calculateTotals()}
+function removeRow(b){b.closest("tr").remove();document.querySelectorAll("#itemsBody tr").forEach((r,i)=>r.querySelector(".sr").value=i+1);calculateTotals()}
+function calculateTotals(){let total=0;document.querySelectorAll("#itemsBody tr").forEach(r=>{let q=Number(r.querySelector(".qty").value||0),rate=Number(r.querySelector(".rate").value||0),a=q*rate;r.querySelector(".amount").value=mv(a);total+=a});let type=vatType.value,v=Number(vatPercent.value||0),before=total,vat=0,grand=total;if(type==="VAT Exclusive"){vat=before*v/100;grand=before+vat}if(type==="VAT Inclusive"){vat=total-(total/(1+v/100));before=total-vat}subtotalText.textContent=mt(before);vatText.textContent=mt(vat);grandText.textContent=mt(grand);updatePreview();return{total,beforeTax:before,vatAmount:vat,grandTotal:grand}}
+function updatePreview(){let cs=customerSelect;pCompanyEmail.textContent=companyEmail.value||"-";pCustomerName.textContent=cs.value!==""?cs.options[cs.selectedIndex].text:"-";pAddress.textContent=customerAddress.value||"-";pAttention.textContent=attention.value||"-";pMobile.textContent=mobile.value||"-";pEmail.textContent=email.value||"-";pDocNo.textContent=quotationNo.value||"-";pDate.textContent=quotationDate.value||"-";pPumpType.textContent=pumpType.value||"-";pCylinderNo.textContent=cylinderNo.value||"-";pNoOfNozzles.textContent=noOfNozzles.value||"-";pPumpNo.textContent=pumpNo.value||"-";pJobNo.textContent=jobNo.value||"-";pSerialNo.textContent=serialNo.value||"-";pWorkOrderNo.textContent=workOrderNo.value||"-";pItemsBody.innerHTML="";document.querySelectorAll("#itemsBody tr").forEach(r=>{let tr=document.createElement("tr");tr.innerHTML=`<td style="text-align:center">${r.querySelector(".sr").value}</td><td style="white-space:pre-line">${r.querySelector(".desc").value||"-"}</td><td style="text-align:center">${r.querySelector(".qty").value||"0"}</td><td class="price-col" style="text-align:right">${mv(r.querySelector(".rate").value)}</td><td class="price-col" style="text-align:right">${mv(r.querySelector(".amount").value)}</td>`;pItemsBody.appendChild(tr)});let t=calculateSilent();pBeforeTax.textContent=mv(t.beforeTax);pVatPercent.textContent=vatPercent.value||"0";pVatAmount.textContent=mv(t.vatAmount);pGrandTotal.textContent=mv(t.grandTotal);pTerms.textContent=terms.value||"-";pSignatureText.textContent=signatureText.value||"-";pVatRow.style.display=["Non-VAT Invoice","Zero Rated","Exempt Supply"].includes(vatType.value)?"none":"grid";let show=printMode.value==="With Price";document.querySelectorAll(".price-col").forEach(e=>e.style.display=show?"":"none");document.querySelectorAll(".price-block").forEach(e=>e.style.display=show?"":"none")}
+function calculateSilent(){let total=0;document.querySelectorAll("#itemsBody tr").forEach(r=>total+=Number(r.querySelector(".amount").value||0));let type=vatType.value,v=Number(vatPercent.value||0),before=total,vat=0,grand=total;if(type==="VAT Exclusive"){vat=before*v/100;grand=before+vat}if(type==="VAT Inclusive"){vat=total-(total/(1+v/100));before=total-vat}return{total,beforeTax:before,vatAmount:vat,grandTotal:grand}}
+quotationForm.addEventListener("submit",e=>{e.preventDefault();let totals=calculateSilent(),arr=getQuotations(),items=[];document.querySelectorAll("#itemsBody tr").forEach(r=>{let d=r.querySelector(".desc").value;if(d.trim())items.push({itemIndex:r.querySelector(".itemSelect").value,description:d,qty:r.querySelector(".qty").value,rate:r.querySelector(".rate").value,amount:r.querySelector(".amount").value,unit:"PCS"})});if(!items.length)return alert("Please add item");let cs=customerSelect;arr.push({quotationNo:quotationNo.value,quotationDate:quotationDate.value,customerName:cs.value!==""?cs.options[cs.selectedIndex].text:"",customerAddress:customerAddress.value,attention:attention.value,mobile:mobile.value,email:email.value,pumpType:pumpType.value,cylinderNo:cylinderNo.value,noOfNozzles:noOfNozzles.value,pumpNo:pumpNo.value,jobNo:jobNo.value,serialNo:serialNo.value,workOrderNo:workOrderNo.value,vatType:vatType.value,vatPercent:vatPercent.value,status:status.value,printMode:printMode.value,items,...totals,terms:terms.value});saveQuotations(arr);alert("Quotation saved");loadSaved()})
+function loadSaved(){savedTable.innerHTML="";getQuotations().forEach((q,i)=>{let tr=document.createElement("tr");tr.innerHTML=`<td>${q.quotationNo||"-"}</td><td>${q.quotationDate||"-"}</td><td>${q.customerName||"-"}</td><td>${mt(q.grandTotal)}</td><td>${q.status||"Draft"}</td><td><button class="btn btn-danger" onclick="delQ(${i})">Delete</button></td>`;savedTable.appendChild(tr)})}function delQ(i){if(confirm("Delete quotation?")){let a=getQuotations();a.splice(i,1);saveQuotations(a);loadSaved()}}
+function resetForm(){quotationForm.reset();itemsBody.innerHTML="";setDefaults();loadCategories();addRow();calculateTotals()}function setDefaults(){quotationDate.value=today();quotationNo.value="QT-"+(1001+getQuotations().length);vatPercent.value=5;vatType.value="VAT Exclusive";printMode.value="With Price";signatureText.value="For Modern Diesel Pump Services";companyEmail.value="moderndieselpumpservices@gmail.com"}
+loadCustomers();loadCategories();setDefaults();addRow();loadSaved();calculateTotals();
+</script></body></html>

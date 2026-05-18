@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bank Master | Post91 Accounts</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Segoe UI,Arial,sans-serif;
+}
+
+body{
+  background:#eef3f8;
+  color:#061833;
+  padding:28px;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:24px;
+}
+
+.header h1{
+  font-size:34px;
+}
+
+.header p{
+  color:#64748b;
+  margin-top:6px;
+}
+
+.back{
+  background:white;
+  color:#0d6efd;
+  text-decoration:none;
+  padding:12px 16px;
+  border-radius:13px;
+  font-weight:900;
+  box-shadow:0 10px 25px rgba(15,23,42,.08);
+}
+
+.card{
+  background:white;
+  border-radius:22px;
+  padding:26px;
+  box-shadow:0 16px 38px rgba(15,23,42,.08);
+  border:1px solid #e5edf7;
+  margin-bottom:22px;
+}
+
+.card h2{
+  margin-bottom:18px;
+  font-size:22px;
+  color:#0d6efd;
+}
+
+.note{
+  background:#e0f2fe;
+  border:1px solid #bae6fd;
+  color:#075985;
+  padding:16px;
+  border-radius:16px;
+  margin-bottom:18px;
+  line-height:1.6;
+  font-weight:700;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+.form-group{
+  margin-bottom:16px;
+}
+
+label{
+  display:block;
+  margin-bottom:7px;
+  font-weight:800;
+}
+
+input,select,textarea{
+  width:100%;
+  padding:13px 14px;
+  border-radius:12px;
+  border:1px solid #dbe4f0;
+  font-size:15px;
+  outline:none;
+  background:white;
+}
+
+input:focus,select:focus,textarea:focus{
+  border-color:#0d6efd;
+  box-shadow:0 0 0 4px rgba(13,110,253,.1);
+}
+
+.full{
+  grid-column:1/-1;
+}
+
+.btn{
+  border:none;
+  background:#0d6efd;
+  color:white;
+  padding:13px 19px;
+  border-radius:13px;
+  font-weight:900;
+  cursor:pointer;
+  font-size:14px;
+  box-shadow:0 14px 30px rgba(13,110,253,.22);
+}
+
+.btn-light{
+  background:#e2e8f0;
+  color:#0f172a;
+  box-shadow:none;
+  margin-left:8px;
+}
+
+.action-btn{
+  border:none;
+  padding:8px 12px;
+  border-radius:10px;
+  font-weight:900;
+  cursor:pointer;
+  margin-right:6px;
+}
+
+.edit{
+  background:#dbeafe;
+  color:#1d4ed8;
+}
+
+.delete{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th{
+  text-align:left;
+  color:#64748b;
+  padding:12px;
+  border-bottom:1px solid #e5edf7;
+  font-size:14px;
+}
+
+td{
+  padding:12px;
+  border-bottom:1px solid #eef2f7;
+  font-weight:700;
+  vertical-align:top;
+}
+
+.badge{
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  display:inline-block;
+}
+
+.active{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.inactive{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.small{
+  font-size:13px;
+  color:#64748b;
+  font-weight:700;
+  margin-top:4px;
+  line-height:1.5;
+}
+
+@media(max-width:900px){
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  table{
+    display:block;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Bank Master</h1>
+    <p>Create multiple bank accounts for payments, receipts and accounting entries.</p>
+  </div>
+
+  <a href="/dashboard.html" class="back">Back to Dashboard</a>
+</div>
+
+<div class="card">
+
+  <div class="note">
+    These bank accounts will later be used in:
+    Expenses, Sales Receipts, Supplier Payments, Cash Book, Bank Book and Reconciliation.
+  </div>
+
+  <h2>Add Bank Account</h2>
+
+  <form id="bankForm">
+
+    <input type="hidden" id="editIndex">
+
+    <div class="grid">
+
+      <div class="form-group">
+        <label>Bank Name</label>
+        <input type="text" id="bankName" placeholder="Bank Muscat">
+      </div>
+
+      <div class="form-group">
+        <label>Account Name</label>
+        <input type="text" id="accountName" placeholder="Post91 Trading LLC">
+      </div>
+
+      <div class="form-group">
+        <label>Account Number</label>
+        <input type="text" id="accountNumber" placeholder="0012456789">
+      </div>
+
+      <div class="form-group">
+        <label>IBAN Optional</label>
+        <input type="text" id="iban" placeholder="OMXX...">
+      </div>
+
+      <div class="form-group">
+        <label>Currency</label>
+        <select id="currency">
+          <option>OMR</option>
+          <option>USD</option>
+          <option>AED</option>
+          <option>INR</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Opening Balance</label>
+        <input type="number" step="0.001" id="openingBalance" placeholder="0.000">
+      </div>
+
+      <div class="form-group">
+        <label>Account Type</label>
+        <select id="accountType">
+          <option>Current Account</option>
+          <option>Savings Account</option>
+          <option>Cash in Hand</option>
+          <option>Petty Cash</option>
+          <option>Credit Card</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Status</label>
+        <select id="status">
+          <option>Active</option>
+          <option>Inactive</option>
+        </select>
+      </div>
+
+      <div class="form-group full">
+        <label>Remarks</label>
+        <textarea id="remarks" placeholder="Internal remarks"></textarea>
+      </div>
+
+    </div>
+
+    <button class="btn" type="submit">Save Bank</button>
+    <button class="btn btn-light" type="button" onclick="resetForm()">Clear</button>
+
+  </form>
+
+</div>
+
+<div class="card">
+
+  <h2>Saved Bank Accounts</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Bank</th>
+        <th>Account</th>
+        <th>Type</th>
+        <th>Opening Balance</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody id="bankTable"></tbody>
+
+  </table>
+
+</div>
+
+<script>
+
+function getBanks(){
+  return JSON.parse(localStorage.getItem("post91Banks") || "[]");
+}
+
+function saveBanks(data){
+  localStorage.setItem("post91Banks", JSON.stringify(data));
+}
+
+document.getElementById("bankForm").addEventListener("submit", function(e){
+
+  e.preventDefault();
+
+  const banks = getBanks();
+  const editIndex = document.getElementById("editIndex").value;
+
+  const bank = {
+
+    bankName: document.getElementById("bankName").value,
+    accountName: document.getElementById("accountName").value,
+    accountNumber: document.getElementById("accountNumber").value,
+    iban: document.getElementById("iban").value,
+    currency: document.getElementById("currency").value,
+    openingBalance: document.getElementById("openingBalance").value,
+    accountType: document.getElementById("accountType").value,
+    status: document.getElementById("status").value,
+    remarks: document.getElementById("remarks").value,
+
+    displayName:
+      `${document.getElementById("bankName").value} (${document.getElementById("accountNumber").value})`
+
+  };
+
+  if(editIndex === ""){
+    banks.push(bank);
+    alert("Bank saved successfully.");
+  }else{
+    banks[editIndex] = bank;
+    alert("Bank updated successfully.");
+  }
+
+  saveBanks(banks);
+  resetForm();
+  loadBanks();
+
+});
+
+function loadBanks(){
+
+  const tbody = document.getElementById("bankTable");
+  tbody.innerHTML = "";
+
+  getBanks().forEach((b,index)=>{
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+
+      <td>
+        ${b.bankName || "-"}
+        <div class="small">${b.accountNumber || "-"}</div>
+      </td>
+
+      <td>
+        ${b.accountName || "-"}
+        <div class="small">${b.currency || "OMR"}</div>
+      </td>
+
+      <td>
+        ${b.accountType || "-"}
+      </td>
+
+      <td>
+        OMR ${Number(b.openingBalance || 0).toFixed(3)}
+      </td>
+
+      <td>
+        <span class="badge ${b.status === "Active" ? "active" : "inactive"}">
+          ${b.status}
+        </span>
+      </td>
+
+      <td>
+        <button class="action-btn edit" onclick="editBank(${index})">Edit</button>
+        <button class="action-btn delete" onclick="deleteBank(${index})">Delete</button>
+      </td>
+
+    `;
+
+    tbody.appendChild(tr);
+
+  });
+
+}
+
+function editBank(index){
+
+  const b = getBanks()[index];
+
+  document.getElementById("editIndex").value = index;
+  document.getElementById("bankName").value = b.bankName || "";
+  document.getElementById("accountName").value = b.accountName || "";
+  document.getElementById("accountNumber").value = b.accountNumber || "";
+  document.getElementById("iban").value = b.iban || "";
+  document.getElementById("currency").value = b.currency || "OMR";
+  document.getElementById("openingBalance").value = b.openingBalance || "";
+  document.getElementById("accountType").value = b.accountType || "Current Account";
+  document.getElementById("status").value = b.status || "Active";
+  document.getElementById("remarks").value = b.remarks || "";
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+
+}
+
+function deleteBank(index){
+
+  if(confirm("Delete this bank account?")){
+
+    const banks = getBanks();
+
+    banks.splice(index,1);
+
+    saveBanks(banks);
+
+    loadBanks();
+
+  }
+
+}
+
+function resetForm(){
+
+  document.getElementById("bankForm").reset();
+  document.getElementById("editIndex").value = "";
+
+}
+
+loadBanks();
+
+</script>
+
+</body>
+</html>

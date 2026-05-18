@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expenses | Post91 Accounts</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
+body{background:#eef3f8;color:#061833;padding:28px;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.header h1{font-size:34px}.header p{color:#64748b;margin-top:6px}
+.back,.quick-create{background:white;color:#0d6efd;text-decoration:none;padding:12px 16px;border-radius:13px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);display:inline-block;}
+.quick-create{font-size:13px;margin-top:8px;}
+.card{background:white;border-radius:22px;padding:26px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:22px;}
+.card h2{margin-bottom:18px;font-size:22px;color:#0d6efd;}
+.note{background:#e0f2fe;border:1px solid #bae6fd;color:#075985;padding:16px;border-radius:16px;margin-bottom:18px;line-height:1.6;font-weight:700;}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.form-group{margin-bottom:16px;}
+label{display:block;margin-bottom:7px;font-weight:800;color:#0f172a;}
+input,select,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #dbe4f0;font-size:15px;outline:none;background:white;}
+textarea{min-height:85px;resize:vertical;}
+input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4px rgba(13,110,253,.1);}
+.full{grid-column:1/-1;}
+.btn{border:none;background:#0d6efd;color:white;padding:13px 19px;border-radius:13px;font-weight:900;cursor:pointer;font-size:14px;box-shadow:0 14px 30px rgba(13,110,253,.22);}
+.btn-light{background:#e2e8f0;color:#0f172a;box-shadow:none;margin-left:8px;}
+.btn-danger{background:#ef4444;color:white;box-shadow:none;}
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+.summary{background:white;border-radius:22px;padding:20px;border:1px solid #e5edf7;box-shadow:0 12px 28px rgba(15,23,42,.06);}
+.summary span{color:#64748b;font-size:13px;font-weight:800;}
+.summary h2{margin-top:8px;color:#0d6efd;}
+.search-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;color:#64748b;padding:12px;border-bottom:1px solid #e5edf7;font-size:14px;}
+td{padding:12px;border-bottom:1px solid #eef2f7;font-weight:700;vertical-align:top;}
+.badge{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:900;display:inline-block;}
+.vat{background:#fef3c7;color:#92400e;}
+.nonvat{background:#fee2e2;color:#991b1b;}
+.paid{background:#dcfce7;color:#166534;}
+.pending{background:#dbeafe;color:#1d4ed8;}
+.action-btn{border:none;padding:8px 12px;border-radius:10px;font-weight:900;cursor:pointer;margin-right:6px;}
+.edit{background:#dbeafe;color:#1d4ed8;}
+.delete{background:#fee2e2;color:#991b1b;}
+.small{font-size:13px;color:#64748b;font-weight:700;margin-top:4px;line-height:1.5;}
+@media(max-width:1000px){.grid,.summary-grid,.search-row{grid-template-columns:1fr 1fr;}table{display:block;overflow-x:auto;white-space:nowrap;}}
+@media(max-width:650px){.grid,.summary-grid,.search-row{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Expenses</h1>
+    <p>Record business expenses with VAT / non-VAT classification, bank account and payment mode.</p>
+  </div>
+  <a href="/dashboard.html" class="back">Back to Dashboard</a>
+</div>
+
+<div class="note">
+  If Payment Mode is Bank Transfer, Card or Cheque, select the related bank account. Add banks from Bank Master if not available.
+</div>
+
+<div class="summary-grid">
+  <div class="summary">
+    <span>Total Expenses</span>
+    <h2 id="totalExpenses">OMR 0.000</h2>
+  </div>
+  <div class="summary">
+    <span>VAT Expenses</span>
+    <h2 id="vatExpenses">OMR 0.000</h2>
+  </div>
+  <div class="summary">
+    <span>Non-VAT Expenses</span>
+    <h2 id="nonVatExpenses">OMR 0.000</h2>
+  </div>
+  <div class="summary">
+    <span>VAT Input</span>
+    <h2 id="vatInput">OMR 0.000</h2>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Expense Entry</h2>
+
+  <form id="expenseForm">
+    <input type="hidden" id="editIndex">
+
+    <div class="grid">
+
+      <div class="form-group">
+        <label>Expense No</label>
+        <input type="text" id="expenseNo">
+      </div>
+
+      <div class="form-group">
+        <label>Expense Date</label>
+        <input type="date" id="expenseDate">
+      </div>
+
+      <div class="form-group">
+        <label>Expense Category</label>
+        <select id="expenseCategory" onchange="toggleCustomCategory()">
+          <option>Fuel</option>
+          <option>Vehicle Maintenance</option>
+          <option>Office Rent</option>
+          <option>Electricity</option>
+          <option>Internet / Telephone</option>
+          <option>Stationery</option>
+          <option>Salary / Wages</option>
+          <option>Bank Charges</option>
+          <option>Transport</option>
+          <option>Meals / Refreshment</option>
+          <option>Professional Fees</option>
+          <option>Software / Subscription</option>
+          <option>Other</option>
+          <option>Custom</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="customCategoryBox" style="display:none;">
+        <label>Custom Category</label>
+        <input type="text" id="customCategory" placeholder="Enter custom category">
+      </div>
+
+      <div class="form-group">
+        <label>Vendor / Paid To</label>
+        <input type="text" id="vendorName" placeholder="Supplier/vendor/staff name">
+      </div>
+
+      <div class="form-group">
+        <label>Bill / Receipt No</label>
+        <input type="text" id="billNo" placeholder="Optional bill number">
+      </div>
+
+      <div class="form-group">
+        <label>Expense Type</label>
+        <select id="expenseType" onchange="calculateTotals()">
+          <option>VAT Exclusive</option>
+          <option>VAT Inclusive</option>
+          <option>Non-VAT Expense</option>
+          <option>Zero Rated Expense</option>
+          <option>Exempt Expense</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>VAT %</label>
+        <input type="number" id="vatPercent" value="5" oninput="calculateTotals()">
+      </div>
+
+      <div class="form-group">
+        <label>Amount</label>
+        <input type="number" step="0.001" id="amount" placeholder="0.000" oninput="calculateTotals()">
+      </div>
+
+      <div class="form-group">
+        <label>Total Before VAT</label>
+        <input type="text" id="beforeTax" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>VAT Amount</label>
+        <input type="text" id="vatAmount" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>Grand Total</label>
+        <input type="text" id="grandTotal" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>Payment Mode</label>
+        <select id="paymentMode" onchange="toggleBankAccount()">
+          <option>Cash</option>
+          <option>Bank Transfer</option>
+          <option>Card</option>
+          <option>Cheque</option>
+          <option>Credit</option>
+          <option>Owner Paid</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="bankAccountBox" style="display:none;">
+        <label>Select Bank Account</label>
+        <select id="bankAccount">
+          <option value="">Select Bank Account</option>
+        </select>
+        <a href="/banks.html" target="_blank" class="quick-create">+ New Bank</a>
+      </div>
+
+      <div class="form-group">
+        <label>Payment Status</label>
+        <select id="paymentStatus">
+          <option>Paid</option>
+          <option>Unpaid</option>
+          <option>Partial</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Project / Vehicle / Job Ref Optional</label>
+        <input type="text" id="reference" placeholder="Vehicle no, job no, project name">
+      </div>
+
+      <div class="form-group">
+        <label>Staff / Responsible Person Optional</label>
+        <input type="text" id="staffName" placeholder="Staff name">
+      </div>
+
+      <div class="form-group full">
+        <label>Remarks</label>
+        <textarea id="remarks" placeholder="Expense details / internal remarks"></textarea>
+      </div>
+
+    </div>
+
+    <button class="btn" type="submit">Save Expense</button>
+    <button class="btn btn-light" type="button" onclick="resetForm()">Clear</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Expense List</h2>
+
+  <div class="search-row">
+    <input type="date" id="filterFrom" onchange="loadExpenses()">
+    <input type="date" id="filterTo" onchange="loadExpenses()">
+    <select id="filterType" onchange="loadExpenses()">
+      <option>All</option>
+      <option>VAT Only</option>
+      <option>Non-VAT Only</option>
+      <option>Paid</option>
+      <option>Unpaid</option>
+      <option>Bank Payments</option>
+      <option>Cash Payments</option>
+    </select>
+    <input type="text" id="searchBox" placeholder="Search expense..." onkeyup="loadExpenses()">
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Expense</th>
+        <th>Date</th>
+        <th>Category</th>
+        <th>Vendor</th>
+        <th>Type</th>
+        <th>Before VAT</th>
+        <th>VAT</th>
+        <th>Total</th>
+        <th>Payment</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="expenseTable"></tbody>
+  </table>
+</div>
+
+<script>
+function getExpenses(){
+  return JSON.parse(localStorage.getItem("post91Expenses") || "[]");
+}
+
+function saveExpenses(expenses){
+  localStorage.setItem("post91Expenses", JSON.stringify(expenses));
+}
+
+function getBanks(){
+  return JSON.parse(localStorage.getItem("post91Banks") || "[]");
+}
+
+function today(){
+  return new Date().toISOString().split("T")[0];
+}
+
+function moneyValue(num){
+  return Number(num || 0).toFixed(3);
+}
+
+function moneyText(num){
+  return "OMR " + Number(num || 0).toFixed(3);
+}
+
+function loadBankAccounts(){
+  const select = document.getElementById("bankAccount");
+  const banks = getBanks().filter(b => b.status !== "Inactive");
+
+  select.innerHTML = `<option value="">Select Bank Account</option>`;
+
+  banks.forEach((b,index)=>{
+    const opt = document.createElement("option");
+    opt.value = index;
+    opt.textContent = `${b.bankName || "Bank"} (${b.accountNumber || "No Account"})`;
+    select.appendChild(opt);
+  });
+}
+
+function toggleBankAccount(){
+  const mode = document.getElementById("paymentMode").value;
+  const box = document.getElementById("bankAccountBox");
+  const bankSelect = document.getElementById("bankAccount");
+
+  const needsBank = mode === "Bank Transfer" || mode === "Card" || mode === "Cheque";
+
+  box.style.display = needsBank ? "block" : "none";
+  bankSelect.required = needsBank;
+
+  if(!needsBank){
+    bankSelect.value = "";
+  }
+}
+
+function finalCategory(){
+  return document.getElementById("expenseCategory").value === "Custom"
+    ? document.getElementById("customCategory").value
+    : document.getElementById("expenseCategory").value;
+}
+
+function toggleCustomCategory(){
+  const isCustom = document.getElementById("expenseCategory").value === "Custom";
+
+  document.getElementById("customCategoryBox").style.display = isCustom ? "block" : "none";
+  document.getElementById("customCategory").required = isCustom;
+
+  if(!isCustom){
+    document.getElementById("customCategory").value = "";
+  }
+}
+
+function calculateTotals(){
+  const amount = Number(document.getElementById("amount").value || 0);
+  const type = document.getElementById("expenseType").value;
+  const vatPercent = Number(document.getElementById("vatPercent").value || 0);
+
+  let beforeTax = amount;
+  let vatAmount = 0;
+  let grandTotal = amount;
+
+  if(type === "VAT Exclusive"){
+    beforeTax = amount;
+    vatAmount = amount * vatPercent / 100;
+    grandTotal = beforeTax + vatAmount;
+  }
+
+  if(type === "VAT Inclusive"){
+    vatAmount = amount - (amount / (1 + vatPercent / 100));
+    beforeTax = amount - vatAmount;
+    grandTotal = amount;
+  }
+
+  if(type === "Non-VAT Expense" || type === "Zero Rated Expense" || type === "Exempt Expense"){
+    beforeTax = amount;
+    vatAmount = 0;
+    grandTotal = amount;
+  }
+
+  document.getElementById("beforeTax").value = moneyValue(beforeTax);
+  document.getElementById("vatAmount").value = moneyValue(vatAmount);
+  document.getElementById("grandTotal").value = moneyValue(grandTotal);
+
+  return {beforeTax, vatAmount, grandTotal};
+}
+
+document.getElementById("expenseForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  const expenses = getExpenses();
+  const editIndex = document.getElementById("editIndex").value;
+  const totals = calculateTotals();
+
+  const bankIndex = document.getElementById("bankAccount").value;
+  const bank = bankIndex !== "" ? getBanks()[bankIndex] : null;
+
+  const expense = {
+    expenseNo: document.getElementById("expenseNo").value,
+    expenseDate: document.getElementById("expenseDate").value,
+    expenseCategory: finalCategory(),
+    vendorName: document.getElementById("vendorName").value,
+    billNo: document.getElementById("billNo").value,
+    expenseType: document.getElementById("expenseType").value,
+    vatPercent: document.getElementById("vatPercent").value,
+    amount: document.getElementById("amount").value,
+    beforeTax: totals.beforeTax,
+    vatAmount: totals.vatAmount,
+    grandTotal: totals.grandTotal,
+    paymentMode: document.getElementById("paymentMode").value,
+    bankAccountIndex: bankIndex,
+    bankName: bank ? bank.bankName : "",
+    bankAccountNumber: bank ? bank.accountNumber : "",
+    bankDisplayName: bank ? `${bank.bankName} (${bank.accountNumber})` : "",
+    paymentStatus: document.getElementById("paymentStatus").value,
+    reference: document.getElementById("reference").value,
+    staffName: document.getElementById("staffName").value,
+    remarks: document.getElementById("remarks").value,
+    reportCategory:
+      document.getElementById("expenseType").value === "VAT Exclusive" ||
+      document.getElementById("expenseType").value === "VAT Inclusive"
+      ? "VAT Expense"
+      : document.getElementById("expenseType").value
+  };
+
+  if(editIndex === ""){
+    expenses.push(expense);
+    alert("Expense saved successfully.");
+  } else {
+    expenses[editIndex] = expense;
+    alert("Expense updated successfully.");
+  }
+
+  saveExpenses(expenses);
+  resetForm();
+  loadExpenses();
+});
+
+function loadExpenses(){
+  const expenses = getExpenses();
+  const from = document.getElementById("filterFrom").value;
+  const to = document.getElementById("filterTo").value;
+  const type = document.getElementById("filterType").value;
+  const search = document.getElementById("searchBox").value.toLowerCase();
+  const tbody = document.getElementById("expenseTable");
+
+  tbody.innerHTML = "";
+
+  let filtered = expenses.filter(e => {
+    const text = `
+      ${e.expenseNo || ""}
+      ${e.expenseCategory || ""}
+      ${e.vendorName || ""}
+      ${e.billNo || ""}
+      ${e.paymentMode || ""}
+      ${e.bankDisplayName || ""}
+      ${e.reference || ""}
+      ${e.staffName || ""}
+      ${e.remarks || ""}
+    `.toLowerCase();
+
+    if(search && !text.includes(search)) return false;
+
+    if(from && new Date(e.expenseDate) < new Date(from)) return false;
+    if(to && new Date(e.expenseDate) > new Date(to)) return false;
+
+    if(type === "VAT Only" && !(e.expenseType === "VAT Exclusive" || e.expenseType === "VAT Inclusive")) return false;
+    if(type === "Non-VAT Only" && e.expenseType !== "Non-VAT Expense") return false;
+    if(type === "Paid" && e.paymentStatus !== "Paid") return false;
+    if(type === "Unpaid" && e.paymentStatus !== "Unpaid") return false;
+    if(type === "Bank Payments" && !(e.paymentMode === "Bank Transfer" || e.paymentMode === "Card" || e.paymentMode === "Cheque")) return false;
+    if(type === "Cash Payments" && e.paymentMode !== "Cash") return false;
+
+    return true;
+  });
+
+  filtered.forEach((e,index)=>{
+    const originalIndex = expenses.indexOf(e);
+    const typeClass = e.expenseType === "VAT Exclusive" || e.expenseType === "VAT Inclusive" ? "vat" : "nonvat";
+    const payClass = e.paymentStatus === "Paid" ? "paid" : "pending";
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>
+        ${e.expenseNo || "-"}
+        <div class="small">Bill: ${e.billNo || "-"}</div>
+      </td>
+      <td>${e.expenseDate || "-"}</td>
+      <td>
+        ${e.expenseCategory || "-"}
+        ${e.reference ? `<div class="small">Ref: ${e.reference}</div>` : ""}
+      </td>
+      <td>
+        ${e.vendorName || "-"}
+        ${e.staffName ? `<div class="small">Staff: ${e.staffName}</div>` : ""}
+      </td>
+      <td><span class="badge ${typeClass}">${e.expenseType}</span></td>
+      <td>${moneyText(e.beforeTax)}</td>
+      <td>${moneyText(e.vatAmount)}</td>
+      <td>${moneyText(e.grandTotal)}</td>
+      <td>
+        <span class="badge ${payClass}">${e.paymentStatus}</span>
+        <div class="small">${e.paymentMode}</div>
+        ${e.bankDisplayName ? `<div class="small">Bank: ${e.bankDisplayName}</div>` : ""}
+      </td>
+      <td>
+        <button class="action-btn edit" onclick="editExpense(${originalIndex})">Edit</button>
+        <button class="action-btn delete" onclick="deleteExpense(${originalIndex})">Delete</button>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  updateSummary(filtered);
+}
+
+function updateSummary(list){
+  const total = list.reduce((sum,e)=>sum + Number(e.grandTotal || 0),0);
+  const vatExp = list
+    .filter(e => e.expenseType === "VAT Exclusive" || e.expenseType === "VAT Inclusive")
+    .reduce((sum,e)=>sum + Number(e.grandTotal || 0),0);
+  const nonVat = list
+    .filter(e => e.expenseType === "Non-VAT Expense")
+    .reduce((sum,e)=>sum + Number(e.grandTotal || 0),0);
+  const vatInput = list.reduce((sum,e)=>sum + Number(e.vatAmount || 0),0);
+
+  document.getElementById("totalExpenses").textContent = moneyText(total);
+  document.getElementById("vatExpenses").textContent = moneyText(vatExp);
+  document.getElementById("nonVatExpenses").textContent = moneyText(nonVat);
+  document.getElementById("vatInput").textContent = moneyText(vatInput);
+}
+
+function editExpense(index){
+  const e = getExpenses()[index];
+
+  document.getElementById("editIndex").value = index;
+  document.getElementById("expenseNo").value = e.expenseNo || "";
+  document.getElementById("expenseDate").value = e.expenseDate || "";
+  document.getElementById("vendorName").value = e.vendorName || "";
+  document.getElementById("billNo").value = e.billNo || "";
+  document.getElementById("expenseType").value = e.expenseType || "VAT Exclusive";
+  document.getElementById("vatPercent").value = e.vatPercent || 5;
+  document.getElementById("amount").value = e.amount || "";
+  document.getElementById("paymentMode").value = e.paymentMode || "Cash";
+
+  toggleBankAccount();
+
+  document.getElementById("bankAccount").value = e.bankAccountIndex || "";
+
+  document.getElementById("paymentStatus").value = e.paymentStatus || "Paid";
+  document.getElementById("reference").value = e.reference || "";
+  document.getElementById("staffName").value = e.staffName || "";
+  document.getElementById("remarks").value = e.remarks || "";
+
+  const defaultCategories = Array.from(document.getElementById("expenseCategory").options).map(o=>o.value);
+
+  if(defaultCategories.includes(e.expenseCategory)){
+    document.getElementById("expenseCategory").value = e.expenseCategory;
+    document.getElementById("customCategory").value = "";
+  } else {
+    document.getElementById("expenseCategory").value = "Custom";
+    document.getElementById("customCategory").value = e.expenseCategory || "";
+  }
+
+  toggleCustomCategory();
+  calculateTotals();
+
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function deleteExpense(index){
+  if(confirm("Delete this expense?")){
+    const expenses = getExpenses();
+    expenses.splice(index,1);
+    saveExpenses(expenses);
+    loadExpenses();
+  }
+}
+
+function resetForm(){
+  document.getElementById("expenseForm").reset();
+  document.getElementById("editIndex").value = "";
+  document.getElementById("expenseDate").value = today();
+  document.getElementById("expenseNo").value = "EXP-" + (1001 + getExpenses().length);
+  document.getElementById("vatPercent").value = 5;
+  loadBankAccounts();
+  toggleCustomCategory();
+  toggleBankAccount();
+  calculateTotals();
+}
+
+loadBankAccounts();
+resetForm();
+loadExpenses();
+</script>
+
+</body>
+</html>

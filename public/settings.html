@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings | Post91 Accounts</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
+body{background:#f4f8fc;color:#061833;padding:32px;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;}
+.header h1{font-size:34px;}
+.header p{color:#64748b;margin-top:6px;}
+.back{background:white;color:#0d6efd;text-decoration:none;padding:13px 18px;border-radius:14px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);}
+.card{background:white;border-radius:28px;padding:30px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:25px;}
+.section-title{font-size:22px;margin:28px 0 18px;color:#0d6efd;}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+.form-group{margin-bottom:18px;}
+label{display:block;margin-bottom:8px;font-weight:800;}
+input,select,textarea{width:100%;padding:15px 16px;border-radius:14px;border:1px solid #dbe4f0;font-size:15px;outline:none;background:white;}
+textarea{min-height:95px;resize:vertical;}
+input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4px rgba(13,110,253,.1);}
+.full{grid-column:1/-1;}
+.note{background:#e0f2fe;border:1px solid #bae6fd;color:#075985;padding:18px;border-radius:18px;margin-bottom:22px;line-height:1.6;font-weight:700;}
+.btn{border:none;background:#0d6efd;color:white;padding:15px 24px;border-radius:14px;font-weight:900;cursor:pointer;font-size:15px;box-shadow:0 14px 30px rgba(13,110,253,.22);}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Settings</h1>
+    <p>Manage invoice numbering, VAT defaults, currency and report preferences.</p>
+  </div>
+  <a class="back" href="/dashboard.html">Back to Dashboard</a>
+</div>
+
+<div class="card">
+
+  <div class="note">
+    Payment terms here are only default terms. Customer-specific payment terms will be handled in Customer Master.
+  </div>
+
+  <form id="settingsForm">
+
+    <div class="section-title">Document Numbering</div>
+
+    <div class="grid">
+      <div class="form-group">
+        <label>Sales Invoice Prefix</label>
+        <input type="text" id="invoicePrefix" value="INV">
+      </div>
+
+      <div class="form-group">
+        <label>Next Sales Invoice Number</label>
+        <input type="number" id="nextInvoiceNo" value="1001">
+      </div>
+
+      <div class="form-group">
+        <label>Quotation Prefix</label>
+        <input type="text" id="quotationPrefix" value="QT">
+      </div>
+
+      <div class="form-group">
+        <label>Next Quotation Number</label>
+        <input type="number" id="nextQuotationNo" value="1001">
+      </div>
+
+      <div class="form-group">
+        <label>Delivery Order Prefix</label>
+        <input type="text" id="doPrefix" value="DO">
+      </div>
+
+      <div class="form-group">
+        <label>Next Delivery Order Number</label>
+        <input type="number" id="nextDoNo" value="1001">
+      </div>
+    </div>
+
+    <div class="section-title">VAT Settings</div>
+
+    <div class="grid">
+      <div class="form-group">
+        <label>Company VAT Registered?</label>
+        <select id="companyVatRegistered">
+          <option>No</option>
+          <option>Yes</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Default VAT Percentage</label>
+        <input type="number" id="vatPercentage" value="5">
+      </div>
+
+      <div class="form-group">
+        <label>Default Invoice VAT Type</label>
+        <select id="defaultVatType">
+          <option>Non-VAT Invoice</option>
+          <option>VAT Exclusive</option>
+          <option>VAT Inclusive</option>
+          <option>Zero Rated</option>
+          <option>Exempt Supply</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Show VAT Summary on Invoice?</label>
+        <select id="showVatSummary">
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section-title">Currency & Financial Year</div>
+
+    <div class="grid">
+      <div class="form-group">
+        <label>Default Currency</label>
+        <select id="currency">
+          <option>OMR</option>
+          <option>USD</option>
+          <option>AED</option>
+          <option>INR</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Decimal Places</label>
+        <select id="decimalPlaces">
+          <option>3</option>
+          <option>2</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Financial Year Start</label>
+        <input type="date" id="financialYearStart">
+      </div>
+
+      <div class="form-group">
+        <label>Financial Year End</label>
+        <input type="date" id="financialYearEnd">
+      </div>
+    </div>
+
+    <div class="section-title">Default Terms & Footer</div>
+
+    <div class="grid">
+      <div class="form-group full">
+        <label>Default Payment Terms</label>
+        <textarea id="defaultPaymentTerms">Payment due as per agreed customer terms.</textarea>
+      </div>
+
+      <div class="form-group full">
+        <label>Invoice Footer Note</label>
+        <textarea id="invoiceFooter">Thank you for your business.</textarea>
+      </div>
+
+      <div class="form-group full">
+        <label>Quotation Footer Note</label>
+        <textarea id="quotationFooter">This quotation is valid as per the stated validity period and subject to confirmation.</textarea>
+      </div>
+    </div>
+
+    <div class="section-title">System Preferences</div>
+
+    <div class="grid">
+      <div class="form-group">
+        <label>Default Theme</label>
+        <select id="theme">
+          <option>Light</option>
+          <option>Dark</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Default Language</label>
+        <select id="language">
+          <option>English</option>
+          <option>Arabic</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Package</label>
+        <select id="packageName">
+          <option>Premium</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Multi User Access</label>
+        <select id="multiUser">
+          <option>Enabled</option>
+          <option>Disabled</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn" type="submit">Save Settings</button>
+
+  </form>
+
+</div>
+
+<script>
+function loadSettings(){
+  const settings = JSON.parse(localStorage.getItem("post91Settings") || "{}");
+
+  Object.keys(settings).forEach(key => {
+    const field = document.getElementById(key);
+    if(field){
+      field.value = settings[key];
+    }
+  });
+}
+
+document.getElementById("settingsForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  const settings = {
+    invoicePrefix: document.getElementById("invoicePrefix").value,
+    nextInvoiceNo: document.getElementById("nextInvoiceNo").value,
+    quotationPrefix: document.getElementById("quotationPrefix").value,
+    nextQuotationNo: document.getElementById("nextQuotationNo").value,
+    doPrefix: document.getElementById("doPrefix").value,
+    nextDoNo: document.getElementById("nextDoNo").value,
+    companyVatRegistered: document.getElementById("companyVatRegistered").value,
+    vatPercentage: document.getElementById("vatPercentage").value,
+    defaultVatType: document.getElementById("defaultVatType").value,
+    showVatSummary: document.getElementById("showVatSummary").value,
+    currency: document.getElementById("currency").value,
+    decimalPlaces: document.getElementById("decimalPlaces").value,
+    financialYearStart: document.getElementById("financialYearStart").value,
+    financialYearEnd: document.getElementById("financialYearEnd").value,
+    defaultPaymentTerms: document.getElementById("defaultPaymentTerms").value,
+    invoiceFooter: document.getElementById("invoiceFooter").value,
+    quotationFooter: document.getElementById("quotationFooter").value,
+    theme: document.getElementById("theme").value,
+    language: document.getElementById("language").value,
+    packageName: document.getElementById("packageName").value,
+    multiUser: document.getElementById("multiUser").value
+  };
+
+  localStorage.setItem("post91Settings", JSON.stringify(settings));
+  alert("Settings saved successfully.");
+});
+
+loadSettings();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suppliers | Post91 Accounts</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
+body{background:#f4f8fc;color:#061833;padding:32px;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;}
+.header h1{font-size:34px}.header p{color:#64748b;margin-top:6px}
+.back{background:white;color:#0d6efd;text-decoration:none;padding:13px 18px;border-radius:14px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);}
+.card{background:white;border-radius:28px;padding:30px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:25px;}
+.note{background:#e0f2fe;border:1px solid #bae6fd;color:#075985;padding:18px;border-radius:18px;margin-bottom:22px;line-height:1.6;font-weight:700;}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+.form-group{margin-bottom:18px;}
+label{display:block;margin-bottom:8px;font-weight:800;}
+input,select,textarea{width:100%;padding:15px 16px;border-radius:14px;border:1px solid #dbe4f0;font-size:15px;outline:none;background:white;}
+textarea{min-height:90px;resize:vertical;}
+input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4px rgba(13,110,253,.1);}
+.full{grid-column:1/-1;}
+.btn{border:none;background:#0d6efd;color:white;padding:15px 24px;border-radius:14px;font-weight:900;cursor:pointer;font-size:15px;box-shadow:0 14px 30px rgba(13,110,253,.22);}
+.btn-light{background:#e2e8f0;color:#0f172a;box-shadow:none;margin-left:10px;}
+.search{margin-bottom:18px;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;color:#64748b;padding-bottom:14px;font-size:14px;}
+td{padding:14px 0;border-top:1px solid #eef2f7;font-weight:700;vertical-align:top;}
+.small{font-size:13px;color:#64748b;font-weight:700;margin-top:4px;line-height:1.5;}
+.badge{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:900;display:inline-block;}
+.yes{background:#dcfce7;color:#166534;}
+.no{background:#fee2e2;color:#991b1b;}
+.type{background:#e0f2fe;color:#075985;}
+.action-btn{border:none;padding:8px 12px;border-radius:10px;font-weight:900;cursor:pointer;margin-right:6px;}
+.edit{background:#dbeafe;color:#1d4ed8;}
+.delete{background:#fee2e2;color:#991b1b;}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}table{font-size:13px;display:block;overflow-x:auto;white-space:nowrap}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Supplier Master</h1>
+    <p>Create suppliers for purchase invoices, supplier payments and purchase reports.</p>
+  </div>
+  <a class="back" href="/dashboard.html">Back to Dashboard</a>
+</div>
+
+<div class="card">
+  <div class="note">
+    Supplier VAT number is optional. Payment terms are supplier-wise and will be used later for payable reports.
+  </div>
+
+  <form id="supplierForm">
+    <input type="hidden" id="editIndex">
+
+    <div class="grid">
+
+      <div class="form-group">
+        <label>Supplier Name *</label>
+        <input type="text" id="supplierName" placeholder="Enter supplier name" required>
+      </div>
+
+      <div class="form-group">
+        <label>Supplier Type</label>
+        <select id="supplierType">
+          <option>Company Supplier</option>
+          <option>Cash Supplier</option>
+          <option>Parts Supplier</option>
+          <option>Service Supplier</option>
+          <option>Transport Supplier</option>
+          <option>Government Supplier</option>
+          <option>Individual Supplier</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Contact Person</label>
+        <input type="text" id="contactPerson" placeholder="Enter contact person">
+      </div>
+
+      <div class="form-group">
+        <label>Mobile Number</label>
+        <input type="text" id="mobile" placeholder="+968 XXXXXXXX">
+      </div>
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="supplier@email.com">
+      </div>
+
+      <div class="form-group">
+        <label>VAT Registered?</label>
+        <select id="vatRegistered">
+          <option>No</option>
+          <option>Yes</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>VAT Number Optional</label>
+        <input type="text" id="vatNumber" placeholder="Enter only if available">
+      </div>
+
+      <div class="form-group">
+        <label>Payment Terms</label>
+        <select id="paymentTerms">
+          <option>Cash / Immediate</option>
+          <option>Advance Payment</option>
+          <option>7 Days Credit</option>
+          <option>15 Days Credit</option>
+          <option>30 Days Credit</option>
+          <option>45 Days Credit</option>
+          <option>60 Days Credit</option>
+          <option>90 Days Credit</option>
+          <option>120 Days Credit</option>
+          <option>Manual / Custom Terms</option>
+          <option>As Per Agreement</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Credit Limit</label>
+        <input type="number" step="0.001" id="creditLimit" placeholder="0.000">
+      </div>
+
+      <div class="form-group">
+        <label>Opening Balance Payable</label>
+        <input type="number" step="0.001" id="openingBalance" placeholder="0.000">
+      </div>
+
+      <div class="form-group">
+        <label>Status</label>
+        <select id="status">
+          <option>Active</option>
+          <option>Inactive</option>
+        </select>
+      </div>
+
+      <div class="form-group full">
+        <label>Supplier Address</label>
+        <textarea id="address" placeholder="Enter supplier address"></textarea>
+      </div>
+
+      <div class="form-group full">
+        <label>Bank Details Optional</label>
+        <textarea id="bankDetails" placeholder="Bank name, account number, IBAN, account name"></textarea>
+      </div>
+
+      <div class="form-group full">
+        <label>Remarks</label>
+        <textarea id="remarks" placeholder="Internal note only"></textarea>
+      </div>
+
+    </div>
+
+    <button class="btn" type="submit">Save Supplier</button>
+    <button class="btn btn-light" type="button" onclick="resetForm()">Clear</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2 style="margin-bottom:18px;">Supplier List</h2>
+
+  <input class="search" type="text" id="searchBox" placeholder="Search supplier..." onkeyup="loadSuppliers()">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Supplier</th>
+        <th>Contact</th>
+        <th>VAT</th>
+        <th>Terms</th>
+        <th>Opening Payable</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="supplierTable"></tbody>
+  </table>
+</div>
+
+<script>
+function getSuppliers(){
+  return JSON.parse(localStorage.getItem("post91Suppliers") || "[]");
+}
+
+function saveSuppliers(suppliers){
+  localStorage.setItem("post91Suppliers", JSON.stringify(suppliers));
+}
+
+function loadSuppliers(){
+  const suppliers = getSuppliers();
+  const search = document.getElementById("searchBox").value.toLowerCase();
+  const tbody = document.getElementById("supplierTable");
+
+  tbody.innerHTML = "";
+
+  suppliers
+    .filter(s => {
+      const text = `
+        ${s.supplierName || ""}
+        ${s.supplierType || ""}
+        ${s.contactPerson || ""}
+        ${s.mobile || ""}
+        ${s.email || ""}
+        ${s.vatNumber || ""}
+      `.toLowerCase();
+
+      return text.includes(search);
+    })
+    .forEach((s,index)=>{
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>
+          ${s.supplierName}
+          <div class="small"><span class="badge type">${s.supplierType}</span></div>
+          ${s.contactPerson ? `<div class="small">Contact: ${s.contactPerson}</div>` : ""}
+        </td>
+
+        <td>
+          ${s.mobile || "-"}
+          <div class="small">${s.email || ""}</div>
+        </td>
+
+        <td>
+          <span class="badge ${s.vatRegistered === "Yes" ? "yes" : "no"}">${s.vatRegistered}</span>
+          <div class="small">${s.vatNumber || "No VAT number"}</div>
+        </td>
+
+        <td>${s.paymentTerms || "-"}</td>
+
+        <td>OMR ${Number(s.openingBalance || 0).toFixed(3)}</td>
+
+        <td>
+          <span class="badge ${s.status === "Active" ? "yes" : "no"}">${s.status}</span>
+        </td>
+
+        <td>
+          <button class="action-btn edit" onclick="editSupplier(${index})">Edit</button>
+          <button class="action-btn delete" onclick="deleteSupplier(${index})">Delete</button>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+}
+
+document.getElementById("supplierForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  const suppliers = getSuppliers();
+  const editIndex = document.getElementById("editIndex").value;
+
+  const supplier = {
+    supplierName: document.getElementById("supplierName").value,
+    supplierType: document.getElementById("supplierType").value,
+    contactPerson: document.getElementById("contactPerson").value,
+    mobile: document.getElementById("mobile").value,
+    email: document.getElementById("email").value,
+    vatRegistered: document.getElementById("vatRegistered").value,
+    vatNumber: document.getElementById("vatNumber").value,
+    paymentTerms: document.getElementById("paymentTerms").value,
+    creditLimit: document.getElementById("creditLimit").value,
+    openingBalance: document.getElementById("openingBalance").value,
+    status: document.getElementById("status").value,
+    address: document.getElementById("address").value,
+    bankDetails: document.getElementById("bankDetails").value,
+    remarks: document.getElementById("remarks").value
+  };
+
+  if(editIndex === ""){
+    suppliers.push(supplier);
+    alert("Supplier saved successfully.");
+  } else {
+    suppliers[editIndex] = supplier;
+    alert("Supplier updated successfully.");
+  }
+
+  saveSuppliers(suppliers);
+  resetForm();
+  loadSuppliers();
+});
+
+function editSupplier(index){
+  const s = getSuppliers()[index];
+
+  document.getElementById("editIndex").value = index;
+  document.getElementById("supplierName").value = s.supplierName || "";
+  document.getElementById("supplierType").value = s.supplierType || "Company Supplier";
+  document.getElementById("contactPerson").value = s.contactPerson || "";
+  document.getElementById("mobile").value = s.mobile || "";
+  document.getElementById("email").value = s.email || "";
+  document.getElementById("vatRegistered").value = s.vatRegistered || "No";
+  document.getElementById("vatNumber").value = s.vatNumber || "";
+  document.getElementById("paymentTerms").value = s.paymentTerms || "Cash / Immediate";
+  document.getElementById("creditLimit").value = s.creditLimit || "";
+  document.getElementById("openingBalance").value = s.openingBalance || "";
+  document.getElementById("status").value = s.status || "Active";
+  document.getElementById("address").value = s.address || "";
+  document.getElementById("bankDetails").value = s.bankDetails || "";
+  document.getElementById("remarks").value = s.remarks || "";
+
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function deleteSupplier(index){
+  if(confirm("Delete this supplier?")){
+    const suppliers = getSuppliers();
+    suppliers.splice(index,1);
+    saveSuppliers(suppliers);
+    loadSuppliers();
+  }
+}
+
+function resetForm(){
+  document.getElementById("supplierForm").reset();
+  document.getElementById("editIndex").value = "";
+}
+
+loadSuppliers();
+</script>
+
+</body>
+</html>

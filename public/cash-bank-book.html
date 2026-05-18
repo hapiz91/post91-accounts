@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cash & Bank Book | Post91 Accounts</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Segoe UI,Arial,sans-serif;
+}
+
+body{
+  background:#eef3f8;
+  color:#061833;
+  padding:28px;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:24px;
+}
+
+.header h1{
+  font-size:34px;
+}
+
+.header p{
+  color:#64748b;
+  margin-top:6px;
+}
+
+.back{
+  background:white;
+  color:#0d6efd;
+  text-decoration:none;
+  padding:12px 16px;
+  border-radius:13px;
+  font-weight:900;
+  box-shadow:0 10px 25px rgba(15,23,42,.08);
+}
+
+.card{
+  background:white;
+  border-radius:22px;
+  padding:26px;
+  box-shadow:0 16px 38px rgba(15,23,42,.08);
+  border:1px solid #e5edf7;
+  margin-bottom:22px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:16px;
+}
+
+label{
+  display:block;
+  margin-bottom:7px;
+  font-weight:800;
+}
+
+input,select{
+  width:100%;
+  padding:13px 14px;
+  border-radius:12px;
+  border:1px solid #dbe4f0;
+  font-size:15px;
+}
+
+.btn{
+  border:none;
+  background:#0d6efd;
+  color:white;
+  padding:13px 19px;
+  border-radius:13px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.btn-light{
+  background:#e2e8f0;
+  color:#0f172a;
+  margin-left:8px;
+}
+
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  margin-bottom:22px;
+}
+
+.summary{
+  background:white;
+  border-radius:22px;
+  padding:20px;
+  border:1px solid #e5edf7;
+  box-shadow:0 12px 28px rgba(15,23,42,.06);
+}
+
+.summary span{
+  color:#64748b;
+  font-size:13px;
+  font-weight:800;
+}
+
+.summary h2{
+  margin-top:8px;
+  color:#0d6efd;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:12px;
+}
+
+th{
+  text-align:left;
+  color:#64748b;
+  padding:12px;
+  border-bottom:1px solid #e5edf7;
+  font-size:14px;
+}
+
+td{
+  padding:12px;
+  border-bottom:1px solid #eef2f7;
+  font-weight:700;
+  vertical-align:top;
+}
+
+.receipt{
+  color:#166534;
+}
+
+.payment{
+  color:#991b1b;
+}
+
+.balance{
+  color:#0d6efd;
+}
+
+.badge{
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  display:inline-block;
+}
+
+.cash{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.bank{
+  background:#dbeafe;
+  color:#1d4ed8;
+}
+
+.expense{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.section-title{
+  font-size:22px;
+  color:#0d6efd;
+  margin-bottom:12px;
+}
+
+@media(max-width:1200px){
+
+  .grid,.summary-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  table{
+    display:block;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+
+}
+
+@media(max-width:650px){
+
+  .grid,.summary-grid{
+    grid-template-columns:1fr;
+  }
+
+  .header{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:15px;
+  }
+
+}
+
+@media print{
+
+  .header,.filter-card,.btn{
+    display:none !important;
+  }
+
+  body{
+    background:white;
+    padding:10px;
+  }
+
+  .card{
+    box-shadow:none;
+    border:none;
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+
+  <div>
+    <h1>Cash & Bank Book</h1>
+    <p>Day-wise receipt, payment and running balance report.</p>
+  </div>
+
+  <a href="/dashboard.html" class="back">
+    Back to Dashboard
+  </a>
+
+</div>
+
+<div class="card filter-card">
+
+  <div class="grid">
+
+    <div>
+      <label>From Date</label>
+      <input type="date" id="fromDate">
+    </div>
+
+    <div>
+      <label>To Date</label>
+      <input type="date" id="toDate">
+    </div>
+
+    <div>
+      <label>Book Type</label>
+
+      <select id="bookType">
+        <option>All</option>
+        <option>Cash Only</option>
+        <option>Bank Only</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Transaction Type</label>
+
+      <select id="transactionType">
+        <option>All</option>
+        <option>Customer Receipt</option>
+        <option>Supplier Payment</option>
+        <option>Expense</option>
+      </select>
+    </div>
+
+    <div>
+      <label>&nbsp;</label>
+
+      <button class="btn" onclick="generateBook()">
+        Generate
+      </button>
+
+      <button class="btn btn-light" onclick="window.print()">
+        Print
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div class="summary-grid">
+
+  <div class="summary">
+    <span>Total Receipts</span>
+    <h2 id="totalReceipts">OMR 0.000</h2>
+  </div>
+
+  <div class="summary">
+    <span>Total Payments</span>
+    <h2 id="totalPayments">OMR 0.000</h2>
+  </div>
+
+  <div class="summary">
+    <span>Closing Balance</span>
+    <h2 id="closingBalance">OMR 0.000</h2>
+  </div>
+
+  <div class="summary">
+    <span>Transactions</span>
+    <h2 id="transactionCount">0</h2>
+  </div>
+
+</div>
+
+<div class="card">
+
+  <div class="section-title">
+    Cash & Bank Transactions
+  </div>
+
+  <table>
+
+    <thead>
+
+      <tr>
+        <th>Date</th>
+        <th>Document</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Book</th>
+        <th>Receipt</th>
+        <th>Payment</th>
+        <th>Balance</th>
+      </tr>
+
+    </thead>
+
+    <tbody id="bookTable"></tbody>
+
+  </table>
+
+</div>
+
+<script>
+
+function getReceipts(){
+  return JSON.parse(localStorage.getItem("post91Receipts") || "[]");
+}
+
+function getSupplierPayments(){
+  return JSON.parse(localStorage.getItem("post91SupplierPayments") || "[]");
+}
+
+function getExpenses(){
+  return JSON.parse(localStorage.getItem("post91Expenses") || "[]");
+}
+
+function money(n){
+  return "OMR " + Number(n || 0).toFixed(3);
+}
+
+function inDate(date,from,to){
+
+  if(!date) return true;
+
+  const d = new Date(date);
+
+  if(from && d < new Date(from)) return false;
+  if(to && d > new Date(to)) return false;
+
+  return true;
+
+}
+
+function buildTransactions(){
+
+  const from = document.getElementById("fromDate").value;
+  const to = document.getElementById("toDate").value;
+
+  let tx = [];
+
+  getReceipts().forEach(r=>{
+
+    if(!inDate(r.receiptDate,from,to)) return;
+
+    tx.push({
+
+      date:r.receiptDate,
+      document:r.receiptNo,
+
+      type:"Customer Receipt",
+
+      description:
+        (r.customerName || "-")
+        + (r.invoiceNo ? " / " + r.invoiceNo : ""),
+
+      book:
+        r.paymentMode === "Cash"
+          ? "Cash"
+          : (r.bankDisplayName || "Bank"),
+
+      mode:r.paymentMode,
+
+      receipt:Number(r.receiptAmount || 0),
+      payment:0
+
+    });
+
+  });
+
+  getSupplierPayments().forEach(p=>{
+
+    if(!inDate(p.paymentDate,from,to)) return;
+
+    tx.push({
+
+      date:p.paymentDate,
+      document:p.paymentNo,
+
+      type:"Supplier Payment",
+
+      description:
+        (p.supplierName || "-")
+        + (p.purchaseNo ? " / " + p.purchaseNo : ""),
+
+      book:
+        p.paymentMode === "Cash"
+          ? "Cash"
+          : (p.bankDisplayName || "Bank"),
+
+      mode:p.paymentMode,
+
+      receipt:0,
+      payment:Number(p.paymentAmount || 0)
+
+    });
+
+  });
+
+  getExpenses().forEach(e=>{
+
+    if(!inDate(e.expenseDate,from,to)) return;
+
+    tx.push({
+
+      date:e.expenseDate,
+      document:e.expenseNo,
+
+      type:"Expense",
+
+      description:
+        e.expenseCategory || "-"
+        + (e.vendorName ? " / " + e.vendorName : ""),
+
+      book:
+        e.paymentMode === "Cash"
+          ? "Cash"
+          : (e.bankDisplayName || "Bank"),
+
+      mode:e.paymentMode,
+
+      receipt:0,
+      payment:Number(e.grandTotal || 0)
+
+    });
+
+  });
+
+  return tx;
+
+}
+
+function filterTransactions(tx){
+
+  const bookType =
+    document.getElementById("bookType").value;
+
+  const type =
+    document.getElementById("transactionType").value;
+
+  return tx.filter(t=>{
+
+    if(bookType === "Cash Only" && t.mode !== "Cash"){
+      return false;
+    }
+
+    if(bookType === "Bank Only" && t.mode === "Cash"){
+      return false;
+    }
+
+    if(type !== "All" && t.type !== type){
+      return false;
+    }
+
+    return true;
+
+  });
+
+}
+
+function generateBook(){
+
+  let tx = buildTransactions();
+
+  tx = filterTransactions(tx);
+
+  tx.sort((a,b)=>
+    new Date(a.date) - new Date(b.date));
+
+  const tbody =
+    document.getElementById("bookTable");
+
+  tbody.innerHTML = "";
+
+  let balance = 0;
+  let receipts = 0;
+  let payments = 0;
+
+  tx.forEach(t=>{
+
+    receipts += Number(t.receipt || 0);
+    payments += Number(t.payment || 0);
+
+    balance +=
+      Number(t.receipt || 0)
+      - Number(t.payment || 0);
+
+    const badgeClass =
+      t.mode === "Cash"
+        ? "cash"
+        : (
+            t.type === "Expense"
+              ? "expense"
+              : "bank"
+          );
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+
+      <td>${t.date || "-"}</td>
+
+      <td>${t.document || "-"}</td>
+
+      <td>${t.type}</td>
+
+      <td>${t.description}</td>
+
+      <td>
+
+        <span class="badge ${badgeClass}">
+          ${t.book}
+        </span>
+
+      </td>
+
+      <td class="receipt">
+
+        ${t.receipt
+          ? money(t.receipt)
+          : "-"}
+
+      </td>
+
+      <td class="payment">
+
+        ${t.payment
+          ? money(t.payment)
+          : "-"}
+
+      </td>
+
+      <td class="balance">
+
+        ${money(balance)}
+
+      </td>
+
+    `;
+
+    tbody.appendChild(tr);
+
+  });
+
+  if(tx.length === 0){
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8">
+          No transactions found.
+        </td>
+      </tr>
+    `;
+
+  }
+
+  document.getElementById("totalReceipts").textContent =
+    money(receipts);
+
+  document.getElementById("totalPayments").textContent =
+    money(payments);
+
+  document.getElementById("closingBalance").textContent =
+    money(balance);
+
+  document.getElementById("transactionCount").textContent =
+    tx.length;
+
+}
+
+generateBook();
+
+</script>
+
+</body>
+</html>

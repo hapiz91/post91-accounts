@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backup & Restore | Post91 Accounts</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
+body{background:#eef3f8;color:#061833;padding:28px;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.header h1{font-size:34px}.header p{color:#64748b;margin-top:6px}
+.back{background:white;color:#0d6efd;text-decoration:none;padding:12px 16px;border-radius:13px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);}
+.card{background:white;border-radius:22px;padding:26px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:22px;}
+.note{background:#e0f2fe;border:1px solid #bae6fd;color:#075985;padding:16px;border-radius:16px;margin-bottom:18px;line-height:1.6;font-weight:700;}
+.warn{background:#fee2e2;border:1px solid #fecaca;color:#991b1b;padding:16px;border-radius:16px;margin-bottom:18px;line-height:1.6;font-weight:700;}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+.btn{border:none;background:#0d6efd;color:white;padding:14px 22px;border-radius:14px;font-weight:900;cursor:pointer;font-size:15px;}
+.btn-danger{background:#ef4444;}
+.btn-light{background:#e2e8f0;color:#0f172a;}
+input[type=file]{width:100%;padding:14px;border:1px dashed #94a3b8;border-radius:14px;background:#f8fbff;}
+table{width:100%;border-collapse:collapse;margin-top:15px;}
+th{text-align:left;color:#64748b;padding:12px;border-bottom:1px solid #e5edf7;font-size:14px;}
+td{padding:12px;border-bottom:1px solid #eef2f7;font-weight:700;}
+.status{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:900;background:#dcfce7;color:#166534;}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Backup & Restore</h1>
+    <p>Export and restore Post91 local data safely.</p>
+  </div>
+  <a href="/dashboard.html" class="back">Back to Dashboard</a>
+</div>
+
+<div class="note">
+  This MVP currently stores data in browser localStorage. Use backup regularly before clearing browser data or changing device.
+</div>
+
+<div class="warn">
+  Restore will overwrite current browser data. Always download a backup before restoring another file.
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2 style="color:#0d6efd;margin-bottom:15px;">Download Backup</h2>
+    <p style="line-height:1.7;color:#64748b;margin-bottom:18px;">
+      Export all saved customers, suppliers, invoices, receipts, payments, expenses, banks, settings and reports data into one JSON file.
+    </p>
+    <button class="btn" onclick="downloadBackup()">Download Backup File</button>
+  </div>
+
+  <div class="card">
+    <h2 style="color:#0d6efd;margin-bottom:15px;">Restore Backup</h2>
+    <p style="line-height:1.7;color:#64748b;margin-bottom:18px;">
+      Select a previous Post91 backup JSON file and restore it to this browser.
+    </p>
+    <input type="file" id="restoreFile" accept=".json">
+    <br><br>
+    <button class="btn btn-danger" onclick="restoreBackup()">Restore Selected Backup</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2 style="color:#0d6efd;margin-bottom:15px;">Data Status</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Module</th>
+        <th>Storage Key</th>
+        <th>Records</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="statusTable"></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2 style="color:#0d6efd;margin-bottom:15px;">Danger Zone</h2>
+  <p style="line-height:1.7;color:#64748b;margin-bottom:18px;">
+    This will permanently clear all Post91 data from this browser only.
+  </p>
+  <button class="btn btn-danger" onclick="clearAllData()">Clear All Local Data</button>
+</div>
+
+<script>
+const keys = [
+  ["Business Profile","post91BusinessProfile"],
+  ["Settings","post91Settings"],
+  ["Customers","post91Customers"],
+  ["Suppliers","post91Suppliers"],
+  ["Items / Services","post91Items"],
+  ["Banks","post91Banks"],
+  ["Quotations","post91Quotations"],
+  ["Delivery Orders","post91DeliveryOrders"],
+  ["Sales Invoices","post91SalesInvoices"],
+  ["Purchase Invoices","post91PurchaseInvoices"],
+  ["Expenses","post91Expenses"],
+  ["Customer Receipts","post91Receipts"],
+  ["Supplier Payments","post91SupplierPayments"]
+];
+
+function safeParse(value){
+  try{
+    return JSON.parse(value);
+  }catch(e){
+    return null;
+  }
+}
+
+function recordCount(data){
+  if(Array.isArray(data)) return data.length;
+  if(data && typeof data === "object" && Object.keys(data).length > 0) return 1;
+  return 0;
+}
+
+function loadStatus(){
+  const tbody = document.getElementById("statusTable");
+  tbody.innerHTML = "";
+
+  keys.forEach(([label,key])=>{
+    const data = safeParse(localStorage.getItem(key) || "null");
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${label}</td>
+      <td>${key}</td>
+      <td>${recordCount(data)}</td>
+      <td><span class="status">Available</span></td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
+
+function downloadBackup(){
+  const backup = {
+    app:"Post91 Accounts",
+    version:"MVP-LocalStorage",
+    backupDate:new Date().toISOString(),
+    data:{}
+  };
+
+  keys.forEach(([label,key])=>{
+    backup.data[key] = safeParse(localStorage.getItem(key) || "null");
+  });
+
+  const blob = new Blob([JSON.stringify(backup,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  const date = new Date().toISOString().split("T")[0];
+  a.href = url;
+  a.download = `post91-backup-${date}.json`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+function restoreBackup(){
+  const file = document.getElementById("restoreFile").files[0];
+
+  if(!file){
+    alert("Please select backup file.");
+    return;
+  }
+
+  if(!confirm("This will overwrite current Post91 local data. Continue?")){
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function(e){
+    try{
+      const backup = JSON.parse(e.target.result);
+
+      if(!backup.data){
+        alert("Invalid backup file.");
+        return;
+      }
+
+      keys.forEach(([label,key])=>{
+        if(backup.data.hasOwnProperty(key)){
+          localStorage.setItem(key, JSON.stringify(backup.data[key]));
+        }
+      });
+
+      alert("Backup restored successfully. Please refresh dashboard.");
+      loadStatus();
+
+    }catch(error){
+      alert("Restore failed. Invalid JSON file.");
+    }
+  };
+
+  reader.readAsText(file);
+}
+
+function clearAllData(){
+  if(!confirm("Are you sure? This will delete all Post91 local data from this browser.")){
+    return;
+  }
+
+  if(!confirm("Final confirmation: download backup first if needed. Continue delete?")){
+    return;
+  }
+
+  keys.forEach(([label,key])=>{
+    localStorage.removeItem(key);
+  });
+
+  alert("All local data cleared.");
+  loadStatus();
+}
+
+loadStatus();
+</script>
+
+</body>
+</html>

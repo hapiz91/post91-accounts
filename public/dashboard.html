@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard | Post91 Accounts</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
+body{background:#f4f8fc;display:flex;min-height:100vh;color:#061833;}
+
+.sidebar{
+  width:300px;background:#020817;color:white;padding:24px 18px;
+  position:fixed;top:0;left:0;bottom:0;height:100vh;overflow-y:auto;
+}
+.sidebar::-webkit-scrollbar{width:8px;}
+.sidebar::-webkit-scrollbar-thumb{background:#1e40af;border-radius:10px;}
+
+.logo{text-align:center;margin-bottom:28px;}
+.logo img{height:78px;background:white;border-radius:18px;padding:8px;margin-bottom:10px;}
+.logo h2{font-size:24px;}
+.logo p{font-size:12px;color:#7dd3fc;}
+
+.menu-title{
+  color:#7dd3fc;font-size:12px;font-weight:900;margin:22px 12px 8px;
+  text-transform:uppercase;letter-spacing:.7px;
+}
+.menu a{
+  display:block;text-decoration:none;color:#cbd5e1;padding:12px 15px;
+  border-radius:13px;font-weight:700;font-size:14px;margin-bottom:5px;transition:.25s;
+}
+.menu a:hover,.menu a.active{background:#0d6efd;color:white;}
+.menu a span{margin-right:8px;}
+
+.main{margin-left:300px;width:calc(100% - 300px);padding:32px;}
+
+.topbar{
+  background:white;border-radius:26px;padding:24px;margin-bottom:26px;
+  display:flex;justify-content:space-between;align-items:flex-start;gap:20px;
+  box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;
+}
+.topbar h1{font-size:34px;color:#0d6efd;}
+.topbar p{color:#64748b;margin-top:6px;font-weight:700;}
+.profile{
+  background:#dcfce7;color:#166534;padding:14px 18px;border-radius:16px;font-weight:900;
+  white-space:nowrap;
+}
+
+.alert-card{
+  background:linear-gradient(135deg,#0d6efd,#063b8f);color:white;
+  padding:24px;border-radius:26px;margin-bottom:24px;
+  display:flex;justify-content:space-between;align-items:center;gap:20px;
+  box-shadow:0 18px 45px rgba(13,110,253,.22);
+}
+.alert-card h3{font-size:22px;margin-bottom:7px;}
+.alert-card p{color:#dbeafe;line-height:1.6;}
+.alert-card a{
+  background:white;color:#0d6efd;text-decoration:none;font-weight:900;
+  padding:13px 20px;border-radius:12px;white-space:nowrap;
+}
+
+.cards{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:24px;
+}
+.card{
+  background:white;padding:23px;border-radius:24px;border:1px solid #e5edf7;
+  box-shadow:0 16px 38px rgba(15,23,42,.08);
+}
+.card span{color:#64748b;font-size:14px;font-weight:800;}
+.card h2{margin-top:12px;font-size:30px;color:#0d6efd;}
+.card small{display:block;margin-top:8px;color:#22c55e;font-weight:800;}
+
+.module-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:24px;
+}
+.module{
+  background:white;border:1px solid #e5edf7;border-radius:22px;padding:22px;
+  text-decoration:none;color:#061833;box-shadow:0 14px 34px rgba(15,23,42,.07);
+  transition:.25s;
+}
+.module:hover{transform:translateY(-5px);box-shadow:0 22px 45px rgba(15,23,42,.12);}
+.module-icon{font-size:31px;margin-bottom:12px;}
+.module h3{font-size:18px;margin-bottom:8px;}
+.module p{font-size:14px;color:#64748b;line-height:1.5;}
+
+.content-grid{display:grid;grid-template-columns:2fr 1fr;gap:22px;}
+.panel{
+  background:white;border-radius:26px;padding:26px;
+  box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;
+}
+.panel h3{margin-bottom:20px;color:#0d6efd;}
+
+.health-item{margin-bottom:18px;}
+.health-item span{font-weight:900;color:#0f172a;}
+.progress{height:12px;background:#e2e8f0;border-radius:999px;margin-top:8px;overflow:hidden;}
+.progress div{height:100%;background:#0d6efd;border-radius:999px;}
+
+.table-section{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;color:#64748b;font-size:14px;padding-bottom:12px;}
+td{padding:13px 0;border-top:1px solid #eef2f7;font-weight:700;vertical-align:top;}
+.status{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:900;}
+.paid{background:#dcfce7;color:#166534;}
+.pending{background:#fef3c7;color:#92400e;}
+.cancelled{background:#fee2e2;color:#991b1b;}
+
+.quick-actions a{
+  display:block;text-decoration:none;background:#f8fbff;color:#061833;
+  padding:13px 15px;border-radius:15px;border:1px solid #e5edf7;
+  margin-bottom:10px;font-weight:900;
+}
+.quick-actions a:hover{border-color:#0d6efd;color:#0d6efd;}
+
+@media(max-width:1150px){
+  .cards,.module-grid{grid-template-columns:repeat(2,1fr);}
+  .content-grid,.table-section{grid-template-columns:1fr;}
+}
+@media(max-width:850px){
+  .sidebar{position:relative;width:100%;height:auto;}
+  body{flex-direction:column;}
+  .main{margin-left:0;width:100%;padding:20px;}
+  .cards,.module-grid{grid-template-columns:1fr;}
+  .alert-card,.topbar{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <img src="/images/post91-logo.png" alt="Post91 Logo">
+    <h2>Post91</h2>
+    <p>Accounts Platform</p>
+  </div>
+
+  <div class="menu">
+    <a href="/dashboard.html" class="active"><span>🏠</span>Dashboard</a>
+
+    <div class="menu-title">Sales</div>
+    <a href="/quotation.html"><span>📝</span>Quotation</a>
+    <a href="/delivery-order.html"><span>🚚</span>Delivery Order</a>
+    <a href="/sales-invoice.html"><span>🧾</span>Sales Invoice</a>
+    <a href="/receipts.html"><span>💰</span>Customer Receipts</a>
+
+    <div class="menu-title">Purchases</div>
+    <a href="/purchase-invoice.html"><span>📦</span>Purchase Invoice</a>
+    <a href="/supplier-payments.html"><span>💳</span>Supplier Payments</a>
+
+    <div class="menu-title">Accounting</div>
+
+<a href="/expenses.html"><span>💸</span>Expenses</a>
+<a href="/banks.html"><span>🏦</span>Bank Master</a>
+<a href="/cash-bank-book.html"><span>📒</span>Cash & Bank Book</a>
+<a href="/profit-loss.html"><span>📈</span>Profit & Loss</a>
+<a href="/reports.html"><span>📊</span>Reports Center</a>
+<a href="/vat-report.html"><span>🧮</span>VAT Report</a>
+<a href="/soa.html"><span>📄</span>Customer SOA</a>
+<a href="/supplier-soa.html"><span>🏭</span>Supplier SOA</a>
+
+    <div class="menu-title">Inventory</div>
+    <a href="/items.html"><span>📋</span>Items / Services</a>
+    <a href="/stock-ledger.html"><span>📦</span>Stock Ledger</a>
+
+    <div class="menu-title">Masters</div>
+    <a href="/customers.html"><span>👥</span>Customers</a>
+    <a href="/suppliers.html"><span>🏭</span>Suppliers</a>
+
+    <div class="menu-title">Admin</div>
+    <a href="/business-profile.html"><span>🏢</span>Business Profile</a>
+    <a href="/users.html"><span>🔐</span>User Creation</a>
+    <a href="/settings.html"><span>⚙️</span>Settings</a>
+    <a href="/backup-restore.html"><span>💾</span>Backup & Restore</a>
+    <a href="/"><span>🚪</span>Logout</a>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="topbar">
+    <div>
+      <h1 id="companyName">Post91 Accounts</h1>
+      <p id="companyAddress">Company address will appear here after Business Profile update.</p>
+      <p id="companyVat">VAT No: Not Registered</p>
+    </div>
+    <div class="profile">Premium Plan</div>
+  </div>
+
+  <div class="alert-card">
+    <div>
+      <h3>Business Overview</h3>
+      <p>Monitor sales, purchases, expenses, VAT, stock, receivables and payables from one dashboard.</p>
+    </div>
+    <a href="/reports.html">Open Reports</a>
+  </div>
+
+  <div class="cards">
+    <div class="card"><span>Total Sales</span><h2 id="totalSales">OMR 0.000</h2><small>From sales invoices</small></div>
+    <div class="card"><span>Total Purchase</span><h2 id="totalPurchase">OMR 0.000</h2><small>From purchase invoices</small></div>
+    <div class="card"><span>Total Expenses</span><h2 id="totalExpenses">OMR 0.000</h2><small>Direct expenses</small></div>
+    <div class="card"><span>Estimated Profit</span><h2 id="estimatedProfit">OMR 0.000</h2><small>Sales - purchase - expenses</small></div>
+  </div>
+
+  <div class="cards">
+    <div class="card"><span>Receivables</span><h2 id="receivables">OMR 0.000</h2><small>Customer outstanding</small></div>
+    <div class="card"><span>Payables</span><h2 id="payables">OMR 0.000</h2><small>Supplier outstanding</small></div>
+    <div class="card"><span>Inventory Value</span><h2 id="inventoryValue">OMR 0.000</h2><small>Stock valuation</small></div>
+    <div class="card"><span>Net VAT Position</span><h2 id="vatPosition">OMR 0.000</h2><small>Output - input VAT</small></div>
+  </div>
+
+  <div class="module-grid">
+    <a class="module" href="/quotation.html">
+      <div class="module-icon">📝</div>
+      <h3>Create Quotation</h3>
+      <p>Prepare quotation with technical job fields and item master.</p>
+    </a>
+
+    <a class="module" href="/delivery-order.html">
+      <div class="module-icon">🚚</div>
+      <h3>Delivery Order</h3>
+      <p>Load quotation into DO and modify before delivery.</p>
+    </a>
+
+    <a class="module" href="/sales-invoice.html">
+      <div class="module-icon">🧾</div>
+      <h3>Sales Invoice</h3>
+      <p>Create VAT, non-VAT, zero-rated or exempt invoices.</p>
+    </a>
+
+    <a class="module" href="/reports.html">
+      <div class="module-icon">📊</div>
+      <h3>Reports Center</h3>
+      <p>Sales, purchase, VAT, item-wise and outstanding reports.</p>
+    </a>
+  </div>
+
+  <div class="content-grid">
+    <div class="panel">
+      <h3>Recent Sales Invoices</h3>
+      <table>
+        <thead>
+          <tr><th>Invoice</th><th>Customer</th><th>Total</th><th>Status</th></tr>
+        </thead>
+        <tbody id="salesTable"></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h3>Business Health</h3>
+
+      <div class="health-item">
+        <span>Collection Efficiency</span>
+        <div class="progress"><div id="collectionBar" style="width:0%"></div></div>
+        <small id="collectionText">0% collected</small>
+      </div>
+
+      <div class="health-item">
+        <span>Expense Ratio</span>
+        <div class="progress"><div id="expenseBar" style="width:0%"></div></div>
+        <small id="expenseText">0% expense ratio</small>
+      </div>
+
+      <div class="health-item">
+        <span>Inventory Ratio</span>
+        <div class="progress"><div id="inventoryBar" style="width:0%"></div></div>
+        <small id="inventoryText">0% inventory ratio</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-section">
+    <div class="panel">
+      <h3>Low Stock Alerts</h3>
+      <table>
+        <thead>
+          <tr><th>Item</th><th>Balance</th><th>Status</th></tr>
+        </thead>
+        <tbody id="stockTable"></tbody>
+      </table>
+    </div>
+
+    <div class="panel quick-actions">
+      <h3>Quick Actions</h3>
+      <a href="/sales-invoice.html">Create Sales Invoice</a>
+      <a href="/purchase-invoice.html">Create Purchase Invoice</a>
+      <a href="/expenses.html">Add Expense</a>
+      <a href="/receipts.html">Customer Receipt</a>
+      <a href="/supplier-payments.html">Supplier Payment</a>
+      <a href="/vat-report.html">VAT Report</a>
+      <a href="/business-profile.html">Update Business Profile</a>
+      <a href="/settings.html">Settings</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function getProfile(){return JSON.parse(localStorage.getItem("post91BusinessProfile") || "{}");}
+function getSales(){return JSON.parse(localStorage.getItem("post91SalesInvoices") || "[]");}
+function getPurchases(){return JSON.parse(localStorage.getItem("post91PurchaseInvoices") || "[]");}
+function getExpenses(){return JSON.parse(localStorage.getItem("post91Expenses") || "[]");}
+function money(num){return "OMR " + Number(num || 0).toFixed(3);}
+
+function loadProfile(){
+  const p = getProfile();
+
+  if(p.businessName){
+    document.getElementById("companyName").textContent = p.businessName;
+  }
+
+  if(p.address){
+    document.getElementById("companyAddress").textContent = p.address;
+  }
+
+  if(p.vatRegistered === "Yes" && p.vatNumber){
+    document.getElementById("companyVat").textContent = "VAT No: " + p.vatNumber;
+  } else {
+    document.getElementById("companyVat").textContent = "VAT No: Not Registered";
+  }
+}
+
+function calculateInventory(){
+  const purchases = getPurchases();
+  const sales = getSales();
+  const stock = {};
+
+  purchases.forEach(p=>{
+    (p.items || []).forEach(item=>{
+      const key = item.description || "Unknown Item";
+      if(!stock[key]) stock[key] = {qty:0,totalCost:0};
+      const qty = Number(item.qty || 0);
+      const rate = Number(item.rate || 0);
+      stock[key].qty += qty;
+      stock[key].totalCost += qty * rate;
+    });
+  });
+
+  sales.forEach(s=>{
+    (s.items || []).forEach(item=>{
+      const key = item.description || "Unknown Item";
+      if(!stock[key]) stock[key] = {qty:0,totalCost:0};
+      stock[key].qty -= Number(item.qty || 0);
+    });
+  });
+
+  let totalValue = 0;
+  Object.values(stock).forEach(i=>{
+    const avg = i.qty <= 0 ? 0 : i.totalCost / Math.max(i.qty,1);
+    totalValue += i.qty * avg;
+  });
+
+  return {stock,totalValue};
+}
+
+function loadDashboard(){
+  const sales = getSales();
+  const purchases = getPurchases();
+  const expenses = getExpenses();
+
+  const totalSales = sales.reduce((s,i)=>s + Number(i.grandTotal || 0),0);
+  const totalPurchase = purchases.reduce((s,i)=>s + Number(i.grandTotal || 0),0);
+  const totalExpenses = expenses.reduce((s,i)=>s + Number(i.grandTotal || 0),0);
+  const estimatedProfit = totalSales - totalPurchase - totalExpenses;
+
+  const receivables = sales.reduce((s,i)=>{
+    return s + (Number(i.grandTotal || 0) - Number(i.receivedAmount || 0));
+  },0);
+
+  const payables = purchases.reduce((s,i)=>{
+    return s + (Number(i.grandTotal || 0) - Number(i.paidAmount || 0));
+  },0);
+
+  const vatSales = sales.reduce((s,i)=>s + Number(i.vatAmount || 0),0);
+  const vatPurchase = purchases.reduce((s,i)=>s + Number(i.vatAmount || 0),0);
+  const vatExpenses = expenses.reduce((s,i)=>s + Number(i.vatAmount || 0),0);
+  const netVat = vatSales - vatPurchase - vatExpenses;
+
+  const inventory = calculateInventory();
+
+  document.getElementById("totalSales").textContent = money(totalSales);
+  document.getElementById("totalPurchase").textContent = money(totalPurchase);
+  document.getElementById("totalExpenses").textContent = money(totalExpenses);
+  document.getElementById("estimatedProfit").textContent = money(estimatedProfit);
+  document.getElementById("receivables").textContent = money(receivables);
+  document.getElementById("payables").textContent = money(payables);
+  document.getElementById("inventoryValue").textContent = money(inventory.totalValue);
+  document.getElementById("vatPosition").textContent = money(netVat);
+
+  loadSalesTable(sales);
+  loadLowStock(inventory.stock);
+  loadHealth(totalSales, receivables, inventory.totalValue, totalExpenses);
+}
+
+function loadSalesTable(sales){
+  const tbody = document.getElementById("salesTable");
+  tbody.innerHTML = "";
+
+  const latest = sales.slice().reverse().slice(0,8);
+
+  if(latest.length === 0){
+    tbody.innerHTML = `<tr><td colspan="4">No sales invoices yet.</td></tr>`;
+    return;
+  }
+
+  latest.forEach(s=>{
+    const cls = s.paymentStatus === "Paid" ? "paid" : "pending";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${s.invoiceNo || "-"}</td>
+      <td>${s.customerName || "-"}</td>
+      <td>${money(s.grandTotal)}</td>
+      <td><span class="status ${cls}">${s.paymentStatus || "Unpaid"}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function loadLowStock(stock){
+  const tbody = document.getElementById("stockTable");
+  tbody.innerHTML = "";
+
+  const low = Object.entries(stock).filter(([k,v])=>v.qty <= 5).slice(0,8);
+
+  if(low.length === 0){
+    tbody.innerHTML = `<tr><td colspan="3">No low stock items.</td></tr>`;
+    return;
+  }
+
+  low.forEach(([name,data])=>{
+    const cls = data.qty <= 0 ? "cancelled" : "pending";
+    const label = data.qty <= 0 ? "Out" : "Low";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${name}</td>
+      <td>${Number(data.qty || 0).toFixed(3)}</td>
+      <td><span class="status ${cls}">${label}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function loadHealth(sales, receivables, inventory, expenses){
+  const collection = sales <= 0 ? 0 : ((sales - receivables) / sales) * 100;
+  const expenseRatio = sales <= 0 ? 0 : (expenses / sales) * 100;
+  const inventoryRatio = sales <= 0 ? 0 : (inventory / sales) * 100;
+
+  document.getElementById("collectionBar").style.width = Math.min(collection,100) + "%";
+  document.getElementById("expenseBar").style.width = Math.min(expenseRatio,100) + "%";
+  document.getElementById("inventoryBar").style.width = Math.min(inventoryRatio,100) + "%";
+
+  document.getElementById("collectionText").textContent = collection.toFixed(1) + "% collected";
+  document.getElementById("expenseText").textContent = expenseRatio.toFixed(1) + "% expense ratio";
+  document.getElementById("inventoryText").textContent = inventoryRatio.toFixed(1) + "% inventory ratio";
+}
+
+loadProfile();
+loadDashboard();
+</script>
+
+</body>
+</html>

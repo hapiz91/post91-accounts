@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Users & Roles | Post91 Accounts</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
+body{background:#eef3f8;color:#061833;padding:28px;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.header h1{font-size:34px}.header p{color:#64748b;margin-top:6px}
+.back{background:white;color:#0d6efd;text-decoration:none;padding:12px 16px;border-radius:13px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);}
+.card{background:white;border-radius:22px;padding:26px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:22px;}
+.note{background:#e0f2fe;border:1px solid #bae6fd;color:#075985;padding:16px;border-radius:16px;margin-bottom:18px;line-height:1.6;font-weight:700;}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+label{display:block;margin-bottom:7px;font-weight:800;}
+input,select,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #dbe4f0;font-size:15px;}
+textarea{min-height:80px;resize:vertical;}
+.full{grid-column:1/-1;}
+.btn{border:none;background:#0d6efd;color:white;padding:13px 19px;border-radius:13px;font-weight:900;cursor:pointer;}
+.btn-light{background:#e2e8f0;color:#0f172a;margin-left:8px;}
+.permission-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:10px;}
+.permission{background:#f8fbff;border:1px solid #e5edf7;border-radius:14px;padding:12px;font-weight:800;}
+.permission input{width:auto;margin-right:8px;}
+table{width:100%;border-collapse:collapse;margin-top:15px;}
+th{text-align:left;color:#64748b;padding:12px;border-bottom:1px solid #e5edf7;font-size:14px;}
+td{padding:12px;border-bottom:1px solid #eef2f7;font-weight:700;vertical-align:top;}
+.badge{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:900;display:inline-block;}
+.active{background:#dcfce7;color:#166534;}
+.inactive{background:#fee2e2;color:#991b1b;}
+.role{background:#dbeafe;color:#1d4ed8;}
+.action-btn{border:none;padding:8px 12px;border-radius:10px;font-weight:900;cursor:pointer;margin-right:6px;}
+.edit{background:#dbeafe;color:#1d4ed8;}
+.delete{background:#fee2e2;color:#991b1b;}
+.small{font-size:13px;color:#64748b;font-weight:700;margin-top:4px;}
+@media(max-width:1000px){.grid,.permission-grid{grid-template-columns:1fr 1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
+@media(max-width:650px){.grid,.permission-grid{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Users & Roles</h1>
+    <p>Create users and assign role-based module access for Post91 Accounts.</p>
+  </div>
+  <a href="/dashboard.html" class="back">Back to Dashboard</a>
+</div>
+
+<div class="note">
+  This is MVP-level user creation using browser storage. Later we will connect it with real login, password hashing, sessions and database permissions.
+</div>
+
+<div class="card">
+  <h2 style="color:#0d6efd;margin-bottom:18px;">Create / Edit User</h2>
+
+  <form id="userForm">
+    <input type="hidden" id="editIndex">
+
+    <div class="grid">
+      <div>
+        <label>Full Name *</label>
+        <input type="text" id="fullName" required placeholder="User full name">
+      </div>
+
+      <div>
+        <label>Email / Username *</label>
+        <input type="text" id="username" required placeholder="login username or email">
+      </div>
+
+      <div>
+        <label>Mobile</label>
+        <input type="text" id="mobile" placeholder="+968 XXXXXXXX">
+      </div>
+
+      <div>
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Temporary password">
+      </div>
+
+      <div>
+        <label>Role</label>
+        <select id="role" onchange="applyRolePermissions()">
+          <option>Admin</option>
+          <option>Manager</option>
+          <option>Accountant</option>
+          <option>Salesman</option>
+          <option>Cashier</option>
+          <option>Store Keeper</option>
+          <option>Viewer</option>
+          <option>Custom</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Status</label>
+        <select id="status">
+          <option>Active</option>
+          <option>Inactive</option>
+        </select>
+      </div>
+
+      <div class="full">
+        <label>Remarks</label>
+        <textarea id="remarks" placeholder="Internal remarks"></textarea>
+      </div>
+    </div>
+
+    <h3 style="margin-top:22px;color:#0d6efd;">Module Permissions</h3>
+
+    <div class="permission-grid" id="permissionGrid"></div>
+
+    <br>
+    <button class="btn" type="submit">Save User</button>
+    <button class="btn btn-light" type="button" onclick="resetForm()">Clear</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2 style="color:#0d6efd;margin-bottom:18px;">Saved Users</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Login</th>
+        <th>Role</th>
+        <th>Permissions</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="userTable"></tbody>
+  </table>
+</div>
+
+<script>
+const modules = [
+  "Dashboard",
+  "Customers",
+  "Suppliers",
+  "Items",
+  "Banks",
+  "Quotation",
+  "Delivery Order",
+  "Sales Invoice",
+  "Customer Receipts",
+  "Purchase Invoice",
+  "Supplier Payments",
+  "Expenses",
+  "Cash & Bank Book",
+  "VAT Report",
+  "Reports Center",
+  "Customer SOA",
+  "Supplier SOA",
+  "Profit & Loss",
+  "Stock Ledger",
+  "Business Profile",
+  "Settings",
+  "Backup & Restore",
+  "Users"
+];
+
+const rolePermissions = {
+  "Admin": modules,
+  "Manager": modules.filter(m => !["Backup & Restore","Users"].includes(m)),
+  "Accountant": [
+    "Dashboard","Customers","Suppliers","Banks","Sales Invoice","Customer Receipts",
+    "Purchase Invoice","Supplier Payments","Expenses","Cash & Bank Book",
+    "VAT Report","Reports Center","Customer SOA","Supplier SOA","Profit & Loss"
+  ],
+  "Salesman": [
+    "Dashboard","Customers","Items","Quotation","Delivery Order","Sales Invoice","Customer SOA"
+  ],
+  "Cashier": [
+    "Dashboard","Customer Receipts","Supplier Payments","Expenses","Cash & Bank Book"
+  ],
+  "Store Keeper": [
+    "Dashboard","Items","Purchase Invoice","Delivery Order","Stock Ledger"
+  ],
+  "Viewer": [
+    "Dashboard","Reports Center","VAT Report","Customer SOA","Supplier SOA","Profit & Loss","Stock Ledger"
+  ],
+  "Custom": []
+};
+
+function getUsers(){
+  return JSON.parse(localStorage.getItem("post91Users") || "[]");
+}
+
+function saveUsers(data){
+  localStorage.setItem("post91Users", JSON.stringify(data));
+}
+
+function renderPermissions(){
+  const grid = document.getElementById("permissionGrid");
+  grid.innerHTML = "";
+
+  modules.forEach(module=>{
+    const div = document.createElement("label");
+    div.className = "permission";
+    div.innerHTML = `
+      <input type="checkbox" class="permCheck" value="${module}">
+      ${module}
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function applyRolePermissions(){
+  const role = document.getElementById("role").value;
+  const allowed = rolePermissions[role] || [];
+
+  document.querySelectorAll(".permCheck").forEach(chk=>{
+    chk.checked = allowed.includes(chk.value);
+  });
+}
+
+function selectedPermissions(){
+  return Array.from(document.querySelectorAll(".permCheck:checked")).map(c=>c.value);
+}
+
+document.getElementById("userForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  const users = getUsers();
+  const editIndex = document.getElementById("editIndex").value;
+
+  const user = {
+    fullName: document.getElementById("fullName").value,
+    username: document.getElementById("username").value,
+    mobile: document.getElementById("mobile").value,
+    password: document.getElementById("password").value,
+    role: document.getElementById("role").value,
+    status: document.getElementById("status").value,
+    remarks: document.getElementById("remarks").value,
+    permissions: selectedPermissions(),
+    createdAt: new Date().toISOString()
+  };
+
+  if(editIndex === ""){
+    users.push(user);
+    alert("User saved successfully.");
+  } else {
+    users[editIndex] = user;
+    alert("User updated successfully.");
+  }
+
+  saveUsers(users);
+  resetForm();
+  loadUsers();
+});
+
+function loadUsers(){
+  const users = getUsers();
+  const tbody = document.getElementById("userTable");
+  tbody.innerHTML = "";
+
+  users.forEach((u,index)=>{
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>
+        ${u.fullName || "-"}
+        <div class="small">${u.mobile || ""}</div>
+      </td>
+      <td>${u.username || "-"}</td>
+      <td><span class="badge role">${u.role || "-"}</span></td>
+      <td>
+        ${(u.permissions || []).slice(0,5).join(", ")}
+        ${(u.permissions || []).length > 5 ? `<div class="small">+ ${(u.permissions || []).length - 5} more</div>` : ""}
+      </td>
+      <td><span class="badge ${u.status === "Active" ? "active" : "inactive"}">${u.status}</span></td>
+      <td>
+        <button class="action-btn edit" onclick="editUser(${index})">Edit</button>
+        <button class="action-btn delete" onclick="deleteUser(${index})">Delete</button>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  if(users.length === 0){
+    tbody.innerHTML = `<tr><td colspan="6">No users created yet.</td></tr>`;
+  }
+}
+
+function editUser(index){
+  const u = getUsers()[index];
+
+  document.getElementById("editIndex").value = index;
+  document.getElementById("fullName").value = u.fullName || "";
+  document.getElementById("username").value = u.username || "";
+  document.getElementById("mobile").value = u.mobile || "";
+  document.getElementById("password").value = u.password || "";
+  document.getElementById("role").value = u.role || "Viewer";
+  document.getElementById("status").value = u.status || "Active";
+  document.getElementById("remarks").value = u.remarks || "";
+
+  document.querySelectorAll(".permCheck").forEach(chk=>{
+    chk.checked = (u.permissions || []).includes(chk.value);
+  });
+
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function deleteUser(index){
+  if(confirm("Delete this user?")){
+    const users = getUsers();
+    users.splice(index,1);
+    saveUsers(users);
+    loadUsers();
+  }
+}
+
+function resetForm(){
+  document.getElementById("userForm").reset();
+  document.getElementById("editIndex").value = "";
+  document.getElementById("role").value = "Admin";
+  applyRolePermissions();
+}
+
+renderPermissions();
+resetForm();
+loadUsers();
+</script>
+
+</body>
+</html>
