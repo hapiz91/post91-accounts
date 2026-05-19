@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Receipt Voucher | Post91 Accounts</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:20px}
+.header h1{margin:0;color:#0d6efd}
+.back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.full{grid-column:1/-1}
+label{display:block;font-weight:800;margin-bottom:6px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
+textarea{min-height:80px}
+.btn{border:0;background:#0d6efd;color:white;padding:11px 15px;border-radius:11px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-danger{background:#ef4444}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #dbe4f0;padding:8px;vertical-align:top}
+th{background:#f8fbff;text-align:left}
+.total-box{max-width:520px;margin-left:auto;background:#f8fbff;border:1px solid #dbe4f0;border-radius:15px;padding:14px;margin-top:16px}
+.total-row{display:flex;justify-content:space-between;border-bottom:1px solid #dbe4f0;padding:8px 0;font-weight:900}
+.total-row:last-child{border-bottom:0}
+.grand{font-size:20px;color:#0d6efd}
+.warning{color:#b45309}
+.good{color:#166534}
+.badge{padding:6px 11px;border-radius:99px;font-size:12px;font-weight:900}
+.draft{background:#fef3c7;color:#92400e}
+.posted{background:#dcfce7;color:#166534}
+.cancelled{background:#fee2e2;color:#991b1b}
+.search{position:relative}
+.panel{display:none;position:absolute;left:0;right:0;top:100%;background:white;border:1px solid #dbe4f0;border-radius:12px;box-shadow:0 15px 35px #0002;z-index:10;max-height:260px;overflow:auto}
+.panel.show{display:block}
+.opt{padding:11px;border-bottom:1px solid #eef2f7;cursor:pointer}
+.opt:hover{background:#f8fbff}
+.opt b{display:block}
+.opt span{font-size:12px;color:#64748b}
+.small{font-size:12px;color:#64748b}
+@media(max-width:900px){.grid{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Receipt Voucher</h1>
+    <p>Record one customer payment against single or multiple sales invoices.</p>
+  </div>
+  <a class="back" href="/dashboard.html">Back</a>
+</div>
+
+<div class="note">
+  Use <b>Against Sales Invoice</b> to allocate one payment to multiple invoices. Any excess amount will be treated as unallocated/advance.
+</div>
+
+<form id="docForm" onsubmit="saveDoc(event)">
+
+<div class="grid">
+  <div class="card">
+    <h2>Customer Details</h2>
+
+    <div class="grid">
+      <div class="full">
+        <label>Customer Name *</label>
+        <div class="search">
+          <input id="customerName" onfocus="customerSearch()" oninput="customerSearch()" placeholder="Search customer">
+          <div id="customerPanel" class="panel"></div>
+        </div>
+      </div>
+
+      <div class="full">
+        <label>Address</label>
+        <textarea id="customerAddress"></textarea>
+      </div>
+
+      <div>
+        <label>Attention</label>
+        <input id="attention">
+      </div>
+
+      <div>
+        <label>Mobile</label>
+        <input id="mobile">
+      </div>
+
+      <div>
+        <label>Email</label>
+        <input id="email">
+      </div>
+
+      <div>
+        <label>VAT IN No</label>
+        <input id="customerVatNo">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Receipt Details</h2>
+
+    <div class="grid">
+      <div>
+        <label>Receipt No</label>
+        <input id="receiptNo">
+      </div>
+
+      <div>
+        <label>Receipt Date</label>
+        <input type="date" id="receiptDate">
+      </div>
+
+      <div>
+        <label>Receipt Type</label>
+        <select id="receiptType" onchange="receiptTypeChanged()">
+          <option>Against Sales Invoice</option>
+          <option>Advance Receipt</option>
+          <option>Other Receipt</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Payment Mode</label>
+        <select id="paymentMode">
+          <option>Cash</option>
+          <option>Bank Transfer</option>
+          <option>Cheque</option>
+          <option>Card</option>
+          <option>Online Payment</option>
+          <option>Other</option>
+        </select>
+      </div>
+<div>
+  <label>Cash / Bank Account</label>
+  <select id="cashBankAccount"></select>
+</div>
+
+      <div>
+        <label>Reference / Transaction No</label>
+        <input id="paymentReference" placeholder="Bank ref / cheque no / card ref">
+      </div>
+
+      <div>
+        <label>Status</label>
+        <select id="docStatus">
+          <option>Posted</option>
+          <option>Draft</option>
+          <option>Cancelled</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Total Receipt Amount *</label>
+        <input type="number" step=".001" id="totalReceiptAmount" value="0.000" oninput="recalculateAllocation()">
+      </div>
+
+      <div>
+        <label>Manual / Advance Against</label>
+        <input id="manualAgainst" placeholder="For advance or other receipt">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="invoiceAllocationCard">
+  <h2>Invoice Allocation</h2>
+
+  <div class="btn-row">
+    <button type="button" class="btn btn-light" onclick="loadOpenInvoices()">Load Open Invoices</button>
+    <button type="button" class="btn btn-light" onclick="autoAllocate()">Auto Allocate Amount</button>
+    <button type="button" class="btn btn-light" onclick="clearAllocations()">Clear Allocation</button>
+  </div>
+
+  <br>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:45px;">Use</th>
+        <th>Invoice No</th>
+        <th>Date</th>
+        <th>Invoice Total</th>
+        <th>Previous Received</th>
+        <th>Balance Before</th>
+        <th>Amount Received</th>
+        <th>Balance After</th>
+      </tr>
+    </thead>
+    <tbody id="allocationBody"></tbody>
+  </table>
+
+  <div class="total-box">
+    <div class="total-row"><span>Total Receipt Amount</span><span id="receiptAmountText">OMR 0.000</span></div>
+    <div class="total-row"><span>Total Allocated</span><span id="allocatedText">OMR 0.000</span></div>
+    <div class="total-row"><span>Unallocated / Advance</span><span id="unallocatedText" class="warning">OMR 0.000</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Remarks</h2>
+
+  <textarea id="remarks" placeholder="Receipt remarks / narration"></textarea>
+
+  <div class="btn-row">
+    <button class="btn">Save Receipt Voucher</button>
+    <button type="button" class="btn btn-light" onclick="setDefaults()">Clear</button>
+  </div>
+</div>
+
+</form>
+
+<div class="card">
+  <h2>Saved Receipt Vouchers</h2>
+
+  <input id="savedSearch" placeholder="Search receipts..." oninput="loadSaved()">
+  <br><br>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Receipt No</th>
+        <th>Date</th>
+        <th>Customer</th>
+        <th>Type</th>
+        <th>Amount</th>
+        <th>Allocated</th>
+        <th>Advance</th>
+        <th>Status</th>
+        <th style="width:180px;">Action</th>
+      </tr>
+    </thead>
+    <tbody id="savedBody"></tbody>
+  </table>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="/firebase-config.js"></script>
+<script src="/data-sync.js"></script>
+<script>
+const STORE="post91ReceiptVouchers";
+let EDIT="";
+
+function gd(k){return JSON.parse(localStorage.getItem(k)||"[]")}
+function sd(k,d){localStorage.setItem(k,JSON.stringify(d))}
+function today(){return new Date().toISOString().split("T")[0]}
+function mv(n){return Number(n||0).toFixed(3)}
+function mt(n){return "OMR "+mv(n)}
+
+function loadCashBankAccounts(){
+  cashBankAccount.innerHTML = `<option value="">Select Cash / Bank Account</option>`;
+
+  gd("post91CashBankAccounts")
+    .filter(a => (a.status || "Active") === "Active")
+    .forEach((a,i)=>{
+      let o = document.createElement("option");
+      o.value = i;
+      o.textContent = `${a.accountName || a.name || "-"} (${a.accountType || "Bank"})`;
+      cashBankAccount.appendChild(o);
+    });
+}
+
+function selectedCashBank(){
+  let accounts = gd("post91CashBankAccounts");
+  let idx = cashBankAccount.value;
+
+  if(idx === "") return {};
+
+  return accounts[idx] || {};
+}
+
+function customerSearch(){
+  let q=customerName.value.toLowerCase();
+
+  let list=gd("post91Customers")
+    .filter(c=>JSON.stringify(c).toLowerCase().includes(q))
+    .slice(0,40);
+
+  customerPanel.innerHTML=list.map((c,i)=>`
+    <div class="opt" data-i="${i}">
+      <b>${c.customerName||c.name||"-"}</b>
+      <span>${c.mobile||c.phone||""} ${c.email||""}</span>
+    </div>
+  `).join("") || `<div class="opt">No customer found</div>`;
+
+  customerPanel.classList.add("show");
+
+  [...customerPanel.querySelectorAll("[data-i]")].forEach((e,i)=>{
+    e.onclick=()=>{
+      let c=list[i];
+
+      customerName.value=c.customerName||c.name||"";
+      customerAddress.value=c.address||c.customerAddress||"";
+      attention.value=c.contactPerson||c.attention||c.contactName||"";
+      mobile.value=c.mobile||c.phone||"";
+      email.value=c.email||"";
+      customerVatNo.value=c.vatNumber||"";
+
+      customerPanel.classList.remove("show");
+      loadOpenInvoices();
+    };
+  });
+}
+
+function receiptTypeChanged(){
+  if(receiptType.value==="Against Sales Invoice"){
+    invoiceAllocationCard.style.display="block";
+    loadOpenInvoices();
+  }else{
+    invoiceAllocationCard.style.display="none";
+    allocationBody.innerHTML="";
+    recalculateAllocation();
+  }
+}
+
+function getInvoiceReceived(invoiceNo, excludeReceiptIndex=""){
+  if(!invoiceNo)return 0;
+
+  let receipts=gd(STORE);
+  let total=0;
+
+  receipts.forEach((r,i)=>{
+    if(String(i)===String(excludeReceiptIndex))return;
+    if((r.docStatus||"Posted")==="Cancelled")return;
+
+    (r.allocations||[]).forEach(a=>{
+      if(a.invoiceNo===invoiceNo){
+        total+=Number(a.amountReceived||0);
+      }
+    });
+  });
+
+  return total;
+}
+
+function getInvoiceBalance(inv){
+  let total=Number(inv.grandTotal||0);
+  let received=getInvoiceReceived(inv.invoiceNo, EDIT);
+  return Math.max(total-received,0);
+}
+
+function loadOpenInvoices(){
+  allocationBody.innerHTML="";
+
+  if(receiptType.value!=="Against Sales Invoice")return;
+
+  let customer=(customerName.value||"").toLowerCase();
+  let invoices=gd("post91SalesInvoices");
+
+  invoices.forEach(inv=>{
+    if(customer && (inv.customerName||"").toLowerCase()!==customer)return;
+
+    let prev=getInvoiceReceived(inv.invoiceNo, EDIT);
+    let total=Number(inv.grandTotal||0);
+    let bal=Math.max(total-prev,0);
+
+    if(bal<=0)return;
+
+    let tr=document.createElement("tr");
+
+    tr.innerHTML=`
+      <td style="text-align:center;">
+        <input type="checkbox" class="useInv" onchange="rowUseChanged(this)">
+      </td>
+      <td class="invNo">${inv.invoiceNo||""}</td>
+      <td class="invDate">${inv.invoiceDate||""}</td>
+      <td class="invTotal">${mv(total)}</td>
+      <td class="prevReceived">${mv(prev)}</td>
+      <td class="balanceBefore">${mv(bal)}</td>
+      <td>
+        <input type="number" step=".001" class="allocAmount" value="0.000" oninput="manualAllocateChanged(this)">
+      </td>
+      <td class="balanceAfter">${mv(bal)}</td>
+    `;
+
+    allocationBody.appendChild(tr);
+  });
+
+  recalculateAllocation();
+}
+
+function rowUseChanged(chk){
+  let row=chk.closest("tr");
+  let amount=row.querySelector(".allocAmount");
+
+  if(!chk.checked){
+    amount.value="0.000";
+  }
+
+  recalculateAllocation();
+}
+
+function manualAllocateChanged(inp){
+  let row=inp.closest("tr");
+  let chk=row.querySelector(".useInv");
+  let bal=Number(row.querySelector(".balanceBefore").textContent||0);
+  let val=Number(inp.value||0);
+
+  if(val>0)chk.checked=true;
+
+  if(val>bal){
+    inp.value=mv(bal);
+  }
+
+  recalculateAllocation();
+}
+
+function autoAllocate(){
+  let remaining=Number(totalReceiptAmount.value||0);
+
+  document.querySelectorAll("#allocationBody tr").forEach(row=>{
+    let chk=row.querySelector(".useInv");
+    let amount=row.querySelector(".allocAmount");
+    let bal=Number(row.querySelector(".balanceBefore").textContent||0);
+
+    if(remaining>0){
+      let alloc=Math.min(remaining,bal);
+      amount.value=mv(alloc);
+      chk.checked=alloc>0;
+      remaining-=alloc;
+    }else{
+      amount.value="0.000";
+      chk.checked=false;
+    }
+  });
+
+  recalculateAllocation();
+}
+
+function clearAllocations(){
+  document.querySelectorAll("#allocationBody tr").forEach(row=>{
+    row.querySelector(".useInv").checked=false;
+    row.querySelector(".allocAmount").value="0.000";
+    row.querySelector(".balanceAfter").textContent=row.querySelector(".balanceBefore").textContent;
+  });
+
+  recalculateAllocation();
+}
+
+function recalculateAllocation(){
+  let receiptAmount=Number(totalReceiptAmount.value||0);
+  let allocated=0;
+
+  document.querySelectorAll("#allocationBody tr").forEach(row=>{
+    let bal=Number(row.querySelector(".balanceBefore").textContent||0);
+    let amount=Number(row.querySelector(".allocAmount").value||0);
+
+    if(amount>bal){
+      amount=bal;
+      row.querySelector(".allocAmount").value=mv(amount);
+    }
+
+    if(amount<0){
+      amount=0;
+      row.querySelector(".allocAmount").value="0.000";
+    }
+
+    row.querySelector(".balanceAfter").textContent=mv(Math.max(bal-amount,0));
+
+    if(amount>0){
+      row.querySelector(".useInv").checked=true;
+      allocated+=amount;
+    }
+  });
+
+  let unallocated=Math.max(receiptAmount-allocated,0);
+
+  receiptAmountText.textContent=mt(receiptAmount);
+  allocatedText.textContent=mt(allocated);
+  unallocatedText.textContent=mt(unallocated);
+
+  if(unallocated>0){
+    unallocatedText.className="warning";
+  }else{
+    unallocatedText.className="good";
+  }
+}
+
+function collectAllocations(){
+  let allocations=[];
+
+  document.querySelectorAll("#allocationBody tr").forEach(row=>{
+    let amount=Number(row.querySelector(".allocAmount").value||0);
+
+    if(amount>0){
+      allocations.push({
+        invoiceNo:row.querySelector(".invNo").textContent,
+        invoiceDate:row.querySelector(".invDate").textContent,
+        invoiceTotal:row.querySelector(".invTotal").textContent,
+        previousReceived:row.querySelector(".prevReceived").textContent,
+        balanceBefore:row.querySelector(".balanceBefore").textContent,
+        amountReceived:mv(amount),
+        balanceAfter:row.querySelector(".balanceAfter").textContent
+      });
+    }
+  });
+
+  return allocations;
+}
+
+function saveDoc(e){
+  e.preventDefault();
+
+  if(!customerName.value.trim()){
+    alert("Customer name is required.");
+    return;
+  }
+
+  let receiptAmount=Number(totalReceiptAmount.value||0);
+
+  if(receiptAmount<=0){
+    alert("Receipt amount should be greater than zero.");
+    return;
+  }
+
+  let allocations=[];
+
+  if(receiptType.value==="Against Sales Invoice"){
+    allocations=collectAllocations();
+
+    if(allocations.length===0){
+      alert("Please allocate amount to at least one invoice.");
+      return;
+    }
+  }
+
+  let allocatedAmount=allocations.reduce((s,a)=>s+Number(a.amountReceived||0),0);
+  let unallocatedAmount=Math.max(receiptAmount-allocatedAmount,0);
+
+  let list=gd(STORE);
+
+let acc = selectedCashBank();  
+let rec={
+    receiptNo:receiptNo.value,
+    receiptDate:receiptDate.value,
+
+    customerName:customerName.value,
+    customerAddress:customerAddress.value,
+    attention:attention.value,
+    mobile:mobile.value,
+    email:email.value,
+    customerVatNo:customerVatNo.value,
+
+    receiptType:receiptType.value,
+    paymentMode:paymentMode.value,
+    cashBankAccountIndex:cashBankAccount.value,
+    cashBankAccountName:acc.accountName || acc.name || "",
+    cashBankAccountType:acc.accountType || "",
+    paymentReference:paymentReference.value,
+    docStatus:docStatus.value,
+
+    totalReceiptAmount:mv(receiptAmount),
+    allocatedAmount:mv(allocatedAmount),
+    unallocatedAmount:mv(unallocatedAmount),
+
+    manualAgainst:manualAgainst.value,
+    allocations:allocations,
+    remarks:remarks.value,
+
+    updatedAt:new Date().toISOString()
+  };
+
+  let oldInvoices=[];
+
+  if(EDIT!==""){
+    oldInvoices=(list[EDIT].allocations||[]).map(a=>a.invoiceNo);
+  }
+
+  if(EDIT===""){
+    rec.createdAt=new Date().toISOString();
+    list.push(rec);
+    alert("Receipt Voucher saved.");
+  }else{
+    rec.createdAt=list[EDIT].createdAt||new Date().toISOString();
+    list[EDIT]={...list[EDIT],...rec};
+    alert("Receipt Voucher updated.");
+  }
+
+  sd(STORE,list);
+
+  let affected=[...new Set([...oldInvoices,...allocations.map(a=>a.invoiceNo)])];
+  affected.forEach(invNo=>updateInvoicePaymentStatus(invNo));
+
+  EDIT="";
+  setDefaults();
+  loadSaved();
+}
+
+function updateInvoicePaymentStatus(invoiceNo){
+  if(!invoiceNo)return;
+
+  let invoices=gd("post91SalesInvoices");
+  let idx=invoices.findIndex(x=>x.invoiceNo===invoiceNo);
+
+  if(idx<0)return;
+
+  let total=Number(invoices[idx].grandTotal||0);
+  let received=getInvoiceReceived(invoiceNo);
+
+  if(received<=0){
+    invoices[idx].paymentStatus="Unpaid";
+  }else if(received>=total){
+    invoices[idx].paymentStatus="Paid";
+  }else{
+    invoices[idx].paymentStatus="Partial";
+  }
+
+  invoices[idx].amountReceived=mv(received);
+  invoices[idx].balanceAmount=mv(Math.max(total-received,0));
+
+  sd("post91SalesInvoices",invoices);
+}
+
+function badge(s){
+  let cls="draft";
+  if(s==="Posted")cls="posted";
+  if(s==="Cancelled")cls="cancelled";
+  return `<span class="badge ${cls}">${s||"Draft"}</span>`;
+}
+
+function loadSaved(){
+  let q=(savedSearch.value||"").toLowerCase();
+  savedBody.innerHTML="";
+
+  gd(STORE).forEach((r,i)=>{
+    if(q && !JSON.stringify(r).toLowerCase().includes(q))return;
+
+    let tr=document.createElement("tr");
+
+    tr.innerHTML=`
+      <td>${r.receiptNo||"-"}</td>
+      <td>${r.receiptDate||"-"}</td>
+      <td>${r.customerName||"-"}</td>
+      <td>${r.receiptType||"-"}</td>
+      <td>${mt(r.totalReceiptAmount)}</td>
+      <td>${mt(r.allocatedAmount)}</td>
+      <td>${mt(r.unallocatedAmount)}</td>
+      <td>${badge(r.docStatus)}</td>
+      <td>
+        <button class="btn btn-light" onclick="editDoc(${i})">Edit</button>
+        <button class="btn btn-danger" onclick="delDoc(${i})">Delete</button>
+      </td>
+    `;
+
+    savedBody.appendChild(tr);
+  });
+}
+
+function editDoc(i){
+  let r=gd(STORE)[i];
+  EDIT=i;
+
+  receiptNo.value=r.receiptNo||"";
+  receiptDate.value=r.receiptDate||today();
+
+  customerName.value=r.customerName||"";
+  customerAddress.value=r.customerAddress||"";
+  attention.value=r.attention||"";
+  mobile.value=r.mobile||"";
+  email.value=r.email||"";
+  customerVatNo.value=r.customerVatNo||"";
+
+  receiptType.value=r.receiptType||"Against Sales Invoice";
+  paymentMode.value=r.paymentMode||"Cash";
+  cashBankAccount.value = r.cashBankAccountIndex || "";
+  paymentReference.value=r.paymentReference||"";
+  docStatus.value=r.docStatus||"Posted";
+  totalReceiptAmount.value=r.totalReceiptAmount||"0.000";
+  manualAgainst.value=r.manualAgainst||"";
+  remarks.value=r.remarks||"";
+
+  receiptTypeChanged();
+
+  if(receiptType.value==="Against Sales Invoice"){
+    loadOpenInvoices();
+
+    (r.allocations||[]).forEach(a=>{
+      [...document.querySelectorAll("#allocationBody tr")].forEach(row=>{
+        if(row.querySelector(".invNo").textContent===a.invoiceNo){
+          row.querySelector(".useInv").checked=true;
+          row.querySelector(".allocAmount").value=mv(a.amountReceived);
+        }
+      });
+    });
+  }
+
+  recalculateAllocation();
+  scrollTo({top:0,behavior:"smooth"});
+}
+
+function delDoc(i){
+  if(!confirm("Delete this receipt voucher?"))return;
+
+  let list=gd(STORE);
+  let affected=(list[i].allocations||[]).map(a=>a.invoiceNo);
+
+  list.splice(i,1);
+  sd(STORE,list);
+
+  affected.forEach(invNo=>updateInvoicePaymentStatus(invNo));
+  loadSaved();
+}
+
+function setDefaults(){
+  EDIT="";
+  docForm.reset();
+
+  receiptNo.value="RV-"+(1001+gd(STORE).length);
+  receiptDate.value=today();
+  receiptType.value="Against Sales Invoice";
+  paymentMode.value="Cash";
+  cashBankAccount.value="";
+  docStatus.value="Posted";
+  totalReceiptAmount.value="0.000";
+
+  allocationBody.innerHTML="";
+  receiptTypeChanged();
+  recalculateAllocation();
+}
+
+document.addEventListener("click",e=>{
+  document.querySelectorAll(".panel").forEach(p=>{
+    if(!p.parentElement.contains(e.target)){
+      p.classList.remove("show");
+    }
+  });
+});
+
+loadCashBankAccounts();
+setDefaults();
+loadSaved();
+</script>
+
+</body>
+</html>

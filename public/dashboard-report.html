@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Report | Post91 Accounts</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.header h1{margin:0;color:#0d6efd}
+.back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:20px;box-shadow:0 14px 34px #0001}
+.card b{display:block;font-size:13px;color:#64748b}
+.card span{font-size:24px;font-weight:900;color:#0d6efd}
+.section{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:20px;margin-top:20px;box-shadow:0 14px 34px #0001}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #dbe4f0;padding:8px;vertical-align:top}
+th{background:#f8fbff;text-align:left}
+.btn{border:0;background:#0d6efd;color:white;padding:11px 15px;border-radius:11px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+.good{color:#166534;font-weight:900}
+.bad{color:#b91c1c;font-weight:900}
+.warn{color:#b45309;font-weight:900}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.grid{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Dashboard Report</h1>
+    <p>Sales, purchase, receipt, payment, expense, stock and cash/bank overview.</p>
+  </div>
+  <a class="back" href="/dashboard.html">Back</a>
+</div>
+
+<div class="note">
+  This dashboard is generated from all saved transaction data in localStorage.
+</div>
+
+<div class="btn-row">
+  <button class="btn" onclick="generateDashboard()">Refresh Dashboard</button>
+</div>
+
+<br>
+
+<div class="grid">
+  <div class="card"><b>Total Sales</b><span id="totalSales">OMR 0.000</span></div>
+  <div class="card"><b>Total Receipts</b><span id="totalReceipts">OMR 0.000</span></div>
+  <div class="card"><b>Receivable Balance</b><span id="receivableBalance">OMR 0.000</span></div>
+  <div class="card"><b>Sales Count</b><span id="salesCount">0</span></div>
+
+  <div class="card"><b>Total Purchases</b><span id="totalPurchases">OMR 0.000</span></div>
+  <div class="card"><b>Total Payments</b><span id="totalPayments">OMR 0.000</span></div>
+  <div class="card"><b>Payable Balance</b><span id="payableBalance">OMR 0.000</span></div>
+  <div class="card"><b>Purchase Count</b><span id="purchaseCount">0</span></div>
+
+  <div class="card"><b>Total Expenses</b><span id="totalExpenses">OMR 0.000</span></div>
+  <div class="card"><b>Cash / Bank Balance</b><span id="cashBankBalance">OMR 0.000</span></div>
+  <div class="card"><b>Stock In Qty</b><span id="stockInQty">0.000</span></div>
+  <div class="card"><b>Stock Out Qty</b><span id="stockOutQty">0.000</span></div>
+</div>
+
+<div class="section">
+  <h2>Recent Sales Invoices</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Invoice No</th>
+        <th>Date</th>
+        <th>Customer</th>
+        <th>Total</th>
+        <th>Payment</th>
+      </tr>
+    </thead>
+    <tbody id="recentSalesBody"></tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h2>Outstanding Customers</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Customer</th>
+        <th>Sales</th>
+        <th>Receipts</th>
+        <th>Balance</th>
+      </tr>
+    </thead>
+    <tbody id="customerOutstandingBody"></tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h2>Outstanding Suppliers</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Supplier</th>
+        <th>Purchases</th>
+        <th>Payments</th>
+        <th>Balance</th>
+      </tr>
+    </thead>
+    <tbody id="supplierOutstandingBody"></tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h2>Cash / Bank Summary</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Account</th>
+        <th>Opening</th>
+        <th>Money In</th>
+        <th>Money Out</th>
+        <th>Balance</th>
+      </tr>
+    </thead>
+    <tbody id="cashBankBody"></tbody>
+  </table>
+</div>
+
+<script>
+function gd(k){return JSON.parse(localStorage.getItem(k)||"[]")}
+function mv(n){return Number(n||0).toFixed(3)}
+function mt(n){return "OMR "+mv(n)}
+
+function isCancelled(s){
+  return (s||"").toLowerCase()==="cancelled";
+}
+
+function generateDashboard(){
+  let sales=gd("post91SalesInvoices").filter(x=>!isCancelled(x.docStatus));
+  let purchases=gd("post91PurchaseInvoices").filter(x=>!isCancelled(x.docStatus));
+  let receipts=gd("post91ReceiptVouchers").filter(x=>!isCancelled(x.docStatus));
+  let payments=gd("post91PaymentVouchers").filter(x=>!isCancelled(x.docStatus));
+  let expenses=gd("post91ExpenseEntries").filter(x=>!isCancelled(x.status));
+  let accounts=gd("post91CashBankAccounts");
+
+  let salesTotal=sales.reduce((s,x)=>s+Number(x.grandTotal||0),0);
+  let receiptTotal=receipts.reduce((s,x)=>s+Number(x.totalReceiptAmount||0),0);
+  let purchaseTotal=purchases.reduce((s,x)=>s+Number(x.grandTotal||0),0);
+  let paymentTotal=payments.reduce((s,x)=>s+Number(x.totalPaymentAmount||0),0);
+  let expenseTotal=expenses.reduce((s,x)=>s+Number(x.totalAmount||0),0);
+
+  totalSales.textContent=mt(salesTotal);
+  totalReceipts.textContent=mt(receiptTotal);
+  receivableBalance.textContent=mt(salesTotal-receiptTotal);
+  salesCount.textContent=sales.length;
+
+  totalPurchases.textContent=mt(purchaseTotal);
+  totalPayments.textContent=mt(paymentTotal);
+  payableBalance.textContent=mt(purchaseTotal-paymentTotal);
+  purchaseCount.textContent=purchases.length;
+
+  totalExpenses.textContent=mt(expenseTotal);
+
+  let stockIn=0;
+  purchases.forEach(p=>{
+    (p.items||[]).forEach(i=>{
+      stockIn+=Number(i.qty||0);
+    });
+  });
+
+  let stockOut=0;
+  sales.forEach(s=>{
+    (s.items||[]).forEach(i=>{
+      stockOut+=Number(i.qty||0);
+    });
+  });
+
+  stockInQty.textContent=mv(stockIn);
+  stockOutQty.textContent=mv(stockOut);
+
+  generateRecentSales(sales);
+  generateCustomerOutstanding(sales,receipts);
+  generateSupplierOutstanding(purchases,payments);
+  generateCashBankSummary(accounts,receipts,payments,expenses);
+}
+
+function generateRecentSales(sales){
+  recentSalesBody.innerHTML="";
+
+  sales
+    .slice()
+    .sort((a,b)=>new Date(b.invoiceDate||"1900-01-01")-new Date(a.invoiceDate||"1900-01-01"))
+    .slice(0,10)
+    .forEach(s=>{
+      let tr=document.createElement("tr");
+
+      tr.innerHTML=`
+        <td>${s.invoiceNo||"-"}</td>
+        <td>${s.invoiceDate||"-"}</td>
+        <td>${s.customerName||"-"}</td>
+        <td>${mt(s.grandTotal)}</td>
+        <td>${s.paymentStatus||"Unpaid"}</td>
+      `;
+
+      recentSalesBody.appendChild(tr);
+    });
+}
+
+function generateCustomerOutstanding(sales,receipts){
+  let map={};
+
+  sales.forEach(s=>{
+    let c=s.customerName||"Unknown";
+    if(!map[c])map[c]={sales:0,receipts:0};
+    map[c].sales+=Number(s.grandTotal||0);
+  });
+
+  receipts.forEach(r=>{
+    let c=r.customerName||"Unknown";
+    if(!map[c])map[c]={sales:0,receipts:0};
+    map[c].receipts+=Number(r.totalReceiptAmount||0);
+  });
+
+  customerOutstandingBody.innerHTML="";
+
+  Object.keys(map)
+    .map(c=>({customer:c,...map[c],balance:map[c].sales-map[c].receipts}))
+    .filter(x=>Math.abs(x.balance)>0.0001)
+    .sort((a,b)=>b.balance-a.balance)
+    .forEach(x=>{
+      let tr=document.createElement("tr");
+
+      tr.innerHTML=`
+        <td>${x.customer}</td>
+        <td>${mt(x.sales)}</td>
+        <td>${mt(x.receipts)}</td>
+        <td class="${x.balance>=0?'bad':'good'}">${mt(x.balance)}</td>
+      `;
+
+      customerOutstandingBody.appendChild(tr);
+    });
+}
+
+function generateSupplierOutstanding(purchases,payments){
+  let map={};
+
+  purchases.forEach(p=>{
+    let s=p.supplierName||"Unknown";
+    if(!map[s])map[s]={purchases:0,payments:0};
+    map[s].purchases+=Number(p.grandTotal||0);
+  });
+
+  payments.forEach(p=>{
+    let s=p.supplierName||"Unknown";
+    if(!map[s])map[s]={purchases:0,payments:0};
+    map[s].payments+=Number(p.totalPaymentAmount||0);
+  });
+
+  supplierOutstandingBody.innerHTML="";
+
+  Object.keys(map)
+    .map(s=>({supplier:s,...map[s],balance:map[s].purchases-map[s].payments}))
+    .filter(x=>Math.abs(x.balance)>0.0001)
+    .sort((a,b)=>b.balance-a.balance)
+    .forEach(x=>{
+      let tr=document.createElement("tr");
+
+      tr.innerHTML=`
+        <td>${x.supplier}</td>
+        <td>${mt(x.purchases)}</td>
+        <td>${mt(x.payments)}</td>
+        <td class="${x.balance>=0?'bad':'good'}">${mt(x.balance)}</td>
+      `;
+
+      supplierOutstandingBody.appendChild(tr);
+    });
+}
+
+function openingOf(a){
+  let bal=Number(a.openingBalance||0);
+  return (a.openingBalanceType||"Debit")==="Credit" ? -bal : bal;
+}
+
+function generateCashBankSummary(accounts,receipts,payments,expenses){
+  cashBankBody.innerHTML="";
+
+  let grandBalance=0;
+
+  accounts.forEach(a=>{
+    let name=a.accountName||a.name||"";
+    let opening=openingOf(a);
+
+    let moneyIn=receipts
+      .filter(r=>(r.cashBankAccountName||"")===name)
+      .reduce((s,r)=>s+Number(r.totalReceiptAmount||0),0);
+
+    let paymentOut=payments
+      .filter(p=>(p.cashBankAccountName||"")===name)
+      .reduce((s,p)=>s+Number(p.totalPaymentAmount||0),0);
+
+    let expenseOut=expenses
+      .filter(e=>(e.cashBankAccountName||"")===name)
+      .reduce((s,e)=>s+Number(e.totalAmount||0),0);
+
+    let moneyOut=paymentOut+expenseOut;
+    let balance=opening+moneyIn-moneyOut;
+
+    grandBalance+=balance;
+
+    let tr=document.createElement("tr");
+
+    tr.innerHTML=`
+      <td>${name||"-"}</td>
+      <td>${mt(opening)}</td>
+      <td class="good">${mt(moneyIn)}</td>
+      <td class="bad">${mt(moneyOut)}</td>
+      <td><b>${mt(balance)}</b></td>
+    `;
+
+    cashBankBody.appendChild(tr);
+  });
+
+  cashBankBalance.textContent=mt(grandBalance);
+}
+
+generateDashboard();
+</script>
+
+</body>
+</html>

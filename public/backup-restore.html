@@ -6,24 +6,118 @@
 <title>Backup & Restore | Post91 Accounts</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
-body{background:#eef3f8;color:#061833;padding:28px;}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
-.header h1{font-size:34px}.header p{color:#64748b;margin-top:6px}
-.back{background:white;color:#0d6efd;text-decoration:none;padding:12px 16px;border-radius:13px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);}
-.card{background:white;border-radius:22px;padding:26px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:22px;}
-.note{background:#e0f2fe;border:1px solid #bae6fd;color:#075985;padding:16px;border-radius:16px;margin-bottom:18px;line-height:1.6;font-weight:700;}
-.warn{background:#fee2e2;border:1px solid #fecaca;color:#991b1b;padding:16px;border-radius:16px;margin-bottom:18px;line-height:1.6;font-weight:700;}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
-.btn{border:none;background:#0d6efd;color:white;padding:14px 22px;border-radius:14px;font-weight:900;cursor:pointer;font-size:15px;}
-.btn-danger{background:#ef4444;}
-.btn-light{background:#e2e8f0;color:#0f172a;}
-input[type=file]{width:100%;padding:14px;border:1px dashed #94a3b8;border-radius:14px;background:#f8fbff;}
-table{width:100%;border-collapse:collapse;margin-top:15px;}
-th{text-align:left;color:#64748b;padding:12px;border-bottom:1px solid #e5edf7;font-size:14px;}
-td{padding:12px;border-bottom:1px solid #eef2f7;font-weight:700;}
-.status{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:900;background:#dcfce7;color:#166534;}
-@media(max-width:800px){.grid{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Segoe UI,Arial,sans-serif;
+  background:#eef3f8;
+  color:#061833;
+  padding:26px;
+}
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+.header h1{
+  margin:0;
+  color:#0d6efd;
+}
+.back{
+  background:#fff;
+  color:#0d6efd;
+  text-decoration:none;
+  border-radius:12px;
+  padding:10px 14px;
+  font-weight:800;
+  box-shadow:0 8px 20px #0001;
+}
+.card{
+  background:#fff;
+  border:1px solid #e5edf7;
+  border-radius:20px;
+  padding:22px;
+  margin-bottom:20px;
+  box-shadow:0 14px 34px #0001;
+}
+.note{
+  background:#e0f2fe;
+  color:#075985;
+  border:1px solid #bae6fd;
+  border-radius:15px;
+  padding:14px;
+  margin-bottom:18px;
+  font-weight:700;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+.box{
+  background:#f8fbff;
+  border:1px solid #dbe4f0;
+  border-radius:15px;
+  padding:16px;
+}
+.box b{
+  display:block;
+  font-size:13px;
+  color:#64748b;
+}
+.box span{
+  font-size:22px;
+  font-weight:900;
+  color:#0d6efd;
+}
+.btn{
+  border:0;
+  background:#0d6efd;
+  color:white;
+  padding:12px 16px;
+  border-radius:12px;
+  font-weight:900;
+  cursor:pointer;
+}
+.btn-light{
+  background:#e2e8f0;
+  color:#0f172a;
+}
+.btn-danger{
+  background:#dc2626;
+}
+.btn-row{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  border:1px solid #dbe4f0;
+  padding:8px;
+  text-align:left;
+}
+th{
+  background:#f8fbff;
+}
+.file-box{
+  border:2px dashed #cbd5e1;
+  border-radius:16px;
+  padding:25px;
+  text-align:center;
+  background:#f8fbff;
+}
+.success{color:#166534;font-weight:900}
+.warning{color:#b45309;font-weight:900}
+.danger{color:#b91c1c;font-weight:900}
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 
@@ -32,170 +126,303 @@ td{padding:12px;border-bottom:1px solid #eef2f7;font-weight:700;}
 <div class="header">
   <div>
     <h1>Backup & Restore</h1>
-    <p>Export and restore Post91 local data safely.</p>
+    <p>Protect and restore all ERP/accounting data.</p>
   </div>
-  <a href="/dashboard.html" class="back">Back to Dashboard</a>
+
+  <a class="back" href="/dashboard.html">Back</a>
 </div>
 
 <div class="note">
-  This MVP currently stores data in browser localStorage. Use backup regularly before clearing browser data or changing device.
-</div>
-
-<div class="warn">
-  Restore will overwrite current browser data. Always download a backup before restoring another file.
+  This module exports/imports all localStorage ERP data including Sales, Purchase, Ledgers, Items, Customers, Suppliers, Cash/Bank and Reports.
 </div>
 
 <div class="grid">
-  <div class="card">
-    <h2 style="color:#0d6efd;margin-bottom:15px;">Download Backup</h2>
-    <p style="line-height:1.7;color:#64748b;margin-bottom:18px;">
-      Export all saved customers, suppliers, invoices, receipts, payments, expenses, banks, settings and reports data into one JSON file.
-    </p>
-    <button class="btn" onclick="downloadBackup()">Download Backup File</button>
+
+  <div class="box">
+    <b>Total localStorage Keys</b>
+    <span id="totalKeys">0</span>
   </div>
 
-  <div class="card">
-    <h2 style="color:#0d6efd;margin-bottom:15px;">Restore Backup</h2>
-    <p style="line-height:1.7;color:#64748b;margin-bottom:18px;">
-      Select a previous Post91 backup JSON file and restore it to this browser.
-    </p>
-    <input type="file" id="restoreFile" accept=".json">
-    <br><br>
-    <button class="btn btn-danger" onclick="restoreBackup()">Restore Selected Backup</button>
+  <div class="box">
+    <b>Estimated Records</b>
+    <span id="totalRecords">0</span>
   </div>
+
+  <div class="box">
+    <b>Backup Status</b>
+    <span id="backupStatus">READY</span>
+  </div>
+
+</div>
+
+<br>
+
+<div class="card">
+
+  <h2>Create Backup</h2>
+
+  <p>
+    Export all ERP data into one secure JSON backup file.
+  </p>
+
+  <div class="btn-row">
+  <button class="btn" onclick="exportBackup()">Export Full Backup</button>
+
+  <button class="btn btn-light" onclick="previewBackup()">
+    Preview Backup
+  </button>
+
+  <button class="btn" onclick="post91PushAllToCloud()">
+    Sync Full Data to Cloud
+  </button>
+
+  <button class="btn btn-light" onclick="post91PullAllFromCloud()">
+    Restore Full Data from Cloud
+  </button>
+</div>
+
 </div>
 
 <div class="card">
-  <h2 style="color:#0d6efd;margin-bottom:15px;">Data Status</h2>
+
+  <h2>Restore Backup</h2>
+
+  <div class="file-box">
+
+    <input type="file" id="restoreFile" accept=".json">
+
+    <br><br>
+
+    <p>
+      Select previously exported backup JSON file.
+    </p>
+
+    <div class="btn-row" style="justify-content:center">
+      <button class="btn" onclick="importBackup()">Import & Restore</button>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="card">
+
+  <h2>Danger Zone</h2>
+
+  <p class="danger">
+    This will permanently remove all ERP data from this browser.
+  </p>
+
+  <div class="btn-row">
+    <button class="btn btn-danger" onclick="clearAllData()">Clear All ERP Data</button>
+  </div>
+
+</div>
+
+<div class="card">
+
+  <h2>Storage Summary</h2>
+
   <table>
     <thead>
       <tr>
-        <th>Module</th>
         <th>Storage Key</th>
         <th>Records</th>
-        <th>Status</th>
       </tr>
     </thead>
-    <tbody id="statusTable"></tbody>
+
+    <tbody id="summaryBody"></tbody>
   </table>
+
 </div>
 
-<div class="card">
-  <h2 style="color:#0d6efd;margin-bottom:15px;">Danger Zone</h2>
-  <p style="line-height:1.7;color:#64748b;margin-bottom:18px;">
-    This will permanently clear all Post91 data from this browser only.
-  </p>
-  <button class="btn btn-danger" onclick="clearAllData()">Clear All Local Data</button>
-</div>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="/firebase-config.js"></script>
+<script src="/data-sync.js"></script>
 
 <script>
-const keys = [
-  ["Business Profile","post91BusinessProfile"],
-  ["Settings","post91Settings"],
-  ["Customers","post91Customers"],
-  ["Suppliers","post91Suppliers"],
-  ["Items / Services","post91Items"],
-  ["Banks","post91Banks"],
-  ["Quotations","post91Quotations"],
-  ["Delivery Orders","post91DeliveryOrders"],
-  ["Sales Invoices","post91SalesInvoices"],
-  ["Purchase Invoices","post91PurchaseInvoices"],
-  ["Expenses","post91Expenses"],
-  ["Customer Receipts","post91Receipts"],
-  ["Supplier Payments","post91SupplierPayments"]
-];
-
-function safeParse(value){
-  try{
-    return JSON.parse(value);
-  }catch(e){
-    return null;
-  }
+function mv(n){
+  return Number(n||0).toFixed(0);
 }
 
-function recordCount(data){
-  if(Array.isArray(data)) return data.length;
-  if(data && typeof data === "object" && Object.keys(data).length > 0) return 1;
-  return 0;
-}
+function refreshSummary(){
 
-function loadStatus(){
-  const tbody = document.getElementById("statusTable");
-  tbody.innerHTML = "";
+  let totalK=0;
+  let totalR=0;
 
-  keys.forEach(([label,key])=>{
-    const data = safeParse(localStorage.getItem(key) || "null");
-    const tr = document.createElement("tr");
+  summaryBody.innerHTML="";
 
-    tr.innerHTML = `
-      <td>${label}</td>
+  for(let i=0;i<localStorage.length;i++){
+
+    let key=localStorage.key(i);
+
+    totalK++;
+
+    let val=localStorage.getItem(key);
+
+    let count=1;
+
+    try{
+
+      let parsed=JSON.parse(val);
+
+      if(Array.isArray(parsed)){
+        count=parsed.length;
+      }
+
+    }catch(e){}
+
+    totalR+=count;
+
+    let tr=document.createElement("tr");
+
+    tr.innerHTML=`
       <td>${key}</td>
-      <td>${recordCount(data)}</td>
-      <td><span class="status">Available</span></td>
+      <td>${count}</td>
     `;
 
-    tbody.appendChild(tr);
-  });
+    summaryBody.appendChild(tr);
+  }
+
+  totalKeys.textContent=mv(totalK);
+  totalRecords.textContent=mv(totalR);
 }
 
-function downloadBackup(){
-  const backup = {
+function exportBackup(){
+
+  let data={};
+
+  for(let i=0;i<localStorage.length;i++){
+
+    let key=localStorage.key(i);
+
+    data[key]=localStorage.getItem(key);
+  }
+
+  let backup={
     app:"Post91 Accounts",
-    version:"MVP-LocalStorage",
+    version:"1.0",
     backupDate:new Date().toISOString(),
-    data:{}
+    totalKeys:Object.keys(data).length,
+    data:data
   };
 
-  keys.forEach(([label,key])=>{
-    backup.data[key] = safeParse(localStorage.getItem(key) || "null");
-  });
+  let blob=new Blob(
+    [JSON.stringify(backup,null,2)],
+    {type:"application/json"}
+  );
 
-  const blob = new Blob([JSON.stringify(backup,null,2)], {type:"application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
+  let a=document.createElement("a");
 
-  const date = new Date().toISOString().split("T")[0];
-  a.href = url;
-  a.download = `post91-backup-${date}.json`;
+  let dt=new Date();
+
+  let fileName=
+    "post91-backup-" +
+    dt.getFullYear() +
+    ("0"+(dt.getMonth()+1)).slice(-2) +
+    ("0"+dt.getDate()).slice(-2) +
+    "-" +
+    ("0"+dt.getHours()).slice(-2) +
+    ("0"+dt.getMinutes()).slice(-2) +
+    ".json";
+
+  a.href=URL.createObjectURL(blob);
+
+  a.download=fileName;
+
   a.click();
 
-  URL.revokeObjectURL(url);
+  backupStatus.textContent="BACKUP EXPORTED";
+
+  setTimeout(()=>{
+    backupStatus.textContent="READY";
+  },3000);
+
+  alert("Backup exported successfully.");
 }
 
-function restoreBackup(){
-  const file = document.getElementById("restoreFile").files[0];
+function previewBackup(){
+
+  let rows=[];
+
+  for(let i=0;i<localStorage.length;i++){
+
+    let key=localStorage.key(i);
+
+    let val=localStorage.getItem(key);
+
+    let count=1;
+
+    try{
+
+      let parsed=JSON.parse(val);
+
+      if(Array.isArray(parsed)){
+        count=parsed.length;
+      }
+
+    }catch(e){}
+
+    rows.push(`${key} → ${count} records`);
+  }
+
+  alert(
+    "ERP Backup Preview\n\n" +
+    rows.join("\n")
+  );
+}
+
+function importBackup(){
+
+  let file=restoreFile.files[0];
 
   if(!file){
+
     alert("Please select backup file.");
     return;
   }
 
-  if(!confirm("This will overwrite current Post91 local data. Continue?")){
-    return;
-  }
+  let reader=new FileReader();
 
-  const reader = new FileReader();
+  reader.onload=function(e){
 
-  reader.onload = function(e){
     try{
-      const backup = JSON.parse(e.target.result);
+
+      let backup=JSON.parse(e.target.result);
 
       if(!backup.data){
+
         alert("Invalid backup file.");
         return;
       }
 
-      keys.forEach(([label,key])=>{
-        if(backup.data.hasOwnProperty(key)){
-          localStorage.setItem(key, JSON.stringify(backup.data[key]));
-        }
+      if(!confirm(
+        "Restore backup now?\n\nCurrent data will be overwritten."
+      )) return;
+
+      Object.keys(backup.data).forEach(key=>{
+
+        localStorage.setItem(
+          key,
+          backup.data[key]
+        );
       });
 
-      alert("Backup restored successfully. Please refresh dashboard.");
-      loadStatus();
+      backupStatus.textContent="RESTORED";
 
-    }catch(error){
-      alert("Restore failed. Invalid JSON file.");
+      refreshSummary();
+
+      alert(
+        "Backup restored successfully.\n\nPlease refresh dashboard/pages."
+      );
+
+    }catch(err){
+
+      console.error(err);
+
+      alert("Backup restore failed.");
     }
   };
 
@@ -203,23 +430,29 @@ function restoreBackup(){
 }
 
 function clearAllData(){
-  if(!confirm("Are you sure? This will delete all Post91 local data from this browser.")){
+
+  let confirmText=prompt(
+    "Type DELETE to remove all ERP data."
+  );
+
+  if(confirmText!=="DELETE"){
+
+    alert("Clear cancelled.");
     return;
   }
 
-  if(!confirm("Final confirmation: download backup first if needed. Continue delete?")){
-    return;
-  }
+  localStorage.clear();
 
-  keys.forEach(([label,key])=>{
-    localStorage.removeItem(key);
-  });
+  refreshSummary();
 
-  alert("All local data cleared.");
-  loadStatus();
+  backupStatus.textContent="CLEARED";
+
+  alert(
+    "All ERP data removed successfully."
+  );
 }
 
-loadStatus();
+refreshSummary();
 </script>
 
 </body>

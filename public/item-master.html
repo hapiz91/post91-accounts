@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Item Master | Post91 Accounts</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Segoe UI,Arial,sans-serif;
+  background:#eef3f8;
+  color:#061833;
+  padding:26px;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.header h1{
+  margin:0;
+  color:#0d6efd;
+}
+
+.back{
+  background:#fff;
+  color:#0d6efd;
+  text-decoration:none;
+  border-radius:12px;
+  padding:10px 14px;
+  font-weight:800;
+  box-shadow:0 8px 20px #0001;
+}
+
+.card{
+  background:#fff;
+  border:1px solid #e5edf7;
+  border-radius:20px;
+  padding:22px;
+  margin-bottom:20px;
+  box-shadow:0 14px 34px #0001;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+}
+
+.full{
+  grid-column:1/-1;
+}
+
+label{
+  display:block;
+  font-weight:800;
+  margin-bottom:6px;
+}
+
+input,select,textarea{
+  width:100%;
+  padding:12px;
+  border:1px solid #dbe4f0;
+  border-radius:11px;
+  font-size:14px;
+}
+
+textarea{
+  min-height:80px;
+}
+
+.btn{
+  border:0;
+  background:#0d6efd;
+  color:white;
+  padding:11px 15px;
+  border-radius:11px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.btn-light{
+  background:#e2e8f0;
+  color:#0f172a;
+}
+
+.btn-danger{
+  background:#dc2626;
+}
+
+.btn-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:15px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  border:1px solid #dbe4f0;
+  padding:8px;
+  vertical-align:top;
+  text-align:left;
+}
+
+th{
+  background:#f8fbff;
+}
+
+.note{
+  background:#e0f2fe;
+  color:#075985;
+  border:1px solid #bae6fd;
+  border-radius:15px;
+  padding:14px;
+  margin-bottom:18px;
+  font-weight:700;
+}
+
+.mode-box{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+
+.mode{
+  border:2px solid #dbe4f0;
+  border-radius:16px;
+  padding:14px;
+  cursor:pointer;
+  text-align:center;
+  font-weight:900;
+  background:#fff;
+}
+
+.mode.active{
+  border-color:#0d6efd;
+  background:#eff6ff;
+  color:#0d6efd;
+}
+
+.hidden{
+  display:none;
+}
+
+@media(max-width:1000px){
+  .grid,.mode-box{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:700px){
+  .grid,.mode-box{
+    grid-template-columns:1fr;
+  }
+
+  table{
+    display:block;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Item Master</h1>
+    <p>Create items, categories, brands and machine/pump types.</p>
+  </div>
+
+  <a class="back" href="/dashboard.html">Back</a>
+</div>
+
+<div class="note">
+  You can create standalone categories, brands and machine/pump types without creating full items.
+</div>
+
+<div class="card">
+
+  <h2>Create Type</h2>
+
+  <div class="mode-box">
+
+    <div class="mode active" onclick="setMode('ITEM')" id="modeITEM">
+      Create Item
+    </div>
+
+    <div class="mode" onclick="setMode('CATEGORY')" id="modeCATEGORY">
+      Create Category
+    </div>
+
+    <div class="mode" onclick="setMode('BRAND')" id="modeBRAND">
+      Create Brand
+    </div>
+
+    <div class="mode" onclick="setMode('TYPE')" id="modeTYPE">
+      Create Pump / Machine Type
+    </div>
+
+  </div>
+
+</div>
+
+<div class="card">
+
+  <h2 id="formTitle">Create Item</h2>
+
+  <div class="grid">
+
+    <div class="itemFields">
+      <label>Item Name</label>
+      <input id="itemName">
+    </div>
+
+    <div class="itemFields">
+      <label>Part Number</label>
+      <input id="partNo">
+    </div>
+
+    <div class="itemFields">
+      <label>OEM Number</label>
+      <input id="oemNo">
+    </div>
+
+    <div class="itemFields">
+      <label>Unit</label>
+      <input id="unit">
+    </div>
+
+    <div class="itemFields">
+      <label>Category</label>
+      <select id="category"></select>
+    </div>
+
+    <div class="itemFields">
+      <label>Brand</label>
+      <select id="brand"></select>
+    </div>
+
+    <div class="itemFields">
+      <label>Pump / Machine Type</label>
+      <select id="machineType"></select>
+    </div>
+
+    <div class="itemFields">
+      <label>Selling Price</label>
+      <input type="number" step="0.001" id="sellingPrice">
+    </div>
+
+    <div class="itemFields">
+      <label>Cost Price</label>
+      <input type="number" step="0.001" id="costPrice">
+    </div>
+
+    <div class="itemFields">
+      <label>Opening Stock</label>
+      <input type="number" step="0.001" id="openingStock">
+    </div>
+
+    <div class="itemFields">
+      <label>Reorder Level</label>
+      <input type="number" step="0.001" id="reorderLevel">
+    </div>
+
+    <div class="itemFields">
+      <label>Status</label>
+      <select id="status">
+        <option>Active</option>
+        <option>Inactive</option>
+      </select>
+    </div>
+
+    <div class="full itemFields">
+      <label>Description</label>
+      <textarea id="description"></textarea>
+    </div>
+
+    <div class="hidden" id="categoryBox">
+      <label>Category Name</label>
+      <input id="categoryOnly">
+    </div>
+
+    <div class="hidden" id="brandBox">
+      <label>Brand Name</label>
+      <input id="brandOnly">
+    </div>
+
+    <div class="hidden" id="typeBox">
+      <label>Pump / Machine / Vehicle Type</label>
+      <input id="typeOnly">
+    </div>
+
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="saveData()">Save</button>
+    <button class="btn btn-light" onclick="clearForm()">Clear</button>
+  </div>
+
+</div>
+
+<div class="card">
+
+  <h2>Saved Items</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Item Name</th>
+        <th>Part No</th>
+        <th>OEM No</th>
+        <th>Category</th>
+        <th>Brand</th>
+        <th>Machine Type</th>
+        <th>Selling Price</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody id="itemBody"></tbody>
+  </table>
+
+</div>
+
+<script>
+const ITEM_KEY = "post91Items";
+const CATEGORY_KEY = "post91Categories";
+const BRAND_KEY = "post91Brands";
+const TYPE_KEY = "post91MachineTypes";
+
+let currentMode = "ITEM";
+
+function gd(k){
+  return JSON.parse(localStorage.getItem(k)||"[]");
+}
+
+function sd(k,v){
+  localStorage.setItem(k,JSON.stringify(v));
+}
+
+function setMode(mode){
+
+  currentMode = mode;
+
+  document.querySelectorAll(".mode")
+    .forEach(x=>x.classList.remove("active"));
+
+  document.getElementById("mode"+mode)
+    .classList.add("active");
+
+  document.querySelectorAll(".itemFields")
+    .forEach(x=>x.classList.add("hidden"));
+
+  categoryBox.classList.add("hidden");
+  brandBox.classList.add("hidden");
+  typeBox.classList.add("hidden");
+
+  if(mode==="ITEM"){
+
+    formTitle.textContent="Create Item";
+
+    document.querySelectorAll(".itemFields")
+      .forEach(x=>x.classList.remove("hidden"));
+  }
+
+  if(mode==="CATEGORY"){
+
+    formTitle.textContent="Create Category";
+
+    categoryBox.classList.remove("hidden");
+  }
+
+  if(mode==="BRAND"){
+
+    formTitle.textContent="Create Brand";
+
+    brandBox.classList.remove("hidden");
+  }
+
+  if(mode==="TYPE"){
+
+    formTitle.textContent="Create Pump / Machine Type";
+
+    typeBox.classList.remove("hidden");
+  }
+}
+
+function loadDropdowns(){
+
+  category.innerHTML='<option value="">Select Category</option>';
+
+  gd(CATEGORY_KEY).forEach(c=>{
+
+    let o=document.createElement("option");
+
+    o.value=c.name;
+    o.textContent=c.name;
+
+    category.appendChild(o);
+  });
+
+  brand.innerHTML='<option value="">Select Brand</option>';
+
+  gd(BRAND_KEY).forEach(b=>{
+
+    let o=document.createElement("option");
+
+    o.value=b.name;
+    o.textContent=b.name;
+
+    brand.appendChild(o);
+  });
+
+  machineType.innerHTML='<option value="">Select Type</option>';
+
+  gd(TYPE_KEY).forEach(t=>{
+
+    let o=document.createElement("option");
+
+    o.value=t.name;
+    o.textContent=t.name;
+
+    machineType.appendChild(o);
+  });
+}
+
+function saveData(){
+
+  if(currentMode==="CATEGORY"){
+
+    let val=categoryOnly.value.trim();
+
+    if(!val)return alert("Enter category");
+
+    let arr=gd(CATEGORY_KEY);
+
+    arr.push({
+      name:val,
+      createdAt:new Date().toISOString()
+    });
+
+    sd(CATEGORY_KEY,arr);
+
+    alert("Category saved");
+
+    categoryOnly.value="";
+
+    loadDropdowns();
+
+    return;
+  }
+
+  if(currentMode==="BRAND"){
+
+    let val=brandOnly.value.trim();
+
+    if(!val)return alert("Enter brand");
+
+    let arr=gd(BRAND_KEY);
+
+    arr.push({
+      name:val,
+      createdAt:new Date().toISOString()
+    });
+
+    sd(BRAND_KEY,arr);
+
+    alert("Brand saved");
+
+    brandOnly.value="";
+
+    loadDropdowns();
+
+    return;
+  }
+
+  if(currentMode==="TYPE"){
+
+    let val=typeOnly.value.trim();
+
+    if(!val)return alert("Enter type");
+
+    let arr=gd(TYPE_KEY);
+
+    arr.push({
+      name:val,
+      createdAt:new Date().toISOString()
+    });
+
+    sd(TYPE_KEY,arr);
+
+    alert("Type saved");
+
+    typeOnly.value="";
+
+    loadDropdowns();
+
+    return;
+  }
+
+  let items=gd(ITEM_KEY);
+
+  items.push({
+
+    itemName:itemName.value.trim(),
+    partNo:partNo.value.trim(),
+    oemNo:oemNo.value.trim(),
+    unit:unit.value.trim(),
+
+    category:category.value,
+    brand:brand.value,
+    machineType:machineType.value,
+
+    sellingPrice:Number(sellingPrice.value||0),
+    costPrice:Number(costPrice.value||0),
+
+    openingStock:Number(openingStock.value||0),
+    reorderLevel:Number(reorderLevel.value||0),
+
+    status:status.value,
+
+    description:description.value.trim(),
+
+    createdAt:new Date().toISOString()
+  });
+
+  sd(ITEM_KEY,items);
+
+  alert("Item saved successfully");
+
+  clearForm();
+
+  loadItems();
+}
+
+function clearForm(){
+
+  [
+    itemName,
+    partNo,
+    oemNo,
+    unit,
+    sellingPrice,
+    costPrice,
+    openingStock,
+    reorderLevel,
+    description
+  ].forEach(x=>x.value="");
+
+  category.value="";
+  brand.value="";
+  machineType.value="";
+  status.value="Active";
+}
+
+function loadItems(){
+
+  let items=gd(ITEM_KEY);
+
+  itemBody.innerHTML="";
+
+  items.forEach((i,index)=>{
+
+    let tr=document.createElement("tr");
+
+    tr.innerHTML=`
+
+      <td>${i.itemName||"-"}</td>
+      <td>${i.partNo||"-"}</td>
+      <td>${i.oemNo||"-"}</td>
+      <td>${i.category||"-"}</td>
+      <td>${i.brand||"-"}</td>
+      <td>${i.machineType||"-"}</td>
+      <td>${Number(i.sellingPrice||0).toFixed(3)}</td>
+      <td>${i.status||"Active"}</td>
+
+      <td>
+        <button class="btn btn-danger"
+          onclick="deleteItem(${index})">
+          Delete
+        </button>
+      </td>
+    `;
+
+    itemBody.appendChild(tr);
+  });
+}
+
+function deleteItem(index){
+
+  if(!confirm("Delete item?")) return;
+
+  let items=gd(ITEM_KEY);
+
+  items.splice(index,1);
+
+  sd(ITEM_KEY,items);
+
+  loadItems();
+}
+
+loadDropdowns();
+loadItems();
+</script>
+
+</body>
+</html>

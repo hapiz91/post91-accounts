@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Theme & Branding | Post91 Accounts</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Segoe UI,Arial,sans-serif;
+  background:#eef3f8;
+  color:#061833;
+  padding:26px;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.header h1{
+  margin:0;
+  color:#0d6efd;
+}
+
+.back{
+  background:#fff;
+  color:#0d6efd;
+  text-decoration:none;
+  border-radius:12px;
+  padding:10px 14px;
+  font-weight:800;
+  box-shadow:0 8px 20px #0001;
+}
+
+.card{
+  background:#fff;
+  border:1px solid #e5edf7;
+  border-radius:20px;
+  padding:22px;
+  margin-bottom:20px;
+  box-shadow:0 14px 34px #0001;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+}
+
+.full{
+  grid-column:1/-1;
+}
+
+label{
+  display:block;
+  font-weight:800;
+  margin-bottom:6px;
+}
+
+input,select,textarea{
+  width:100%;
+  padding:12px;
+  border:1px solid #dbe4f0;
+  border-radius:11px;
+  font-size:15px;
+}
+
+textarea{
+  min-height:80px;
+}
+
+.btn{
+  border:0;
+  background:#0d6efd;
+  color:white;
+  padding:12px 16px;
+  border-radius:12px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.btn-light{
+  background:#e2e8f0;
+  color:#0f172a;
+}
+
+.btn-danger{
+  background:#dc2626;
+}
+
+.btn-row{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+
+.note{
+  background:#e0f2fe;
+  color:#075985;
+  border:1px solid #bae6fd;
+  border-radius:15px;
+  padding:14px;
+  margin-bottom:18px;
+  font-weight:700;
+}
+
+.preview{
+  border-radius:20px;
+  overflow:hidden;
+  border:1px solid #dbe4f0;
+  background:#fff;
+}
+
+.preview-sidebar{
+  width:240px;
+  background:#061833;
+  color:#fff;
+  padding:20px;
+  min-height:360px;
+}
+
+.preview-body{
+  flex:1;
+  background:#eef3f8;
+  padding:22px;
+}
+
+.preview-wrap{
+  display:flex;
+}
+
+.logo-preview{
+  width:80px;
+  height:80px;
+  object-fit:contain;
+  background:white;
+  border-radius:16px;
+  display:none;
+  margin-bottom:12px;
+}
+
+.brand-name{
+  font-size:22px;
+  font-weight:900;
+}
+
+.brand-tagline{
+  font-size:12px;
+  opacity:.75;
+  margin-bottom:22px;
+}
+
+.preview-nav{
+  padding:10px;
+  border-radius:12px;
+  margin-bottom:8px;
+  background:#0d6efd;
+  font-weight:800;
+}
+
+.preview-card{
+  background:white;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 14px 34px #0001;
+  margin-bottom:16px;
+}
+
+.preview-card h3{
+  margin-top:0;
+}
+
+.color-row{
+  display:grid;
+  grid-template-columns:120px 1fr;
+  gap:10px;
+  align-items:center;
+}
+
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr}
+  .preview-wrap{display:block}
+  .preview-sidebar{width:100%;min-height:auto}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Theme & Branding</h1>
+    <p>Customize software name, logo, colors and footer branding.</p>
+  </div>
+  <a class="back" href="/dashboard.html">Back</a>
+</div>
+
+<div class="note">
+  This saves branding settings in <b>post91ThemeBranding</b>. Later dashboard and pages can read this to apply your custom look.
+</div>
+
+<div class="card">
+  <h2>Brand Details</h2>
+
+  <div class="grid">
+    <div>
+      <label>Software / Brand Name</label>
+      <input id="brandName" placeholder="Post91 Accounts">
+    </div>
+
+    <div>
+      <label>Tagline</label>
+      <input id="tagline" placeholder="Simple Accounting for Smart Businesses">
+    </div>
+
+    <div>
+      <label>Powered By Text</label>
+      <input id="poweredBy" placeholder="Powered by Post91">
+    </div>
+
+    <div>
+      <label>Theme Mode</label>
+      <select id="themeMode" onchange="updatePreview()">
+        <option>Light</option>
+        <option>Dark</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Logo Upload</label>
+      <input type="file" id="logoFile" accept="image/*" onchange="previewLogo()">
+    </div>
+
+    <div>
+      <label>Favicon Upload</label>
+      <input type="file" id="faviconFile" accept="image/*" onchange="previewFavicon()">
+    </div>
+
+    <div class="full">
+      <label>Print Footer / Footer Note</label>
+      <textarea id="footerNote" placeholder="Thank you for your business."></textarea>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Colors</h2>
+
+  <div class="grid">
+    <div>
+      <label>Primary Color</label>
+      <div class="color-row">
+        <input type="color" id="primaryColor" value="#0d6efd" onchange="updatePreview()">
+        <input id="primaryColorText" value="#0d6efd" oninput="syncColorText('primary')">
+      </div>
+    </div>
+
+    <div>
+      <label>Sidebar Color</label>
+      <div class="color-row">
+        <input type="color" id="sidebarColor" value="#061833" onchange="updatePreview()">
+        <input id="sidebarColorText" value="#061833" oninput="syncColorText('sidebar')">
+      </div>
+    </div>
+
+    <div>
+      <label>Background Color</label>
+      <div class="color-row">
+        <input type="color" id="backgroundColor" value="#eef3f8" onchange="updatePreview()">
+        <input id="backgroundColorText" value="#eef3f8" oninput="syncColorText('background')">
+      </div>
+    </div>
+
+    <div>
+      <label>Card Color</label>
+      <div class="color-row">
+        <input type="color" id="cardColor" value="#ffffff" onchange="updatePreview()">
+        <input id="cardColorText" value="#ffffff" oninput="syncColorText('card')">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Preview</h2>
+
+  <div class="preview">
+    <div class="preview-wrap">
+
+      <div class="preview-sidebar" id="previewSidebar">
+        <img id="logoPreview" class="logo-preview" alt="">
+        <div class="brand-name" id="pBrandName">Post91 Accounts</div>
+        <div class="brand-tagline" id="pTagline">Simple Accounting for Smart Businesses</div>
+
+        <div class="preview-nav" id="pNav1">Dashboard</div>
+        <div class="preview-nav" id="pNav2">Sales Invoice</div>
+        <div class="preview-nav" id="pNav3">Reports</div>
+      </div>
+
+      <div class="preview-body" id="previewBody">
+        <div class="preview-card" id="previewCard1">
+          <h3 id="previewTitle">Dashboard</h3>
+          <p>This is how your branded dashboard area will look.</p>
+        </div>
+
+        <div class="preview-card" id="previewCard2">
+          <h3>Footer Note</h3>
+          <p id="pFooterNote">Thank you for your business.</p>
+          <small id="pPoweredBy">Powered by Post91</small>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="saveBranding()">Save Branding</button>
+    <button class="btn btn-light" onclick="loadBranding()">Reload Saved</button>
+    <button class="btn btn-light" onclick="applyDefaultTheme()">Default Theme</button>
+    <button class="btn btn-danger" onclick="clearBranding()">Clear Branding</button>
+  </div>
+</div>
+
+<script>
+let logoBase64 = "";
+let faviconBase64 = "";
+
+function getBranding(){
+  return JSON.parse(localStorage.getItem("post91ThemeBranding") || "{}");
+}
+
+function saveBrandingToStorage(data){
+  localStorage.setItem("post91ThemeBranding", JSON.stringify(data));
+}
+
+function previewLogo(){
+  let file = logoFile.files[0];
+
+  if(!file) return;
+
+  let reader = new FileReader();
+
+  reader.onload = function(e){
+    logoBase64 = e.target.result;
+    logoPreview.src = logoBase64;
+    logoPreview.style.display = "block";
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function previewFavicon(){
+  let file = faviconFile.files[0];
+
+  if(!file) return;
+
+  let reader = new FileReader();
+
+  reader.onload = function(e){
+    faviconBase64 = e.target.result;
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function syncColorText(type){
+  if(type === "primary"){
+    primaryColor.value = primaryColorText.value;
+  }
+
+  if(type === "sidebar"){
+    sidebarColor.value = sidebarColorText.value;
+  }
+
+  if(type === "background"){
+    backgroundColor.value = backgroundColorText.value;
+  }
+
+  if(type === "card"){
+    cardColor.value = cardColorText.value;
+  }
+
+  updatePreview();
+}
+
+function updateColorText(){
+  primaryColorText.value = primaryColor.value;
+  sidebarColorText.value = sidebarColor.value;
+  backgroundColorText.value = backgroundColor.value;
+  cardColorText.value = cardColor.value;
+}
+
+function updatePreview(){
+  updateColorText();
+
+  pBrandName.textContent = brandName.value || "Post91 Accounts";
+  pTagline.textContent = tagline.value || "Simple Accounting for Smart Businesses";
+  pPoweredBy.textContent = poweredBy.value || "Powered by Post91";
+  pFooterNote.textContent = footerNote.value || "Thank you for your business.";
+
+  previewSidebar.style.background = sidebarColor.value;
+  previewBody.style.background = backgroundColor.value;
+
+  [pNav1,pNav2,pNav3].forEach(x=>{
+    x.style.background = primaryColor.value;
+  });
+
+  previewTitle.style.color = primaryColor.value;
+
+  [previewCard1,previewCard2].forEach(c=>{
+    c.style.background = cardColor.value;
+  });
+
+  if(themeMode.value === "Dark"){
+    previewBody.style.background = "#0f172a";
+    [previewCard1,previewCard2].forEach(c=>{
+      c.style.background = "#1e293b";
+      c.style.color = "#fff";
+    });
+  }
+}
+
+function saveBranding(){
+  let old = getBranding();
+
+  let data = {
+    ...old,
+    brandName: brandName.value.trim() || "Post91 Accounts",
+    tagline: tagline.value.trim() || "Simple Accounting for Smart Businesses",
+    poweredBy: poweredBy.value.trim() || "Powered by Post91",
+    themeMode: themeMode.value,
+    primaryColor: primaryColor.value,
+    sidebarColor: sidebarColor.value,
+    backgroundColor: backgroundColor.value,
+    cardColor: cardColor.value,
+    footerNote: footerNote.value.trim(),
+    logo: logoBase64 || old.logo || "",
+    favicon: faviconBase64 || old.favicon || "",
+    updatedAt: new Date().toISOString()
+  };
+
+  saveBrandingToStorage(data);
+  alert("Theme & branding saved successfully.");
+}
+
+function loadBranding(){
+  let data = getBranding();
+
+  brandName.value = data.brandName || "Post91 Accounts";
+  tagline.value = data.tagline || "Simple Accounting for Smart Businesses";
+  poweredBy.value = data.poweredBy || "Powered by Post91";
+  themeMode.value = data.themeMode || "Light";
+
+  primaryColor.value = data.primaryColor || "#0d6efd";
+  sidebarColor.value = data.sidebarColor || "#061833";
+  backgroundColor.value = data.backgroundColor || "#eef3f8";
+  cardColor.value = data.cardColor || "#ffffff";
+
+  footerNote.value = data.footerNote || "Thank you for your business.";
+
+  logoBase64 = data.logo || "";
+  faviconBase64 = data.favicon || "";
+
+  if(logoBase64){
+    logoPreview.src = logoBase64;
+    logoPreview.style.display = "block";
+  }else{
+    logoPreview.removeAttribute("src");
+    logoPreview.style.display = "none";
+  }
+
+  updatePreview();
+}
+
+function applyDefaultTheme(){
+  brandName.value = "Post91 Accounts";
+  tagline.value = "Simple Accounting for Smart Businesses";
+  poweredBy.value = "Powered by Post91";
+  themeMode.value = "Light";
+
+  primaryColor.value = "#0d6efd";
+  sidebarColor.value = "#061833";
+  backgroundColor.value = "#eef3f8";
+  cardColor.value = "#ffffff";
+  footerNote.value = "Thank you for your business.";
+
+  updatePreview();
+}
+
+function clearBranding(){
+  if(!confirm("Clear saved branding settings?")) return;
+
+  localStorage.removeItem("post91ThemeBranding");
+
+  logoBase64 = "";
+  faviconBase64 = "";
+  logoFile.value = "";
+  faviconFile.value = "";
+
+  applyDefaultTheme();
+
+  logoPreview.removeAttribute("src");
+  logoPreview.style.display = "none";
+
+  alert("Branding cleared.");
+}
+
+[
+  brandName,
+  tagline,
+  poweredBy,
+  footerNote
+].forEach(el=>{
+  el.addEventListener("input", updatePreview);
+});
+
+loadBranding();
+</script>
+
+</body>
+</html>

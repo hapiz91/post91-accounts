@@ -3,36 +3,49 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profit & Loss | Post91 Accounts</title>
+<title>Profit & Loss Report | Post91 Accounts</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
-body{background:#eef3f8;color:#061833;padding:28px;}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
-.header h1{font-size:34px}.header p{color:#64748b;margin-top:6px}
-.back{background:white;color:#0d6efd;text-decoration:none;padding:12px 16px;border-radius:13px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);}
-.card{background:white;border-radius:22px;padding:26px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:22px;}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
-label{display:block;margin-bottom:7px;font-weight:800;}
-input,select{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #dbe4f0;font-size:15px;}
-.btn{border:none;background:#0d6efd;color:white;padding:13px 19px;border-radius:13px;font-weight:900;cursor:pointer;}
-.btn-light{background:#e2e8f0;color:#0f172a;margin-left:8px;}
-.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
-.summary{background:white;border-radius:22px;padding:20px;border:1px solid #e5edf7;box-shadow:0 12px 28px rgba(15,23,42,.06);}
-.summary span{color:#64748b;font-size:13px;font-weight:800;}
-.summary h2{margin-top:8px;color:#0d6efd;}
-table{width:100%;border-collapse:collapse;margin-top:12px;}
-th{text-align:left;color:#64748b;padding:12px;border-bottom:1px solid #e5edf7;font-size:14px;}
-td{padding:13px 12px;border-bottom:1px solid #eef2f7;font-weight:700;}
-.amount{text-align:right;}
-.profit{color:#166534;}
-.loss{color:#991b1b;}
-.section-title{font-size:22px;color:#0d6efd;margin-bottom:12px;}
-.total-row{background:#f8fbff;font-weight:900;}
-.net-row{background:#e0f2fe;font-size:18px;font-weight:900;}
-@media(max-width:1000px){.grid,.summary-grid{grid-template-columns:1fr 1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
-@media(max-width:650px){.grid,.summary-grid{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}}
-@media print{.header,.filter-card,.btn{display:none!important}body{background:white;padding:10px}.card{box-shadow:none;border:none}.summary-grid{grid-template-columns:repeat(4,1fr)}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.header h1{margin:0;color:#0d6efd}
+.back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+label{display:block;font-weight:800;margin-bottom:6px}
+input{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
+.btn{border:0;background:#0d6efd;color:white;padding:11px 15px;border-radius:11px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.box{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:18px;box-shadow:0 14px 34px #0001}
+.box b{display:block;font-size:13px;color:#64748b}
+.box span{font-size:24px;font-weight:900;color:#0d6efd}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+.report{background:#fff;border:1px solid #111;border-radius:12px;padding:20px;color:#000}
+.report-head{text-align:center;border-bottom:3px double #111;padding-bottom:12px;margin-bottom:12px}
+.report-head h2{margin:0;font-size:24px;text-decoration:underline}
+.report-head p{margin:6px 0 0;font-weight:700}
+.row{display:grid;grid-template-columns:1fr 160px;border-bottom:1px solid #ddd}
+.row div{padding:9px;font-size:14px}
+.row .label{font-weight:800}
+.row .amount{text-align:right;font-weight:900}
+.section-title{background:#f1f5f9;font-weight:900;border:1px solid #111;margin-top:12px;padding:9px}
+.total-row{background:#f8fbff;border:1px solid #111;font-weight:900}
+.profit{color:#166534!important}
+.loss{color:#b91c1c!important}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #dbe4f0;padding:8px;text-align:left}
+th{background:#f8fbff}
+@media(max-width:900px){.grid,.summary{grid-template-columns:1fr}.row{grid-template-columns:1fr 130px}}
+@media print{
+  @page{size:A4;margin:10mm}
+  body{background:#fff;padding:0}
+  .header,.note,.filters,.summary,.btn-row{display:none!important}
+  .card{box-shadow:none;border:0;padding:0;margin:0}
+  .report{border:0;border-radius:0;padding:0}
+}
 </style>
 </head>
 
@@ -40,250 +53,259 @@ td{padding:13px 12px;border-bottom:1px solid #eef2f7;font-weight:700;}
 
 <div class="header">
   <div>
-    <h1>Profit & Loss</h1>
-    <p>Revenue, purchases, expenses and estimated net profit report.</p>
+    <h1>Profit & Loss Report</h1>
+    <p>Sales, purchase cost and expense-based profitability summary.</p>
   </div>
-  <a href="/dashboard.html" class="back">Back to Dashboard</a>
+  <a class="back" href="/dashboard.html">Back</a>
 </div>
 
-<div class="card filter-card">
+<div class="note">
+  This report is generated from Sales Invoices, Purchase Invoices and Expense Entries.
+</div>
+
+<div class="card filters">
+  <h2>Filters</h2>
+
   <div class="grid">
     <div>
       <label>From Date</label>
-      <input type="date" id="fromDate">
+      <input type="date" id="fromDate" onchange="generatePL()">
     </div>
 
     <div>
       <label>To Date</label>
-      <input type="date" id="toDate">
+      <input type="date" id="toDate" onchange="generatePL()">
     </div>
 
     <div>
-      <label>Report Basis</label>
-      <select id="reportBasis">
-        <option>Invoice Basis</option>
-        <option>Paid/Received Basis</option>
-      </select>
+      <label>Report Name</label>
+      <input id="reportName" value="Profit & Loss Report" oninput="generatePL()">
     </div>
+  </div>
 
-    <div>
-      <label>&nbsp;</label>
-      <button class="btn" onclick="generatePL()">Generate</button>
-      <button class="btn btn-light" onclick="window.print()">Print</button>
-    </div>
+  <div class="btn-row">
+    <button class="btn" onclick="generatePL()">Refresh Report</button>
+    <button class="btn btn-light" onclick="clearFilters()">Clear Filter</button>
+    <button class="btn btn-light" onclick="window.print()">Print</button>
   </div>
 </div>
 
-<div class="summary-grid">
-  <div class="summary">
-    <span>Total Revenue</span>
-    <h2 id="totalRevenue">OMR 0.000</h2>
-  </div>
+<div class="summary">
+  <div class="box"><b>Total Revenue</b><span id="summaryRevenue">OMR 0.000</span></div>
+  <div class="box"><b>Cost of Goods Sold</b><span id="summaryCogs">OMR 0.000</span></div>
+  <div class="box"><b>Total Expenses</b><span id="summaryExpenses">OMR 0.000</span></div>
+  <div class="box"><b>Net Profit / Loss</b><span id="summaryNet">OMR 0.000</span></div>
+</div>
 
-  <div class="summary">
-    <span>Total Purchases</span>
-    <h2 id="totalPurchases">OMR 0.000</h2>
-  </div>
+<br>
 
-  <div class="summary">
-    <span>Total Expenses</span>
-    <h2 id="totalExpenses">OMR 0.000</h2>
-  </div>
+<div class="card">
+  <div class="report">
 
-  <div class="summary">
-    <span>Net Profit / Loss</span>
-    <h2 id="netProfit">OMR 0.000</h2>
+    <div class="report-head">
+      <h2 id="pReportName">Profit & Loss Report</h2>
+      <p id="pPeriod">For the selected period</p>
+    </div>
+
+    <div class="section-title">Income</div>
+
+    <div class="row">
+      <div class="label">Sales Revenue</div>
+      <div class="amount" id="pSalesRevenue">0.000</div>
+    </div>
+
+    <div class="row total-row">
+      <div class="label">Total Income</div>
+      <div class="amount" id="pTotalIncome">0.000</div>
+    </div>
+
+    <div class="section-title">Cost of Goods Sold</div>
+
+    <div class="row">
+      <div class="label">Purchase Cost</div>
+      <div class="amount" id="pPurchaseCost">0.000</div>
+    </div>
+
+    <div class="row total-row">
+      <div class="label">Gross Profit</div>
+      <div class="amount" id="pGrossProfit">0.000</div>
+    </div>
+
+    <div class="section-title">Expenses</div>
+
+    <div id="expenseRows"></div>
+
+    <div class="row total-row">
+      <div class="label">Total Expenses</div>
+      <div class="amount" id="pTotalExpenses">0.000</div>
+    </div>
+
+    <div class="section-title">Net Result</div>
+
+    <div class="row total-row">
+      <div class="label" id="netLabel">Net Profit / Loss</div>
+      <div class="amount" id="pNetProfit">0.000</div>
+    </div>
+
   </div>
 </div>
 
 <div class="card">
-  <div class="section-title">Profit & Loss Summary</div>
-
-  <table>
-    <tbody id="plTable"></tbody>
-  </table>
-</div>
-
-<div class="card">
-  <div class="section-title">Expense Category Breakdown</div>
+  <h2>Expense Category Breakup</h2>
 
   <table>
     <thead>
       <tr>
         <th>Expense Category</th>
-        <th class="amount">Amount</th>
+        <th>Total Amount</th>
       </tr>
     </thead>
-    <tbody id="expenseBreakdown"></tbody>
-  </table>
-</div>
-
-<div class="card">
-  <div class="section-title">Purchase Category Breakdown</div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Purchase Category</th>
-        <th class="amount">Amount</th>
-      </tr>
-    </thead>
-    <tbody id="purchaseBreakdown"></tbody>
+    <tbody id="expenseBreakupBody"></tbody>
   </table>
 </div>
 
 <script>
-function getSales(){return JSON.parse(localStorage.getItem("post91SalesInvoices") || "[]");}
-function getPurchases(){return JSON.parse(localStorage.getItem("post91PurchaseInvoices") || "[]");}
-function getExpenses(){return JSON.parse(localStorage.getItem("post91Expenses") || "[]");}
-function getReceipts(){return JSON.parse(localStorage.getItem("post91Receipts") || "[]");}
-function getPayments(){return JSON.parse(localStorage.getItem("post91SupplierPayments") || "[]");}
+function gd(k){return JSON.parse(localStorage.getItem(k)||"[]")}
+function mv(n){return Number(n||0).toFixed(3)}
+function mt(n){return "OMR "+mv(n)}
 
-function money(n){
-  return "OMR " + Number(n || 0).toFixed(3);
+function isCancelled(status){
+  return (status||"").toLowerCase()==="cancelled";
 }
 
-function inDate(date,from,to){
-  if(!date) return true;
-  const d = new Date(date);
-  if(from && d < new Date(from)) return false;
-  if(to && d > new Date(to)) return false;
+function dateOk(date){
+  if(!date)return true;
+
+  let d=new Date(date);
+  let f=fromDate.value ? new Date(fromDate.value) : null;
+  let t=toDate.value ? new Date(toDate.value) : null;
+
+  if(f && d<f)return false;
+  if(t && d>t)return false;
+
   return true;
 }
 
-function sum(arr,field){
-  return arr.reduce((s,row)=>s + Number(row[field] || 0),0);
-}
+function periodText(){
+  if(fromDate.value && toDate.value){
+    return `From ${fromDate.value} to ${toDate.value}`;
+  }
 
-function groupSum(arr,keyField,amountField){
-  const map = {};
+  if(fromDate.value){
+    return `From ${fromDate.value}`;
+  }
 
-  arr.forEach(row=>{
-    const key = row[keyField] || "Unclassified";
-    if(!map[key]) map[key] = 0;
-    map[key] += Number(row[amountField] || 0);
-  });
+  if(toDate.value){
+    return `Up to ${toDate.value}`;
+  }
 
-  return map;
+  return "For all periods";
 }
 
 function generatePL(){
-  const from = document.getElementById("fromDate").value;
-  const to = document.getElementById("toDate").value;
-  const basis = document.getElementById("reportBasis").value;
+  let sales=gd("post91SalesInvoices")
+    .filter(x=>!isCancelled(x.docStatus))
+    .filter(x=>dateOk(x.invoiceDate));
 
-  const sales = getSales().filter(s=>inDate(s.invoiceDate,from,to));
-  const purchases = getPurchases().filter(p=>inDate(p.purchaseDate,from,to));
-  const expenses = getExpenses().filter(e=>inDate(e.expenseDate,from,to));
+  let purchases=gd("post91PurchaseInvoices")
+    .filter(x=>!isCancelled(x.docStatus))
+    .filter(x=>dateOk(x.purchaseDate));
 
-  const receipts = getReceipts().filter(r=>inDate(r.receiptDate,from,to));
-  const supplierPayments = getPayments().filter(p=>inDate(p.paymentDate,from,to));
+  let expenses=gd("post91ExpenseEntries")
+    .filter(x=>!isCancelled(x.status))
+    .filter(x=>dateOk(x.expenseDate));
 
-  let revenue = 0;
-  let purchaseCost = 0;
-  let expenseCost = 0;
+  let salesRevenue=sales.reduce((s,x)=>s+Number(x.beforeTax||x.grandTotal||0),0);
 
-  if(basis === "Invoice Basis"){
-    revenue = sum(sales,"beforeTax");
-    purchaseCost = sum(purchases,"beforeTax");
-    expenseCost = sum(expenses,"beforeTax");
-  } else {
-    revenue = sum(receipts,"receiptAmount");
-    purchaseCost = sum(supplierPayments,"paymentAmount");
-    expenseCost = expenses
-      .filter(e=>e.paymentStatus === "Paid")
-      .reduce((s,e)=>s + Number(e.beforeTax || 0),0);
-  }
+  let purchaseCost=purchases.reduce((s,x)=>s+Number(x.beforeTax||x.grandTotal||0),0);
 
-  const grossProfit = revenue - purchaseCost;
-  const netProfit = grossProfit - expenseCost;
+  let expenseMap={};
+  let expenseTotal=0;
 
-  document.getElementById("totalRevenue").textContent = money(revenue);
-  document.getElementById("totalPurchases").textContent = money(purchaseCost);
-  document.getElementById("totalExpenses").textContent = money(expenseCost);
-  document.getElementById("netProfit").textContent = money(netProfit);
-  document.getElementById("netProfit").className = netProfit >= 0 ? "profit" : "loss";
+  expenses.forEach(e=>{
+    let cat=e.expenseCategory||"Miscellaneous Expense";
+    let amt=Number(e.baseAmount||e.totalAmount||0);
 
-  renderPL(revenue,purchaseCost,grossProfit,expenseCost,netProfit);
-  renderExpenseBreakdown(expenses);
-  renderPurchaseBreakdown(purchases);
+    if(!expenseMap[cat])expenseMap[cat]=0;
+    expenseMap[cat]+=amt;
+    expenseTotal+=amt;
+  });
+
+  let grossProfit=salesRevenue-purchaseCost;
+  let netProfit=grossProfit-expenseTotal;
+
+  summaryRevenue.textContent=mt(salesRevenue);
+  summaryCogs.textContent=mt(purchaseCost);
+  summaryExpenses.textContent=mt(expenseTotal);
+  summaryNet.textContent=mt(netProfit);
+  summaryNet.className=netProfit>=0?"profit":"loss";
+
+  pReportName.textContent=reportName.value||"Profit & Loss Report";
+  pPeriod.textContent=periodText();
+
+  pSalesRevenue.textContent=mv(salesRevenue);
+  pTotalIncome.textContent=mv(salesRevenue);
+  pPurchaseCost.textContent=mv(purchaseCost);
+  pGrossProfit.textContent=mv(grossProfit);
+  pTotalExpenses.textContent=mv(expenseTotal);
+  pNetProfit.textContent=mv(netProfit);
+
+  pGrossProfit.className="amount "+(grossProfit>=0?"profit":"loss");
+  pNetProfit.className="amount "+(netProfit>=0?"profit":"loss");
+  netLabel.textContent=netProfit>=0?"Net Profit":"Net Loss";
+
+  renderExpenseRows(expenseMap);
 }
 
-function renderPL(revenue,purchaseCost,grossProfit,expenseCost,netProfit){
-  const tbody = document.getElementById("plTable");
+function renderExpenseRows(expenseMap){
+  expenseRows.innerHTML="";
+  expenseBreakupBody.innerHTML="";
 
-  tbody.innerHTML = `
-    <tr>
-      <td><strong>Revenue / Sales Before VAT</strong></td>
-      <td class="amount profit">${money(revenue)}</td>
-    </tr>
+  let cats=Object.keys(expenseMap).sort();
 
-    <tr>
-      <td>Less: Purchases / Cost Before VAT</td>
-      <td class="amount loss">${money(purchaseCost)}</td>
-    </tr>
+  if(cats.length===0){
+    expenseRows.innerHTML=`
+      <div class="row">
+        <div class="label">No expenses recorded</div>
+        <div class="amount">0.000</div>
+      </div>
+    `;
 
-    <tr class="total-row">
-      <td>Gross Profit</td>
-      <td class="amount ${grossProfit >= 0 ? "profit" : "loss"}">${money(grossProfit)}</td>
-    </tr>
+    expenseBreakupBody.innerHTML=`
+      <tr>
+        <td>No expenses recorded</td>
+        <td>OMR 0.000</td>
+      </tr>
+    `;
 
-    <tr>
-      <td>Less: Operating Expenses Before VAT</td>
-      <td class="amount loss">${money(expenseCost)}</td>
-    </tr>
-
-    <tr class="net-row">
-      <td>Net Profit / Loss</td>
-      <td class="amount ${netProfit >= 0 ? "profit" : "loss"}">${money(netProfit)}</td>
-    </tr>
-  `;
-}
-
-function renderExpenseBreakdown(expenses){
-  const tbody = document.getElementById("expenseBreakdown");
-  const map = groupSum(expenses,"expenseCategory","beforeTax");
-
-  tbody.innerHTML = "";
-
-  const keys = Object.keys(map);
-
-  if(keys.length === 0){
-    tbody.innerHTML = `<tr><td colspan="2">No expenses found.</td></tr>`;
     return;
   }
 
-  keys.forEach(k=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${k}</td>
-      <td class="amount">${money(map[k])}</td>
+  cats.forEach(cat=>{
+    let amt=expenseMap[cat];
+
+    let row=document.createElement("div");
+    row.className="row";
+    row.innerHTML=`
+      <div class="label">${cat}</div>
+      <div class="amount">${mv(amt)}</div>
     `;
-    tbody.appendChild(tr);
+    expenseRows.appendChild(row);
+
+    let tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${cat}</td>
+      <td>${mt(amt)}</td>
+    `;
+    expenseBreakupBody.appendChild(tr);
   });
 }
 
-function renderPurchaseBreakdown(purchases){
-  const tbody = document.getElementById("purchaseBreakdown");
-  const map = groupSum(purchases,"purchaseCategory","beforeTax");
-
-  tbody.innerHTML = "";
-
-  const keys = Object.keys(map);
-
-  if(keys.length === 0){
-    tbody.innerHTML = `<tr><td colspan="2">No purchases found.</td></tr>`;
-    return;
-  }
-
-  keys.forEach(k=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${k}</td>
-      <td class="amount">${money(map[k])}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+function clearFilters(){
+  fromDate.value="";
+  toDate.value="";
+  reportName.value="Profit & Loss Report";
+  generatePL();
 }
 
 generatePL();

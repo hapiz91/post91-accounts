@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Master | Post91 Accounts</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.header h1{margin:0;color:#0d6efd}
+.back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.full{grid-column:1/-1}
+label{display:block;font-weight:800;margin-bottom:6px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
+textarea{min-height:80px}
+.btn{border:0;background:#0d6efd;color:white;padding:10px 14px;border-radius:11px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-danger{background:#ef4444}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #dbe4f0;padding:8px;vertical-align:top}
+th{background:#f8fbff;text-align:left}
+.search-box{margin-bottom:14px}
+.badge{padding:5px 10px;border-radius:99px;font-size:12px;font-weight:900;display:inline-block}
+.active{background:#dcfce7;color:#166534}
+.inactive{background:#fee2e2;color:#991b1b}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+@media(max-width:900px){.grid{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Customer Master</h1>
+    <p>Create, edit, activate/inactivate and manage customer records.</p>
+  </div>
+  <a class="back" href="/dashboard.html">Back</a>
+</div>
+
+<div class="note">
+  This page saves customers in <b>post91Customers</b>, so Quotation, Delivery Order and Sales Invoice will use the same customer list.
+</div>
+
+<div class="card">
+  <h2 id="formTitle">Add Customer</h2>
+
+  <div class="grid">
+    <div>
+      <label>Customer Name *</label>
+      <input id="customerName" placeholder="Customer / Company Name">
+    </div>
+
+    <div>
+      <label>Contact Person / Attention</label>
+      <input id="contactPerson" placeholder="Contact person name">
+    </div>
+
+    <div class="full">
+      <label>Address</label>
+      <textarea id="address" placeholder="Customer address"></textarea>
+    </div>
+
+    <div>
+      <label>Mobile</label>
+      <input id="mobile" placeholder="Mobile number">
+    </div>
+
+    <div>
+      <label>Email</label>
+      <input id="email" placeholder="Email ID">
+    </div>
+
+    <div>
+      <label>VAT IN Number</label>
+      <input id="vatNumber" placeholder="VAT number">
+    </div>
+
+    <div>
+      <label>Credit Period</label>
+      <input id="creditPeriod" placeholder="Example: 30 Days">
+    </div>
+
+    <div>
+      <label>Status</label>
+      <select id="status">
+        <option>Active</option>
+        <option>Inactive</option>
+      </select>
+    </div>
+
+    <div class="full">
+      <label>Remarks</label>
+      <textarea id="remarks" placeholder="Optional remarks"></textarea>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="saveCustomer()">Save Customer</button>
+    <button class="btn btn-light" onclick="clearForm()">Clear</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Customer List</h2>
+
+  <input class="search-box" id="searchText" placeholder="Search by customer name, mobile, email, VAT, contact person..." oninput="loadCustomers()">
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:60px;">#</th>
+        <th>Customer</th>
+        <th>Contact</th>
+        <th>Mobile</th>
+        <th>Email</th>
+        <th>VAT IN</th>
+        <th>Credit</th>
+        <th>Status</th>
+        <th style="width:210px;">Action</th>
+      </tr>
+    </thead>
+    <tbody id="customerBody"></tbody>
+  </table>
+</div>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="/firebase-config.js"></script>
+<script src="/data-sync.js"></script>
+<script>
+const CUSTOMER_KEY = "post91Customers";
+let EDIT_INDEX = "";
+
+function gd(k){
+  return JSON.parse(localStorage.getItem(k) || "[]");
+}
+
+function sd(k,d){
+  localStorage.setItem(k, JSON.stringify(d));
+}
+
+function saveCustomer(){
+  let customers = gd(CUSTOMER_KEY);
+
+  let name = customerName.value.trim();
+
+  if(!name){
+    alert("Customer name is required.");
+    return;
+  }
+
+  let rec = {
+    customerName:name,
+    name:name,
+
+    contactPerson:contactPerson.value.trim(),
+    attention:contactPerson.value.trim(),
+    contactName:contactPerson.value.trim(),
+
+    address:address.value.trim(),
+    customerAddress:address.value.trim(),
+
+    mobile:mobile.value.trim(),
+    phone:mobile.value.trim(),
+
+    email:email.value.trim(),
+    vatNumber:vatNumber.value.trim(),
+    creditPeriod:creditPeriod.value.trim(),
+    status:status.value,
+    remarks:remarks.value.trim(),
+
+    updatedAt:new Date().toISOString()
+  };
+
+  if(EDIT_INDEX === ""){
+    rec.createdAt = new Date().toISOString();
+    customers.push(rec);
+    alert("Customer saved successfully.");
+  }else{
+    rec.createdAt = customers[EDIT_INDEX].createdAt || new Date().toISOString();
+    customers[EDIT_INDEX] = {...customers[EDIT_INDEX], ...rec};
+    alert("Customer updated successfully.");
+  }
+
+  sd(CUSTOMER_KEY, customers);
+  clearForm();
+  loadCustomers();
+}
+
+function editCustomer(i){
+  let c = gd(CUSTOMER_KEY)[i];
+
+  EDIT_INDEX = i;
+  formTitle.textContent = "Edit Customer";
+
+  customerName.value = c.customerName || c.name || "";
+  contactPerson.value = c.contactPerson || c.attention || c.contactName || "";
+  address.value = c.address || c.customerAddress || "";
+  mobile.value = c.mobile || c.phone || "";
+  email.value = c.email || "";
+  vatNumber.value = c.vatNumber || "";
+  creditPeriod.value = c.creditPeriod || "";
+  status.value = c.status || "Active";
+  remarks.value = c.remarks || "";
+
+  scrollTo({top:0,behavior:"smooth"});
+}
+
+function deleteCustomer(i){
+  if(!confirm("Delete this customer?")) return;
+
+  let customers = gd(CUSTOMER_KEY);
+  customers.splice(i,1);
+  sd(CUSTOMER_KEY, customers);
+  loadCustomers();
+}
+
+function toggleStatus(i){
+  let customers = gd(CUSTOMER_KEY);
+  customers[i].status = (customers[i].status || "Active") === "Active" ? "Inactive" : "Active";
+  customers[i].updatedAt = new Date().toISOString();
+  sd(CUSTOMER_KEY, customers);
+  loadCustomers();
+}
+
+function clearForm(){
+  EDIT_INDEX = "";
+  formTitle.textContent = "Add Customer";
+
+  customerName.value = "";
+  contactPerson.value = "";
+  address.value = "";
+  mobile.value = "";
+  email.value = "";
+  vatNumber.value = "";
+  creditPeriod.value = "";
+  status.value = "Active";
+  remarks.value = "";
+}
+
+function badge(s){
+  return `<span class="badge ${(s || "Active") === "Active" ? "active" : "inactive"}">${s || "Active"}</span>`;
+}
+
+function loadCustomers(){
+  let q = (searchText.value || "").toLowerCase();
+  let customers = gd(CUSTOMER_KEY);
+
+  customerBody.innerHTML = "";
+
+  customers.forEach((c,i)=>{
+    let combined = JSON.stringify(c).toLowerCase();
+
+    if(q && !combined.includes(q)) return;
+
+    let tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td><b>${c.customerName || c.name || "-"}</b><br><small>${c.address || c.customerAddress || ""}</small></td>
+      <td>${c.contactPerson || c.attention || c.contactName || "-"}</td>
+      <td>${c.mobile || c.phone || "-"}</td>
+      <td>${c.email || "-"}</td>
+      <td>${c.vatNumber || "-"}</td>
+      <td>${c.creditPeriod || "-"}</td>
+      <td>${badge(c.status)}</td>
+      <td>
+        <button class="btn btn-light" onclick="editCustomer(${i})">Edit</button>
+        <button class="btn btn-light" onclick="toggleStatus(${i})">Status</button>
+        <button class="btn btn-danger" onclick="deleteCustomer(${i})">Delete</button>
+      </td>
+    `;
+
+    customerBody.appendChild(tr);
+  });
+}
+
+loadCustomers();
+</script>
+
+</body>
+</html>

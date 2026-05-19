@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Company Profile | Post91 Accounts</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.header h1{margin:0;color:#0d6efd}
+.back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.full{grid-column:1/-1}
+label{display:block;font-weight:800;margin-bottom:6px}
+input,textarea{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
+textarea{min-height:90px}
+.btn{border:0;background:#0d6efd;color:white;padding:12px 17px;border-radius:12px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-danger{background:#ef4444}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+.preview-box{border:1px dashed #94a3b8;border-radius:15px;padding:15px;text-align:center;background:#f8fafc}
+.preview-box img{max-width:100%;max-height:180px;object-fit:contain;display:none;margin:auto}
+.company-preview{border:1px solid #111;border-radius:12px;padding:20px;text-align:center;background:white;color:#000}
+.company-name{font-size:28px;font-weight:900;color:#004b7a}
+.company-line{font-size:13px;font-weight:700;margin-top:5px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Company Profile</h1>
+    <p>Company details and letterhead used in Quotation, D/O and Sales Invoice.</p>
+  </div>
+  <a class="back" href="/dashboard.html">Back</a>
+</div>
+
+<div class="note">
+  Existing company profile data will load automatically. If you do not upload a new letterhead, the old letterhead will remain.
+</div>
+
+<div class="card">
+  <h2>Company Details</h2>
+
+  <div class="grid">
+    <div>
+      <label>Company Name *</label>
+      <input id="companyName" placeholder="Company Name">
+    </div>
+
+    <div>
+      <label>Trade Name / Short Name</label>
+      <input id="tradeName" placeholder="Optional">
+    </div>
+
+    <div class="full">
+      <label>Address</label>
+      <textarea id="address" placeholder="Full company address"></textarea>
+    </div>
+
+    <div>
+      <label>Phone</label>
+      <input id="phone" placeholder="Office phone">
+    </div>
+
+    <div>
+      <label>Mobile</label>
+      <input id="mobile" placeholder="Mobile / WhatsApp">
+    </div>
+
+    <div>
+      <label>Email</label>
+      <input id="email" placeholder="company@email.com">
+    </div>
+
+    <div>
+      <label>Website</label>
+      <input id="website" placeholder="www.example.com">
+    </div>
+
+    <div>
+      <label>VAT IN Number</label>
+      <input id="vatNumber" placeholder="OMxxxxxxxxx">
+    </div>
+
+    <div>
+      <label>C.R. Number</label>
+      <input id="crNumber" placeholder="Commercial Registration No">
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Letterhead Upload</h2>
+
+  <div class="grid">
+    <div>
+      <label>Upload Letterhead Image</label>
+      <input type="file" id="letterheadFile" accept="image/*" onchange="previewNewLetterhead()">
+      <p class="note" style="margin-top:10px;">
+        Recommended: wide PNG/JPG letterhead. This will appear at the top of all printed documents.
+      </p>
+    </div>
+
+    <div class="preview-box">
+      <b>Letterhead Preview</b>
+      <br><br>
+      <img id="letterheadPreview" alt="">
+      <p id="noLetterheadText">No letterhead uploaded. Company details will be used as heading.</p>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-danger" type="button" onclick="removeLetterhead()">Remove Letterhead</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Fallback Header Preview</h2>
+
+  <div class="company-preview">
+    <div class="company-name" id="previewCompanyName">Company Name</div>
+    <div class="company-line" id="previewAddress"></div>
+    <div class="company-line" id="previewContact"></div>
+    <div class="company-line" id="previewVat"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" type="button" onclick="saveCompanyProfile()">Save / Update Company Profile</button>
+    <button class="btn btn-light" type="button" onclick="loadCompanyProfile()">Reload Existing Data</button>
+    <button class="btn btn-danger" type="button" onclick="clearCompanyProfile()">Clear Profile</button>
+  </div>
+</div>
+
+<script>
+let selectedLetterheadBase64 = "";
+
+function getCompanyProfile(){
+  return JSON.parse(localStorage.getItem("post91CompanyProfile") || "{}");
+}
+
+function saveProfileToStorage(profile){
+  localStorage.setItem("post91CompanyProfile", JSON.stringify(profile));
+}
+
+function loadCompanyProfile(){
+  let company = getCompanyProfile();
+
+  companyName.value = company.companyName || "";
+  tradeName.value = company.tradeName || "";
+  address.value = company.address || "";
+  phone.value = company.phone || "";
+  mobile.value = company.mobile || "";
+  email.value = company.email || "";
+  website.value = company.website || "";
+  vatNumber.value = company.vatNumber || "";
+  crNumber.value = company.crNumber || "";
+
+  selectedLetterheadBase64 = company.letterhead || "";
+
+  if(selectedLetterheadBase64){
+    letterheadPreview.src = selectedLetterheadBase64;
+    letterheadPreview.style.display = "block";
+    noLetterheadText.style.display = "none";
+  }else{
+    letterheadPreview.removeAttribute("src");
+    letterheadPreview.style.display = "none";
+    noLetterheadText.style.display = "block";
+  }
+
+  updateFallbackPreview();
+}
+
+function previewNewLetterhead(){
+  let file = letterheadFile.files[0];
+
+  if(!file){
+    return;
+  }
+
+  let reader = new FileReader();
+
+  reader.onload = function(e){
+    selectedLetterheadBase64 = e.target.result;
+    letterheadPreview.src = selectedLetterheadBase64;
+    letterheadPreview.style.display = "block";
+    noLetterheadText.style.display = "none";
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function removeLetterhead(){
+  selectedLetterheadBase64 = "";
+  letterheadFile.value = "";
+  letterheadPreview.removeAttribute("src");
+  letterheadPreview.style.display = "none";
+  noLetterheadText.style.display = "block";
+  alert("Letterhead removed. Save profile to confirm.");
+}
+
+function saveCompanyProfile(){
+  if(!companyName.value.trim()){
+    alert("Company name is required.");
+    return;
+  }
+
+  let oldProfile = getCompanyProfile();
+
+  let updatedProfile = {
+    ...oldProfile,
+    companyName: companyName.value.trim(),
+    name: companyName.value.trim(),
+    tradeName: tradeName.value.trim(),
+    address: address.value.trim(),
+    phone: phone.value.trim(),
+    mobile: mobile.value.trim(),
+    email: email.value.trim(),
+    website: website.value.trim(),
+    vatNumber: vatNumber.value.trim(),
+    vatIn: vatNumber.value.trim(),
+    crNumber: crNumber.value.trim(),
+    letterhead: selectedLetterheadBase64 || "",
+    updatedAt: new Date().toISOString()
+  };
+
+  saveProfileToStorage(updatedProfile);
+  updateFallbackPreview();
+
+  alert("Company profile updated successfully.");
+}
+
+function clearCompanyProfile(){
+  if(!confirm("Clear full company profile including letterhead?")) return;
+
+  localStorage.removeItem("post91CompanyProfile");
+
+  companyName.value = "";
+  tradeName.value = "";
+  address.value = "";
+  phone.value = "";
+  mobile.value = "";
+  email.value = "";
+  website.value = "";
+  vatNumber.value = "";
+  crNumber.value = "";
+  letterheadFile.value = "";
+  selectedLetterheadBase64 = "";
+
+  letterheadPreview.removeAttribute("src");
+  letterheadPreview.style.display = "none";
+  noLetterheadText.style.display = "block";
+
+  updateFallbackPreview();
+
+  alert("Company profile cleared.");
+}
+
+function updateFallbackPreview(){
+  previewCompanyName.textContent = companyName.value || "Company Name";
+  previewAddress.textContent = address.value || "";
+
+  let contactParts = [];
+
+  if(phone.value) contactParts.push("Tel: " + phone.value);
+  if(mobile.value) contactParts.push("Mobile: " + mobile.value);
+  if(email.value) contactParts.push("Email: " + email.value);
+  if(website.value) contactParts.push("Website: " + website.value);
+
+  previewContact.textContent = contactParts.join(" | ");
+
+  let regParts = [];
+
+  if(vatNumber.value) regParts.push("VAT IN: " + vatNumber.value);
+  if(crNumber.value) regParts.push("C.R. No: " + crNumber.value);
+
+  previewVat.textContent = regParts.join(" | ");
+}
+
+[
+  companyName,
+  tradeName,
+  address,
+  phone,
+  mobile,
+  email,
+  website,
+  vatNumber,
+  crNumber
+].forEach(el=>{
+  el.addEventListener("input", updateFallbackPreview);
+});
+
+loadCompanyProfile();
+</script>
+
+</body>
+</html>

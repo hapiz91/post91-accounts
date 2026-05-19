@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supplier Master | Post91 Accounts</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.header h1{margin:0;color:#0d6efd}
+.back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.full{grid-column:1/-1}
+label{display:block;font-weight:800;margin-bottom:6px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
+textarea{min-height:80px}
+.btn{border:0;background:#0d6efd;color:white;padding:10px 14px;border-radius:11px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-danger{background:#ef4444}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #dbe4f0;padding:8px;vertical-align:top}
+th{background:#f8fbff;text-align:left}
+.search-box{margin-bottom:14px}
+.badge{padding:5px 10px;border-radius:99px;font-size:12px;font-weight:900;display:inline-block}
+.active{background:#dcfce7;color:#166534}
+.inactive{background:#fee2e2;color:#991b1b}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+@media(max-width:900px){.grid{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Supplier Master</h1>
+    <p>Create, edit, activate/inactivate and manage supplier records.</p>
+  </div>
+  <a class="back" href="/dashboard.html">Back</a>
+</div>
+
+<div class="note">
+  This page saves suppliers in <b>post91Suppliers</b>. Purchase, expense and supplier ledger modules can use this same supplier list later.
+</div>
+
+<div class="card">
+  <h2 id="formTitle">Add Supplier</h2>
+
+  <div class="grid">
+    <div>
+      <label>Supplier Name *</label>
+      <input id="supplierName" placeholder="Supplier / Company Name">
+    </div>
+
+    <div>
+      <label>Contact Person / Attention</label>
+      <input id="contactPerson" placeholder="Contact person name">
+    </div>
+
+    <div class="full">
+      <label>Address</label>
+      <textarea id="address" placeholder="Supplier address"></textarea>
+    </div>
+
+    <div>
+      <label>Mobile</label>
+      <input id="mobile" placeholder="Mobile number">
+    </div>
+
+    <div>
+      <label>Email</label>
+      <input id="email" placeholder="Email ID">
+    </div>
+
+    <div>
+      <label>VAT IN Number</label>
+      <input id="vatNumber" placeholder="VAT number">
+    </div>
+
+    <div>
+      <label>Credit Period</label>
+      <input id="creditPeriod" placeholder="Example: 30 Days">
+    </div>
+
+    <div>
+      <label>Status</label>
+      <select id="status">
+        <option>Active</option>
+        <option>Inactive</option>
+      </select>
+    </div>
+
+    <div class="full">
+      <label>Remarks</label>
+      <textarea id="remarks" placeholder="Optional remarks"></textarea>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="saveSupplier()">Save Supplier</button>
+    <button class="btn btn-light" onclick="clearForm()">Clear</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Supplier List</h2>
+
+  <input class="search-box" id="searchText" placeholder="Search by supplier name, mobile, email, VAT, contact person..." oninput="loadSuppliers()">
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:60px;">#</th>
+        <th>Supplier</th>
+        <th>Contact</th>
+        <th>Mobile</th>
+        <th>Email</th>
+        <th>VAT IN</th>
+        <th>Credit</th>
+        <th>Status</th>
+        <th style="width:210px;">Action</th>
+      </tr>
+    </thead>
+    <tbody id="supplierBody"></tbody>
+  </table>
+</div>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="/firebase-config.js"></script>
+<script src="/data-sync.js"></script>
+<script>
+const SUPPLIER_KEY = "post91Suppliers";
+let EDIT_INDEX = "";
+
+function gd(k){
+  return JSON.parse(localStorage.getItem(k) || "[]");
+}
+
+function sd(k,d){
+  localStorage.setItem(k, JSON.stringify(d));
+}
+
+function saveSupplier(){
+  let suppliers = gd(SUPPLIER_KEY);
+
+  let name = supplierName.value.trim();
+
+  if(!name){
+    alert("Supplier name is required.");
+    return;
+  }
+
+  let rec = {
+    supplierName:name,
+    name:name,
+
+    contactPerson:contactPerson.value.trim(),
+    attention:contactPerson.value.trim(),
+    contactName:contactPerson.value.trim(),
+
+    address:address.value.trim(),
+    supplierAddress:address.value.trim(),
+
+    mobile:mobile.value.trim(),
+    phone:mobile.value.trim(),
+
+    email:email.value.trim(),
+    vatNumber:vatNumber.value.trim(),
+    creditPeriod:creditPeriod.value.trim(),
+    status:status.value,
+    remarks:remarks.value.trim(),
+
+    updatedAt:new Date().toISOString()
+  };
+
+  if(EDIT_INDEX === ""){
+    rec.createdAt = new Date().toISOString();
+    suppliers.push(rec);
+    alert("Supplier saved successfully.");
+  }else{
+    rec.createdAt = suppliers[EDIT_INDEX].createdAt || new Date().toISOString();
+    suppliers[EDIT_INDEX] = {...suppliers[EDIT_INDEX], ...rec};
+    alert("Supplier updated successfully.");
+  }
+
+  sd(SUPPLIER_KEY, suppliers);
+  clearForm();
+  loadSuppliers();
+}
+
+function editSupplier(i){
+  let s = gd(SUPPLIER_KEY)[i];
+
+  EDIT_INDEX = i;
+  formTitle.textContent = "Edit Supplier";
+
+  supplierName.value = s.supplierName || s.name || "";
+  contactPerson.value = s.contactPerson || s.attention || s.contactName || "";
+  address.value = s.address || s.supplierAddress || "";
+  mobile.value = s.mobile || s.phone || "";
+  email.value = s.email || "";
+  vatNumber.value = s.vatNumber || "";
+  creditPeriod.value = s.creditPeriod || "";
+  status.value = s.status || "Active";
+  remarks.value = s.remarks || "";
+
+  scrollTo({top:0,behavior:"smooth"});
+}
+
+function deleteSupplier(i){
+  if(!confirm("Delete this supplier?")) return;
+
+  let suppliers = gd(SUPPLIER_KEY);
+  suppliers.splice(i,1);
+  sd(SUPPLIER_KEY, suppliers);
+  loadSuppliers();
+}
+
+function toggleStatus(i){
+  let suppliers = gd(SUPPLIER_KEY);
+  suppliers[i].status = (suppliers[i].status || "Active") === "Active" ? "Inactive" : "Active";
+  suppliers[i].updatedAt = new Date().toISOString();
+  sd(SUPPLIER_KEY, suppliers);
+  loadSuppliers();
+}
+
+function clearForm(){
+  EDIT_INDEX = "";
+  formTitle.textContent = "Add Supplier";
+
+  supplierName.value = "";
+  contactPerson.value = "";
+  address.value = "";
+  mobile.value = "";
+  email.value = "";
+  vatNumber.value = "";
+  creditPeriod.value = "";
+  status.value = "Active";
+  remarks.value = "";
+}
+
+function badge(s){
+  return `<span class="badge ${(s || "Active") === "Active" ? "active" : "inactive"}">${s || "Active"}</span>`;
+}
+
+function loadSuppliers(){
+  let q = (searchText.value || "").toLowerCase();
+  let suppliers = gd(SUPPLIER_KEY);
+
+  supplierBody.innerHTML = "";
+
+  suppliers.forEach((s,i)=>{
+    let combined = JSON.stringify(s).toLowerCase();
+
+    if(q && !combined.includes(q)) return;
+
+    let tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td><b>${s.supplierName || s.name || "-"}</b><br><small>${s.address || s.supplierAddress || ""}</small></td>
+      <td>${s.contactPerson || s.attention || s.contactName || "-"}</td>
+      <td>${s.mobile || s.phone || "-"}</td>
+      <td>${s.email || "-"}</td>
+      <td>${s.vatNumber || "-"}</td>
+      <td>${s.creditPeriod || "-"}</td>
+      <td>${badge(s.status)}</td>
+      <td>
+        <button class="btn btn-light" onclick="editSupplier(${i})">Edit</button>
+        <button class="btn btn-light" onclick="toggleStatus(${i})">Status</button>
+        <button class="btn btn-danger" onclick="deleteSupplier(${i})">Delete</button>
+      </td>
+    `;
+
+    supplierBody.appendChild(tr);
+  });
+}
+
+loadSuppliers();
+</script>
+
+</body>
+</html>

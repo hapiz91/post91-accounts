@@ -6,271 +6,45 @@
 <title>Stock Ledger | Post91 Accounts</title>
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Segoe UI,Arial,sans-serif;
-}
-
-body{
-  background:#eef3f8;
-  color:#061833;
-  padding:28px;
-}
-
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:24px;
-}
-
-.header h1{
-  font-size:34px;
-}
-
-.header p{
-  color:#64748b;
-  margin-top:6px;
-}
-
-.back{
-  background:white;
-  color:#0d6efd;
-  text-decoration:none;
-  padding:12px 16px;
-  border-radius:13px;
-  font-weight:900;
-  box-shadow:0 10px 25px rgba(15,23,42,.08);
-}
-
-.card{
-  background:white;
-  border-radius:22px;
-  padding:26px;
-  box-shadow:0 16px 38px rgba(15,23,42,.08);
-  border:1px solid #e5edf7;
-  margin-bottom:22px;
-}
-
-.card h2{
-  margin-bottom:18px;
-  font-size:22px;
-  color:#0d6efd;
-}
-
-.note{
-  background:#e0f2fe;
-  border:1px solid #bae6fd;
-  color:#075985;
-  padding:16px;
-  border-radius:16px;
-  margin-bottom:18px;
-  line-height:1.6;
-  font-weight:700;
-}
-
-.summary-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:16px;
-  margin-bottom:22px;
-}
-
-.summary{
-  background:white;
-  border-radius:22px;
-  padding:20px;
-  border:1px solid #e5edf7;
-  box-shadow:0 12px 28px rgba(15,23,42,.06);
-}
-
-.summary span{
-  color:#64748b;
-  font-size:13px;
-  font-weight:800;
-}
-
-.summary h2{
-  margin-top:8px;
-  color:#0d6efd;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:16px;
-}
-
-.form-group{
-  margin-bottom:16px;
-}
-
-label{
-  display:block;
-  margin-bottom:7px;
-  font-weight:800;
-}
-
-input,select{
-  width:100%;
-  padding:13px 14px;
-  border-radius:12px;
-  border:1px solid #dbe4f0;
-  font-size:15px;
-  outline:none;
-  background:white;
-}
-
-input:focus,select:focus{
-  border-color:#0d6efd;
-  box-shadow:0 0 0 4px rgba(13,110,253,.1);
-}
-
-.btn{
-  border:none;
-  background:#0d6efd;
-  color:white;
-  padding:13px 19px;
-  border-radius:13px;
-  font-weight:900;
-  cursor:pointer;
-  font-size:14px;
-  box-shadow:0 14px 30px rgba(13,110,253,.22);
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th{
-  text-align:left;
-  color:#64748b;
-  padding:12px;
-  border-bottom:1px solid #e5edf7;
-  font-size:14px;
-}
-
-td{
-  padding:12px;
-  border-bottom:1px solid #eef2f7;
-  font-weight:700;
-  vertical-align:top;
-}
-
-.badge{
-  padding:6px 12px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:900;
-  display:inline-block;
-}
-
-.in{
-  background:#dcfce7;
-  color:#166534;
-}
-
-.out{
-  background:#fee2e2;
-  color:#991b1b;
-}
-
-.low{
-  background:#fef3c7;
-  color:#92400e;
-}
-
-.ok{
-  background:#dbeafe;
-  color:#1d4ed8;
-}
-
-.small{
-  font-size:13px;
-  color:#64748b;
-  font-weight:700;
-  margin-top:4px;
-}
-
-@media(max-width:1100px){
-
-  .summary-grid,.grid{
-    grid-template-columns:1fr 1fr;
-  }
-
-  table{
-    display:block;
-    overflow-x:auto;
-    white-space:nowrap;
-  }
-
-}
-
-@media(max-width:650px){
-
-  .summary-grid,.grid{
-    grid-template-columns:1fr;
-  }
-
-  .header{
-    flex-direction:column;
-    align-items:flex-start;
-    gap:15px;
-  }
-
-}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.header h1{margin:0;color:#0d6efd}
+.back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+label{display:block;font-weight:800;margin-bottom:6px}
+input,select{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
+.btn{border:0;background:#0d6efd;color:white;padding:11px 15px;border-radius:11px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #dbe4f0;padding:8px;vertical-align:top}
+th{background:#f8fbff;text-align:left}
+.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.box{background:#f8fbff;border:1px solid #dbe4f0;border-radius:15px;padding:16px}
+.box b{display:block;font-size:13px;color:#64748b}
+.box span{font-size:22px;font-weight:900;color:#0d6efd}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+.inward{color:#166534;font-weight:900}
+.outward{color:#b91c1c;font-weight:900}
+.balance{font-weight:900;color:#0d6efd}
+@media(max-width:900px){.grid,.summary{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-
   <div>
     <h1>Stock Ledger</h1>
-    <p>Track stock IN, stock OUT, balances and inventory valuation.</p>
+    <p>Item-wise inward, outward and stock balance report.</p>
   </div>
-
-  <a href="/dashboard.html" class="back">
-    Back to Dashboard
-  </a>
-
+  <a class="back" href="/dashboard.html">Back</a>
 </div>
 
 <div class="note">
-
-  Stock calculation is automatically generated from:
-  Purchase Invoices (Stock IN)
-  and
-  Sales Invoices (Stock OUT)
-
-</div>
-
-<div class="summary-grid">
-
-  <div class="summary">
-    <span>Total Items</span>
-    <h2 id="totalItems">0</h2>
-  </div>
-
-  <div class="summary">
-    <span>Total Stock Qty</span>
-    <h2 id="totalQty">0</h2>
-  </div>
-
-  <div class="summary">
-    <span>Inventory Value</span>
-    <h2 id="inventoryValue">OMR 0.000</h2>
-  </div>
-
-  <div class="summary">
-    <span>Low Stock Items</span>
-    <h2 id="lowStock">0</h2>
-  </div>
-
+  Stock ledger is automatically generated from Purchase Invoice (Stock In) and Sales Invoice (Stock Out).
 </div>
 
 <div class="card">
@@ -279,483 +53,335 @@ td{
 
   <div class="grid">
 
-    <div class="form-group">
-      <label>Search Item</label>
-      <input type="text" id="searchBox"
-        placeholder="Item / OEM / Part Number"
-        onkeyup="loadLedger()">
-    </div>
-
-    <div class="form-group">
-      <label>Stock Status</label>
-
-      <select id="stockFilter" onchange="loadLedger()">
-        <option>All</option>
-        <option>Available</option>
-        <option>Low Stock</option>
-        <option>Out of Stock</option>
+    <div>
+      <label>Item</label>
+      <select id="itemSelect" onchange="generateLedger()">
+        <option value="">All Items</option>
       </select>
-
     </div>
 
-    <div class="form-group">
-      <label>Sort By</label>
-
-      <select id="sortBy" onchange="loadLedger()">
-        <option>Item Name</option>
-        <option>Highest Qty</option>
-        <option>Lowest Qty</option>
-        <option>Highest Value</option>
+    <div>
+      <label>Category</label>
+      <select id="categorySelect" onchange="generateLedger()">
+        <option value="">All Categories</option>
       </select>
-
     </div>
 
-    <div class="form-group">
-      <label>Minimum Stock Level</label>
+    <div>
+      <label>From Date</label>
+      <input type="date" id="fromDate" onchange="generateLedger()">
+    </div>
 
-      <input type="number"
-        id="minimumStock"
-        value="5"
-        oninput="loadLedger()">
-
+    <div>
+      <label>To Date</label>
+      <input type="date" id="toDate" onchange="generateLedger()">
     </div>
 
   </div>
 
-</div>
-
-<div class="card">
-
-  <h2>Current Stock Position</h2>
-
-  <table>
-
-    <thead>
-
-      <tr>
-        <th>Item</th>
-        <th>Category</th>
-        <th>Stock IN</th>
-        <th>Stock OUT</th>
-        <th>Balance</th>
-        <th>Avg Cost</th>
-        <th>Stock Value</th>
-        <th>Status</th>
-      </tr>
-
-    </thead>
-
-    <tbody id="ledgerTable"></tbody>
-
-  </table>
+  <div class="btn-row">
+    <button class="btn" onclick="generateLedger()">Refresh Ledger</button>
+    <button class="btn btn-light" onclick="clearFilters()">Clear Filter</button>
+  </div>
 
 </div>
 
+<div class="summary">
+
+  <div class="box">
+    <b>Opening Qty</b>
+    <span id="openingQty">0.000</span>
+  </div>
+
+  <div class="box">
+    <b>Total Inward</b>
+    <span id="totalInward">0.000</span>
+  </div>
+
+  <div class="box">
+    <b>Total Outward</b>
+    <span id="totalOutward">0.000</span>
+  </div>
+
+  <div class="box">
+    <b>Closing Qty</b>
+    <span id="closingQty">0.000</span>
+  </div>
+
+  <div class="box">
+    <b>Total Items</b>
+    <span id="totalItems">0</span>
+  </div>
+
+</div>
+
+<br>
+
 <div class="card">
 
-  <h2>Stock Movement Ledger</h2>
+  <h2>Stock Movement</h2>
 
   <table>
-
     <thead>
-
       <tr>
         <th>Date</th>
-        <th>Document</th>
-        <th>Type</th>
         <th>Item</th>
-        <th>Qty</th>
-        <th>Rate</th>
-        <th>Total</th>
+        <th>Category</th>
+        <th>Type</th>
+        <th>Document No</th>
+        <th>Reference</th>
+        <th>Inward Qty</th>
+        <th>Outward Qty</th>
+        <th>Balance Qty</th>
       </tr>
-
     </thead>
 
-    <tbody id="movementTable"></tbody>
-
+    <tbody id="ledgerBody"></tbody>
   </table>
 
 </div>
 
 <script>
-
-function getPurchases(){
-  return JSON.parse(localStorage.getItem("post91PurchaseInvoices") || "[]");
+function gd(k){
+  return JSON.parse(localStorage.getItem(k)||"[]");
 }
 
-function getSales(){
-  return JSON.parse(localStorage.getItem("post91SalesInvoices") || "[]");
+function mv(n){
+  return Number(n||0).toFixed(3);
 }
 
-function money(num){
-  return "OMR " + Number(num || 0).toFixed(3);
-}
+function loadFilters(){
 
-function buildInventory(){
+  itemSelect.innerHTML='<option value="">All Items</option>';
+  categorySelect.innerHTML='<option value="">All Categories</option>';
 
-  const purchases = getPurchases();
-  const sales = getSales();
+  let items=gd("post91Items");
 
-  const inventory = {};
-  const movements = [];
-
-  purchases.forEach(p=>{
-
-    (p.items || []).forEach(item=>{
-
-      const key = item.description || "Unknown Item";
-
-      if(!inventory[key]){
-
-        inventory[key] = {
-
-          itemName:key,
-          category:item.category || "-",
-
-          stockIn:0,
-          stockOut:0,
-
-          qty:0,
-
-          totalCost:0,
-          avgCost:0,
-
-          value:0
-
-        };
-
-      }
-
-      const qty = Number(item.qty || 0);
-      const rate = Number(item.rate || 0);
-
-      inventory[key].stockIn += qty;
-      inventory[key].qty += qty;
-
-      inventory[key].totalCost += qty * rate;
-
-      movements.push({
-
-        date:p.purchaseDate || "-",
-        doc:p.purchaseNo || "-",
-        type:"IN",
-        item:key,
-        qty:qty,
-        rate:rate,
-        total:qty * rate
-
-      });
-
-    });
-
-  });
-
-  sales.forEach(s=>{
-
-    (s.items || []).forEach(item=>{
-
-      const key = item.description || "Unknown Item";
-
-      if(!inventory[key]){
-
-        inventory[key] = {
-
-          itemName:key,
-          category:item.category || "-",
-
-          stockIn:0,
-          stockOut:0,
-
-          qty:0,
-
-          totalCost:0,
-          avgCost:0,
-
-          value:0
-
-        };
-
-      }
-
-      const qty = Number(item.qty || 0);
-      const rate = Number(item.rate || 0);
-
-      inventory[key].stockOut += qty;
-      inventory[key].qty -= qty;
-
-      movements.push({
-
-        date:s.invoiceDate || "-",
-        doc:s.invoiceNo || "-",
-        type:"OUT",
-        item:key,
-        qty:qty,
-        rate:rate,
-        total:qty * rate
-
-      });
-
-    });
-
-  });
-
-  Object.values(inventory).forEach(i=>{
-
-    const purchasedQty = i.stockIn || 1;
-
-    i.avgCost = i.totalCost / purchasedQty;
-
-    i.value = i.qty * i.avgCost;
-
-  });
-
-  return {inventory,movements};
-
-}
-
-function loadLedger(){
-
-  const result = buildInventory();
-
-  let items = Object.values(result.inventory);
-
-  const search =
-    document.getElementById("searchBox").value.toLowerCase();
-
-  const stockFilter =
-    document.getElementById("stockFilter").value;
-
-  const sortBy =
-    document.getElementById("sortBy").value;
-
-  const minimumStock =
-    Number(document.getElementById("minimumStock").value || 5);
-
-  items = items.filter(i=>{
-
-    const text =
-      `${i.itemName} ${i.category}`.toLowerCase();
-
-    if(search && !text.includes(search)){
-      return false;
-    }
-
-    if(stockFilter === "Available" && i.qty <= 0){
-      return false;
-    }
-
-    if(stockFilter === "Low Stock" &&
-      !(i.qty > 0 && i.qty <= minimumStock)){
-      return false;
-    }
-
-    if(stockFilter === "Out of Stock" &&
-      i.qty > 0){
-      return false;
-    }
-
-    return true;
-
-  });
-
-  if(sortBy === "Highest Qty"){
-    items.sort((a,b)=>b.qty - a.qty);
-  }
-
-  if(sortBy === "Lowest Qty"){
-    items.sort((a,b)=>a.qty - b.qty);
-  }
-
-  if(sortBy === "Highest Value"){
-    items.sort((a,b)=>b.value - a.value);
-  }
-
-  if(sortBy === "Item Name"){
-    items.sort((a,b)=>
-      a.itemName.localeCompare(b.itemName));
-  }
-
-  renderSummary(items,minimumStock);
-  renderLedger(items);
-  renderMovements(result.movements);
-
-}
-
-function renderSummary(items,minimumStock){
-
-  let totalQty = 0;
-  let totalValue = 0;
-  let lowStock = 0;
+  let categories=[];
 
   items.forEach(i=>{
 
-    totalQty += Number(i.qty || 0);
-    totalValue += Number(i.value || 0);
+    let item=i.itemName||"";
 
-    if(i.qty > 0 && i.qty <= minimumStock){
-      lowStock++;
+    if(item){
+
+      let o=document.createElement("option");
+      o.value=item;
+      o.textContent=item;
+
+      itemSelect.appendChild(o);
     }
 
+    let cat=i.category||i.mainCategory||"";
+
+    if(cat && !categories.includes(cat)){
+      categories.push(cat);
+    }
   });
 
-  document.getElementById("totalItems").textContent =
-    items.length;
+  categories.sort().forEach(c=>{
 
-  document.getElementById("totalQty").textContent =
-    totalQty.toFixed(3);
+    let o=document.createElement("option");
 
-  document.getElementById("inventoryValue").textContent =
-    money(totalValue);
+    o.value=c;
+    o.textContent=c;
 
-  document.getElementById("lowStock").textContent =
-    lowStock;
-
+    categorySelect.appendChild(o);
+  });
 }
 
-function renderLedger(items){
+function dateOk(date){
 
-  const tbody =
-    document.getElementById("ledgerTable");
+  if(!date)return true;
 
-  tbody.innerHTML = "";
+  let d=new Date(date);
 
-  const minimumStock =
-    Number(document.getElementById("minimumStock").value || 5);
+  let f=fromDate.value ? new Date(fromDate.value) : null;
+  let t=toDate.value ? new Date(toDate.value) : null;
 
-  items.forEach(i=>{
+  if(f && d<f)return false;
+  if(t && d>t)return false;
 
-    let status = "";
-    let statusClass = "";
+  return true;
+}
 
-    if(i.qty <= 0){
+function itemOk(name){
 
-      status = "Out of Stock";
-      statusClass = "out";
+  if(!itemSelect.value)return true;
 
-    }else if(i.qty <= minimumStock){
+  return (name||"").toLowerCase()===
+  itemSelect.value.toLowerCase();
+}
 
-      status = "Low Stock";
-      statusClass = "low";
+function categoryOk(cat){
 
-    }else{
+  if(!categorySelect.value)return true;
 
-      status = "Available";
-      statusClass = "ok";
+  return (cat||"").toLowerCase()===
+  categorySelect.value.toLowerCase();
+}
 
+function generateLedger(){
+
+  let rows=[];
+
+  let itemMaster=gd("post91Items");
+
+  let itemMap={};
+
+  itemMaster.forEach(i=>{
+
+    itemMap[i.itemName]={
+      category:i.category||i.mainCategory||""
+    };
+  });
+
+  gd("post91PurchaseInvoices").forEach(inv=>{
+
+    if((inv.docStatus||"Submitted")==="Cancelled")return;
+
+    if(!dateOk(inv.purchaseDate))return;
+
+    (inv.items||[]).forEach(it=>{
+
+      let itemName=it.itemName||"";
+
+      let category=itemMap[itemName]?.category||"";
+
+      if(!itemOk(itemName))return;
+      if(!categoryOk(category))return;
+
+      rows.push({
+
+        date:inv.purchaseDate||"",
+        item:itemName,
+        category:category,
+
+        type:"Purchase",
+
+        docNo:inv.purchaseNo||"",
+
+        ref:inv.supplierName||"",
+
+        inward:Number(it.qty||0),
+
+        outward:0
+      });
+    });
+  });
+
+  gd("post91SalesInvoices").forEach(inv=>{
+
+    if((inv.docStatus||"Submitted")==="Cancelled")return;
+
+    if(!dateOk(inv.invoiceDate))return;
+
+    (inv.items||[]).forEach(it=>{
+
+      let itemName=it.itemName||"";
+
+      let category=itemMap[itemName]?.category||"";
+
+      if(!itemOk(itemName))return;
+      if(!categoryOk(category))return;
+
+      rows.push({
+
+        date:inv.invoiceDate||"",
+        item:itemName,
+        category:category,
+
+        type:"Sales",
+
+        docNo:inv.invoiceNo||"",
+
+        ref:inv.customerName||"",
+
+        inward:0,
+
+        outward:Number(it.qty||0)
+      });
+    });
+  });
+
+  rows.sort((a,b)=>{
+
+    let da=new Date(a.date||"1900-01-01");
+    let db=new Date(b.date||"1900-01-01");
+
+    return da-db;
+  });
+
+  let inwardTotal=0;
+  let outwardTotal=0;
+  let running=0;
+
+  let uniqueItems=[];
+
+  ledgerBody.innerHTML="";
+
+  rows.forEach(r=>{
+
+    inwardTotal+=r.inward;
+    outwardTotal+=r.outward;
+
+    running+=r.inward-r.outward;
+
+    if(!uniqueItems.includes(r.item)){
+      uniqueItems.push(r.item);
     }
 
-    const tr = document.createElement("tr");
+    let tr=document.createElement("tr");
 
-    tr.innerHTML = `
+    tr.innerHTML=`
 
-      <td>
+      <td>${r.date||"-"}</td>
 
-        ${i.itemName}
+      <td>${r.item||"-"}</td>
 
+      <td>${r.category||"-"}</td>
+
+      <td>${r.type}</td>
+
+      <td>${r.docNo||"-"}</td>
+
+      <td>${r.ref||"-"}</td>
+
+      <td class="inward">
+        ${r.inward?mv(r.inward):"-"}
       </td>
 
-      <td>
-
-        ${i.category || "-"}
-
+      <td class="outward">
+        ${r.outward?mv(r.outward):"-"}
       </td>
 
-      <td>
-
-        <span class="badge in">
-          ${i.stockIn.toFixed(3)}
-        </span>
-
+      <td class="balance">
+        ${mv(running)}
       </td>
-
-      <td>
-
-        <span class="badge out">
-          ${i.stockOut.toFixed(3)}
-        </span>
-
-      </td>
-
-      <td>
-
-        ${i.qty.toFixed(3)}
-
-      </td>
-
-      <td>
-
-        ${money(i.avgCost)}
-
-      </td>
-
-      <td>
-
-        ${money(i.value)}
-
-      </td>
-
-      <td>
-
-        <span class="badge ${statusClass}">
-          ${status}
-        </span>
-
-      </td>
-
     `;
 
-    tbody.appendChild(tr);
-
+    ledgerBody.appendChild(tr);
   });
 
+  openingQty.textContent=mv(0);
+  totalInward.textContent=mv(inwardTotal);
+  totalOutward.textContent=mv(outwardTotal);
+  closingQty.textContent=mv(running);
+  totalItems.textContent=uniqueItems.length;
 }
 
-function renderMovements(movements){
+function clearFilters(){
 
-  const tbody =
-    document.getElementById("movementTable");
+  itemSelect.value="";
+  categorySelect.value="";
+  fromDate.value="";
+  toDate.value="";
 
-  tbody.innerHTML = "";
-
-  movements.sort((a,b)=>
-    new Date(b.date) - new Date(a.date));
-
-  movements.forEach(m=>{
-
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-
-      <td>${m.date}</td>
-
-      <td>${m.doc}</td>
-
-      <td>
-
-        <span class="badge ${m.type === "IN" ? "in" : "out"}">
-          ${m.type}
-        </span>
-
-      </td>
-
-      <td>${m.item}</td>
-
-      <td>${Number(m.qty).toFixed(3)}</td>
-
-      <td>${money(m.rate)}</td>
-
-      <td>${money(m.total)}</td>
-
-    `;
-
-    tbody.appendChild(tr);
-
-  });
-
+  generateLedger();
 }
 
-loadLedger();
-
+loadFilters();
+generateLedger();
 </script>
 
 </body>

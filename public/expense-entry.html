@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Entry | Post91 Accounts</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.header h1{margin:0;color:#0d6efd}
+.back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.full{grid-column:1/-1}
+label{display:block;font-weight:800;margin-bottom:6px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
+textarea{min-height:80px}
+.btn{border:0;background:#0d6efd;color:white;padding:10px 14px;border-radius:11px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-danger{background:#ef4444}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #dbe4f0;padding:8px;vertical-align:top}
+th{background:#f8fbff;text-align:left}
+.total-box{max-width:460px;margin-left:auto;background:#f8fbff;border:1px solid #dbe4f0;border-radius:15px;padding:14px;margin-top:16px}
+.total-row{display:flex;justify-content:space-between;border-bottom:1px solid #dbe4f0;padding:8px 0;font-weight:900}
+.total-row:last-child{border-bottom:0}
+.grand{font-size:20px;color:#0d6efd}
+.badge{padding:5px 10px;border-radius:99px;font-size:12px;font-weight:900;display:inline-block}
+.posted{background:#dcfce7;color:#166534}
+.draft{background:#fef3c7;color:#92400e}
+.cancelled{background:#fee2e2;color:#991b1b}
+.search-box{margin-bottom:14px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Expense Entry</h1>
+    <p>Record office, vehicle, salary, rent, utilities and other expenses.</p>
+  </div>
+  <a class="back" href="/dashboard.html">Back</a>
+</div>
+
+<div class="note">
+  This page saves expenses in <b>post91ExpenseEntries</b>. It uses Cash / Bank Master for payment account selection.
+</div>
+
+<form id="expenseForm" onsubmit="saveExpense(event)">
+
+<div class="card">
+  <h2 id="formTitle">Add Expense</h2>
+
+  <div class="grid">
+
+    <div>
+      <label>Expense No</label>
+      <input id="expenseNo">
+    </div>
+
+    <div>
+      <label>Expense Date</label>
+      <input type="date" id="expenseDate">
+    </div>
+
+    <div>
+      <label>Status</label>
+      <select id="status">
+        <option>Posted</option>
+        <option>Draft</option>
+        <option>Cancelled</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Expense Category *</label>
+      <select id="expenseCategory">
+        <option>Office Expense</option>
+        <option>Vehicle Expense</option>
+        <option>Salary / Wages</option>
+        <option>Rent</option>
+        <option>Utilities</option>
+        <option>Bank Charges</option>
+        <option>Repairs & Maintenance</option>
+        <option>Fuel Expense</option>
+        <option>Travel Expense</option>
+        <option>Marketing Expense</option>
+        <option>Miscellaneous Expense</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Paid To / Supplier</label>
+      <input id="paidTo" list="supplierList" placeholder="Supplier or person name">
+    </div>
+
+    <div>
+      <label>Payment Mode</label>
+      <select id="paymentMode">
+        <option>Cash</option>
+        <option>Bank Transfer</option>
+        <option>Cheque</option>
+        <option>Card</option>
+        <option>Online Payment</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Cash / Bank Account</label>
+      <select id="cashBankAccount"></select>
+    </div>
+
+    <div>
+      <label>Reference / Bill No</label>
+      <input id="referenceNo" placeholder="Bill no / transaction no / cheque no">
+    </div>
+
+    <div>
+      <label>VAT Type</label>
+      <select id="vatType" onchange="calcExpense()">
+        <option>VAT Exclusive</option>
+        <option>VAT Inclusive</option>
+        <option>Non-VAT</option>
+        <option>Zero Rated</option>
+        <option>Exempt</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Amount</label>
+      <input type="number" step=".001" id="amount" value="0.000" oninput="calcExpense()">
+    </div>
+
+    <div>
+      <label>VAT %</label>
+      <input type="number" id="vatPercent" value="5" oninput="calcExpense()">
+    </div>
+
+    <div>
+      <label>VAT Amount</label>
+      <input id="vatAmount" readonly>
+    </div>
+
+    <div>
+      <label>Total Amount</label>
+      <input id="totalAmount" readonly>
+    </div>
+
+    <div class="full">
+      <label>Description / Narration</label>
+      <textarea id="description" placeholder="Expense details"></textarea>
+    </div>
+
+  </div>
+
+  <div class="total-box">
+    <div class="total-row"><span>Expense Amount</span><span id="baseText">OMR 0.000</span></div>
+    <div class="total-row"><span>VAT Amount</span><span id="vatText">OMR 0.000</span></div>
+    <div class="total-row grand"><span>Total Amount</span><span id="totalText">OMR 0.000</span></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn">Save Expense</button>
+    <button type="button" class="btn btn-light" onclick="clearForm()">Clear</button>
+  </div>
+</div>
+
+</form>
+
+<div class="card">
+  <h2>Saved Expenses</h2>
+
+  <input class="search-box" id="searchText" placeholder="Search expenses..." oninput="loadExpenses()">
+
+  <table>
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Date</th>
+        <th>Category</th>
+        <th>Paid To</th>
+        <th>Payment</th>
+        <th>Base</th>
+        <th>VAT</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th style="width:180px;">Action</th>
+      </tr>
+    </thead>
+    <tbody id="expenseBody"></tbody>
+  </table>
+</div>
+
+<datalist id="supplierList"></datalist>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="/firebase-config.js"></script>
+<script src="/data-sync.js"></script>
+
+<script>
+const EXPENSE_KEY="post91ExpenseEntries";
+let EDIT_INDEX="";
+
+function gd(k){return JSON.parse(localStorage.getItem(k)||"[]")}
+function sd(k,d){localStorage.setItem(k,JSON.stringify(d))}
+function today(){return new Date().toISOString().split("T")[0]}
+function mv(n){return Number(n||0).toFixed(3)}
+function mt(n){return "OMR "+mv(n)}
+
+function loadSuppliers(){
+  supplierList.innerHTML="";
+  gd("post91Suppliers").forEach(s=>{
+    let o=document.createElement("option");
+    o.value=s.supplierName||s.name||"";
+    supplierList.appendChild(o);
+  });
+}
+
+function loadCashBankAccounts(){
+  cashBankAccount.innerHTML=`<option value="">Select Account</option>`;
+
+  gd("post91CashBankAccounts")
+    .filter(a=>(a.status||"Active")==="Active")
+    .forEach((a,i)=>{
+      let o=document.createElement("option");
+      o.value=i;
+      o.textContent=`${a.accountName||a.name||"-"} (${a.accountType||"Bank"})`;
+      cashBankAccount.appendChild(o);
+    });
+}
+
+function calcExpense(){
+  let amt=Number(amount.value||0);
+  let vatP=Number(vatPercent.value||0);
+  let type=vatType.value;
+
+  let base=amt;
+  let vat=0;
+  let total=amt;
+
+  if(type==="VAT Exclusive"){
+    base=amt;
+    vat=base*vatP/100;
+    total=base+vat;
+  }
+
+  if(type==="VAT Inclusive"){
+    total=amt;
+    vat=total-(total/(1+vatP/100));
+    base=total-vat;
+  }
+
+  if(["Non-VAT","Zero Rated","Exempt"].includes(type)){
+    base=amt;
+    vat=0;
+    total=amt;
+  }
+
+  vatAmount.value=mv(vat);
+  totalAmount.value=mv(total);
+
+  baseText.textContent=mt(base);
+  vatText.textContent=mt(vat);
+  totalText.textContent=mt(total);
+
+  return {baseAmount:base, vatAmount:vat, totalAmount:total};
+}
+
+function selectedCashBank(){
+  let accounts=gd("post91CashBankAccounts");
+  let idx=cashBankAccount.value;
+
+  if(idx==="")return {};
+
+  return accounts[idx]||{};
+}
+
+function saveExpense(e){
+  e.preventDefault();
+
+  if(!expenseCategory.value){
+    alert("Expense category is required.");
+    return;
+  }
+
+  let totals=calcExpense();
+  let acc=selectedCashBank();
+
+  let list=gd(EXPENSE_KEY);
+
+  let rec={
+    expenseNo:expenseNo.value,
+    expenseDate:expenseDate.value,
+    status:status.value,
+
+    expenseCategory:expenseCategory.value,
+    paidTo:paidTo.value,
+    paymentMode:paymentMode.value,
+
+    cashBankAccountIndex:cashBankAccount.value,
+    cashBankAccountName:acc.accountName||acc.name||"",
+    cashBankAccountType:acc.accountType||"",
+
+    referenceNo:referenceNo.value,
+    vatType:vatType.value,
+    vatPercent:vatPercent.value,
+
+    amount:mv(amount.value),
+    baseAmount:mv(totals.baseAmount),
+    vatAmount:mv(totals.vatAmount),
+    totalAmount:mv(totals.totalAmount),
+
+    description:description.value,
+
+    updatedAt:new Date().toISOString()
+  };
+
+  if(EDIT_INDEX===""){
+    rec.createdAt=new Date().toISOString();
+    list.push(rec);
+    alert("Expense saved successfully.");
+  }else{
+    rec.createdAt=list[EDIT_INDEX].createdAt||new Date().toISOString();
+    list[EDIT_INDEX]={...list[EDIT_INDEX],...rec};
+    alert("Expense updated successfully.");
+  }
+
+  sd(EXPENSE_KEY,list);
+  clearForm();
+  loadExpenses();
+}
+
+function editExpense(i){
+  let e=gd(EXPENSE_KEY)[i];
+
+  EDIT_INDEX=i;
+  formTitle.textContent="Edit Expense";
+
+  expenseNo.value=e.expenseNo||"";
+  expenseDate.value=e.expenseDate||today();
+  status.value=e.status||"Posted";
+  expenseCategory.value=e.expenseCategory||"Office Expense";
+  paidTo.value=e.paidTo||"";
+  paymentMode.value=e.paymentMode||"Cash";
+  cashBankAccount.value=e.cashBankAccountIndex||"";
+  referenceNo.value=e.referenceNo||"";
+  vatType.value=e.vatType||"VAT Exclusive";
+  vatPercent.value=e.vatPercent||5;
+  amount.value=e.amount||"0.000";
+  description.value=e.description||"";
+
+  calcExpense();
+  scrollTo({top:0,behavior:"smooth"});
+}
+
+function deleteExpense(i){
+  if(!confirm("Delete this expense?"))return;
+
+  let list=gd(EXPENSE_KEY);
+  list.splice(i,1);
+  sd(EXPENSE_KEY,list);
+  loadExpenses();
+}
+
+function clearForm(){
+  EDIT_INDEX="";
+  formTitle.textContent="Add Expense";
+
+  expenseForm.reset();
+
+  expenseNo.value="EXP-"+(1001+gd(EXPENSE_KEY).length);
+  expenseDate.value=today();
+  status.value="Posted";
+  vatType.value="VAT Exclusive";
+  vatPercent.value=5;
+  amount.value="0.000";
+  vatAmount.value="0.000";
+  totalAmount.value="0.000";
+
+  calcExpense();
+}
+
+function badge(s){
+  let cls="posted";
+  if(s==="Draft")cls="draft";
+  if(s==="Cancelled")cls="cancelled";
+  return `<span class="badge ${cls}">${s||"Posted"}</span>`;
+}
+
+function loadExpenses(){
+  let q=(searchText.value||"").toLowerCase();
+  let list=gd(EXPENSE_KEY);
+
+  expenseBody.innerHTML="";
+
+  list.forEach((e,i)=>{
+    if(q && !JSON.stringify(e).toLowerCase().includes(q))return;
+
+    let tr=document.createElement("tr");
+
+    tr.innerHTML=`
+      <td>${e.expenseNo||"-"}</td>
+      <td>${e.expenseDate||"-"}</td>
+      <td>${e.expenseCategory||"-"}</td>
+      <td>${e.paidTo||"-"}</td>
+      <td>${e.paymentMode||"-"}<br><small>${e.cashBankAccountName||""}</small></td>
+      <td>${mt(e.baseAmount)}</td>
+      <td>${mt(e.vatAmount)}</td>
+      <td><b>${mt(e.totalAmount)}</b></td>
+      <td>${badge(e.status)}</td>
+      <td>
+        <button class="btn btn-light" onclick="editExpense(${i})">Edit</button>
+        <button class="btn btn-danger" onclick="deleteExpense(${i})">Delete</button>
+      </td>
+    `;
+
+    expenseBody.appendChild(tr);
+  });
+}
+
+loadSuppliers();
+loadCashBankAccounts();
+clearForm();
+loadExpenses();
+</script>
+
+</body>
+</html>

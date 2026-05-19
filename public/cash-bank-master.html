@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cash / Bank Master | Post91 Accounts</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.header h1{margin:0;color:#0d6efd}
+.back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.full{grid-column:1/-1}
+label{display:block;font-weight:800;margin-bottom:6px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
+textarea{min-height:80px}
+.btn{border:0;background:#0d6efd;color:white;padding:10px 14px;border-radius:11px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-danger{background:#ef4444}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #dbe4f0;padding:8px;vertical-align:top}
+th{background:#f8fbff;text-align:left}
+.search-box{margin-bottom:14px}
+.badge{padding:5px 10px;border-radius:99px;font-size:12px;font-weight:900;display:inline-block}
+.active{background:#dcfce7;color:#166534}
+.inactive{background:#fee2e2;color:#991b1b}
+.cash{background:#e0f2fe;color:#075985}
+.bank{background:#ede9fe;color:#5b21b6}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+@media(max-width:900px){.grid{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Cash / Bank Master</h1>
+    <p>Create and manage cash and bank accounts used in receipts and payments.</p>
+  </div>
+  <a class="back" href="/dashboard.html">Back</a>
+</div>
+
+<div class="note">
+  This master saves in <b>post91CashBankAccounts</b>. Later Receipt Voucher and Payment Voucher will use this list for bank/cash selection.
+</div>
+
+<div class="card">
+  <h2 id="formTitle">Add Cash / Bank Account</h2>
+
+  <div class="grid">
+    <div>
+      <label>Account Type *</label>
+      <select id="accountType" onchange="typeChanged()">
+        <option>Bank</option>
+        <option>Cash</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Account Name *</label>
+      <input id="accountName" placeholder="Example: Bank Muscat Current A/C">
+    </div>
+
+    <div>
+      <label>Bank Name</label>
+      <input id="bankName" placeholder="Example: Bank Muscat">
+    </div>
+
+    <div>
+      <label>Account Number</label>
+      <input id="accountNumber" placeholder="Account number">
+    </div>
+
+    <div>
+      <label>IBAN</label>
+      <input id="iban" placeholder="IBAN">
+    </div>
+
+    <div>
+      <label>Branch</label>
+      <input id="branch" placeholder="Branch">
+    </div>
+
+    <div>
+      <label>Opening Balance</label>
+      <input type="number" step=".001" id="openingBalance" value="0.000">
+    </div>
+
+    <div>
+      <label>Opening Balance Type</label>
+      <select id="openingBalanceType">
+        <option>Debit</option>
+        <option>Credit</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Currency</label>
+      <input id="currency" value="OMR">
+    </div>
+
+    <div>
+      <label>Status</label>
+      <select id="status">
+        <option>Active</option>
+        <option>Inactive</option>
+      </select>
+    </div>
+
+    <div class="full">
+      <label>Remarks</label>
+      <textarea id="remarks" placeholder="Optional remarks"></textarea>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="saveAccount()">Save Account</button>
+    <button class="btn btn-light" onclick="clearForm()">Clear</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Cash / Bank Account List</h2>
+
+  <input class="search-box" id="searchText" placeholder="Search account, bank, account number, IBAN..." oninput="loadAccounts()">
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:60px;">#</th>
+        <th>Account</th>
+        <th>Type</th>
+        <th>Bank Details</th>
+        <th>Opening Balance</th>
+        <th>Currency</th>
+        <th>Status</th>
+        <th style="width:210px;">Action</th>
+      </tr>
+    </thead>
+    <tbody id="accountBody"></tbody>
+  </table>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="/firebase-config.js"></script>
+<script src="/data-sync.js"></script>
+<script>
+const CASH_BANK_KEY = "post91CashBankAccounts";
+let EDIT_INDEX = "";
+
+function gd(k){
+  return JSON.parse(localStorage.getItem(k) || "[]");
+}
+
+function sd(k,d){
+  localStorage.setItem(k, JSON.stringify(d));
+}
+
+function mv(n){
+  return Number(n || 0).toFixed(3);
+}
+
+function typeChanged(){
+  const isCash = accountType.value === "Cash";
+
+  bankName.disabled = isCash;
+  accountNumber.disabled = isCash;
+  iban.disabled = isCash;
+  branch.disabled = isCash;
+
+  if(isCash){
+    bankName.value = "";
+    accountNumber.value = "";
+    iban.value = "";
+    branch.value = "";
+
+    if(!accountName.value){
+      accountName.value = "Cash in Hand";
+    }
+  }
+}
+
+function saveAccount(){
+  let accounts = gd(CASH_BANK_KEY);
+
+  if(!accountName.value.trim()){
+    alert("Account name is required.");
+    return;
+  }
+
+  let rec = {
+    accountType:accountType.value,
+    accountName:accountName.value.trim(),
+    name:accountName.value.trim(),
+
+    bankName:bankName.value.trim(),
+    accountNumber:accountNumber.value.trim(),
+    iban:iban.value.trim(),
+    branch:branch.value.trim(),
+
+    openingBalance:mv(openingBalance.value),
+    openingBalanceType:openingBalanceType.value,
+    currency:currency.value.trim() || "OMR",
+
+    status:status.value,
+    remarks:remarks.value.trim(),
+
+    updatedAt:new Date().toISOString()
+  };
+
+  if(EDIT_INDEX === ""){
+    rec.createdAt = new Date().toISOString();
+    accounts.push(rec);
+    alert("Cash / Bank account saved successfully.");
+  }else{
+    rec.createdAt = accounts[EDIT_INDEX].createdAt || new Date().toISOString();
+    accounts[EDIT_INDEX] = {...accounts[EDIT_INDEX], ...rec};
+    alert("Cash / Bank account updated successfully.");
+  }
+
+  sd(CASH_BANK_KEY, accounts);
+  clearForm();
+  loadAccounts();
+}
+
+function editAccount(i){
+  let a = gd(CASH_BANK_KEY)[i];
+
+  EDIT_INDEX = i;
+  formTitle.textContent = "Edit Cash / Bank Account";
+
+  accountType.value = a.accountType || "Bank";
+  accountName.value = a.accountName || a.name || "";
+
+  bankName.value = a.bankName || "";
+  accountNumber.value = a.accountNumber || "";
+  iban.value = a.iban || "";
+  branch.value = a.branch || "";
+
+  openingBalance.value = mv(a.openingBalance);
+  openingBalanceType.value = a.openingBalanceType || "Debit";
+  currency.value = a.currency || "OMR";
+
+  status.value = a.status || "Active";
+  remarks.value = a.remarks || "";
+
+  typeChanged();
+
+  scrollTo({top:0,behavior:"smooth"});
+}
+
+function deleteAccount(i){
+  if(!confirm("Delete this cash/bank account?")) return;
+
+  let accounts = gd(CASH_BANK_KEY);
+  accounts.splice(i,1);
+  sd(CASH_BANK_KEY, accounts);
+  loadAccounts();
+}
+
+function toggleStatus(i){
+  let accounts = gd(CASH_BANK_KEY);
+  accounts[i].status = (accounts[i].status || "Active") === "Active" ? "Inactive" : "Active";
+  accounts[i].updatedAt = new Date().toISOString();
+  sd(CASH_BANK_KEY, accounts);
+  loadAccounts();
+}
+
+function clearForm(){
+  EDIT_INDEX = "";
+  formTitle.textContent = "Add Cash / Bank Account";
+
+  accountType.value = "Bank";
+  accountName.value = "";
+  bankName.value = "";
+  accountNumber.value = "";
+  iban.value = "";
+  branch.value = "";
+  openingBalance.value = "0.000";
+  openingBalanceType.value = "Debit";
+  currency.value = "OMR";
+  status.value = "Active";
+  remarks.value = "";
+
+  typeChanged();
+}
+
+function statusBadge(s){
+  return `<span class="badge ${(s || "Active") === "Active" ? "active" : "inactive"}">${s || "Active"}</span>`;
+}
+
+function typeBadge(t){
+  return `<span class="badge ${t === "Cash" ? "cash" : "bank"}">${t || "Bank"}</span>`;
+}
+
+function loadAccounts(){
+  let q = (searchText.value || "").toLowerCase();
+  let accounts = gd(CASH_BANK_KEY);
+
+  accountBody.innerHTML = "";
+
+  accounts.forEach((a,i)=>{
+    let combined = JSON.stringify(a).toLowerCase();
+
+    if(q && !combined.includes(q)) return;
+
+    let bankDetails = "";
+
+    if((a.accountType || "Bank") === "Cash"){
+      bankDetails = "Cash Account";
+    }else{
+      bankDetails = `
+        <b>Bank:</b> ${a.bankName || "-"}<br>
+        <b>A/C:</b> ${a.accountNumber || "-"}<br>
+        <b>IBAN:</b> ${a.iban || "-"}<br>
+        <b>Branch:</b> ${a.branch || "-"}
+      `;
+    }
+
+    let tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td><b>${a.accountName || a.name || "-"}</b><br><small>${a.remarks || ""}</small></td>
+      <td>${typeBadge(a.accountType)}</td>
+      <td>${bankDetails}</td>
+      <td>${mv(a.openingBalance)} ${a.openingBalanceType || "Debit"}</td>
+      <td>${a.currency || "OMR"}</td>
+      <td>${statusBadge(a.status)}</td>
+      <td>
+        <button class="btn btn-light" onclick="editAccount(${i})">Edit</button>
+        <button class="btn btn-light" onclick="toggleStatus(${i})">Status</button>
+        <button class="btn btn-danger" onclick="deleteAccount(${i})">Delete</button>
+      </td>
+    `;
+
+    accountBody.appendChild(tr);
+  });
+}
+
+typeChanged();
+loadAccounts();
+</script>
+
+</body>
+</html>

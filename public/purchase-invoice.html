@@ -6,41 +6,41 @@
 <title>Purchase Invoice | Post91 Accounts</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
-body{background:#eef3f8;color:#061833;padding:28px;}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
-.header h1{font-size:34px}.header p{color:#64748b;margin-top:6px}
-.back,.quick-create{background:white;color:#0d6efd;text-decoration:none;padding:12px 16px;border-radius:13px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);display:inline-block;}
-.quick-create{font-size:13px;margin-top:8px;}
-.card{background:white;border-radius:22px;padding:26px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:22px;}
-.card h2{margin-bottom:18px;font-size:22px;color:#0d6efd;}
-.note{background:#e0f2fe;border:1px solid #bae6fd;color:#075985;padding:16px;border-radius:16px;margin-bottom:18px;line-height:1.6;font-weight:700;}
-.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.form-group{margin-bottom:16px;}
-label{display:block;margin-bottom:7px;font-weight:800;color:#0f172a;}
-input,select,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #dbe4f0;font-size:15px;outline:none;background:white;}
-textarea{min-height:80px;resize:vertical;}
-input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4px rgba(13,110,253,.1);}
-.full{grid-column:1/-1;}
-.btn{border:none;background:#0d6efd;color:white;padding:13px 19px;border-radius:13px;font-weight:900;cursor:pointer;font-size:14px;box-shadow:0 14px 30px rgba(13,110,253,.22);}
-.btn-light{background:#e2e8f0;color:#0f172a;box-shadow:none;}
-.btn-danger{background:#ef4444;color:white;box-shadow:none;}
-.btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;}
-table{width:100%;border-collapse:collapse;}
-th{background:#f8fbff;color:#061833;text-align:left;padding:12px;border:1px solid #dbe4f0;font-size:14px;}
-td{border:1px solid #dbe4f0;padding:8px;vertical-align:top;}
-td input,td textarea,td select{border:none;padding:8px;border-radius:8px;}
-.small{font-size:12px;color:#64748b;font-weight:700;margin-top:4px;line-height:1.4;}
-.total-box{max-width:430px;margin-left:auto;margin-top:20px;background:#f8fbff;border:1px solid #dbe4f0;border-radius:18px;padding:18px;}
-.total-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #dbe4f0;font-weight:900;}
-.total-row.grand{color:#0d6efd;font-size:22px;border-bottom:none;}
-.saved-card{margin-top:22px;}
-.badge{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:900;display:inline-block;}
-.paid{background:#dcfce7;color:#166534;}
-.pending{background:#fef3c7;color:#92400e;}
-.cancelled{background:#fee2e2;color:#991b1b;}
-@media(max-width:1000px){.main-grid,.grid{grid-template-columns:1fr;}table{display:block;overflow-x:auto;white-space:nowrap;}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:20px}
+.header h1{margin:0;color:#0d6efd}
+.back,.quick{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001;display:inline-block}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.full{grid-column:1/-1}
+label{display:block;font-weight:800;margin-bottom:6px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
+textarea{min-height:75px}
+.btn{border:0;background:#0d6efd;color:white;padding:12px 17px;border-radius:12px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-danger{background:#ef4444}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #dbe4f0;padding:8px;vertical-align:top}
+th{background:#f8fbff}
+.total-box{max-width:440px;margin-left:auto;background:#f8fbff;border:1px solid #dbe4f0;border-radius:15px;padding:14px;margin-top:16px}
+.total-row{display:flex;justify-content:space-between;border-bottom:1px solid #dbe4f0;padding:8px 0;font-weight:900}
+.grand{font-size:20px;color:#0d6efd;border-bottom:0}
+.small{font-size:12px;color:#64748b;font-weight:700}
+.badge{padding:6px 11px;border-radius:99px;font-size:12px;font-weight:900}
+.draft{background:#fef3c7;color:#92400e}
+.submitted{background:#dcfce7;color:#166534}
+.search{position:relative}
+.panel{display:none;position:absolute;left:0;right:0;top:100%;background:white;border:1px solid #dbe4f0;border-radius:12px;box-shadow:0 15px 35px #0002;z-index:10;max-height:240px;overflow:auto}
+.panel.show{display:block}
+.opt{padding:11px;border-bottom:1px solid #eef2f7;cursor:pointer}
+.opt:hover{background:#f8fbff}
+.opt b{display:block}
+.opt span{font-size:12px;color:#64748b}
+@media(max-width:900px){.grid,.grid3{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
 </style>
 </head>
 
@@ -49,523 +49,570 @@ td input,td textarea,td select{border:none;padding:8px;border-radius:8px;}
 <div class="header">
   <div>
     <h1>Purchase Invoice</h1>
-    <p>Record supplier purchases with VAT / non-VAT purchase classification and payable tracking.</p>
+    <p>Purchase entry, supplier invoice tracking and stock inward base.</p>
   </div>
-  <a href="/dashboard.html" class="back">Back to Dashboard</a>
+  <a class="back" href="/dashboard.html">Back</a>
 </div>
 
 <div class="note">
-  Purchase invoice data will be used later for supplier-wise purchase, item-wise purchase, VAT purchase, non-VAT purchase and payable reports.
+  Purchase Invoice updates supplier history and can later connect to stock/accounting modules.
 </div>
 
-<form id="purchaseForm">
+<form id="docForm" onsubmit="saveDoc(event)">
 
-<div class="main-grid">
+<div class="grid">
 
   <div class="card">
     <h2>Supplier Details</h2>
 
     <div class="grid">
-      <div class="form-group full">
-        <label>Select Supplier</label>
-        <select id="supplierSelect" onchange="loadSupplierData()">
-          <option value="">Select Supplier</option>
-        </select>
-        <a href="/suppliers.html" target="_blank" class="quick-create">+ New Supplier</a>
-      </div>
 
-      <div class="form-group full">
+      <div class="full">
         <label>Supplier Name</label>
-        <input type="text" id="supplierName" placeholder="Supplier name">
+
+        <div class="search">
+          <input id="supplierName" onfocus="supplierSearch()" oninput="supplierSearch()" placeholder="Search supplier">
+          <div id="supplierPanel" class="panel"></div>
+        </div>
       </div>
 
-      <div class="form-group full">
-        <label>Supplier Address</label>
-        <textarea id="supplierAddress" placeholder="Supplier address"></textarea>
+      <div class="full">
+        <label>Address</label>
+        <textarea id="supplierAddress"></textarea>
       </div>
 
-      <div class="form-group">
-        <label>Mobile Number</label>
-        <input type="text" id="mobile" placeholder="-">
+      <div>
+        <label>Attention</label>
+        <input id="attention">
       </div>
 
-      <div class="form-group">
-        <label>Email ID</label>
-        <input type="email" id="email" placeholder="-">
+      <div>
+        <label>Mobile</label>
+        <input id="mobile">
       </div>
 
-      <div class="form-group">
-        <label>Supplier VAT Number Optional</label>
-        <input type="text" id="supplierVatNo" placeholder="Optional">
+      <div>
+        <label>Email</label>
+        <input id="email">
       </div>
 
-      <div class="form-group">
-        <label>Payment Terms</label>
-        <input type="text" id="paymentTerms" placeholder="Cash / 30 Days / Manual">
+      <div>
+        <label>VAT IN No</label>
+        <input id="supplierVatNo">
       </div>
+
     </div>
   </div>
 
   <div class="card">
-    <h2>Purchase Details</h2>
+    <h2>Purchase Invoice Details</h2>
 
     <div class="grid">
-      <div class="form-group">
-        <label>Purchase Entry No</label>
-        <input type="text" id="purchaseNo">
+
+      <div>
+        <label>Purchase Invoice No</label>
+        <input id="purchaseNo">
       </div>
 
-      <div class="form-group">
-        <label>Supplier Invoice No</label>
-        <input type="text" id="supplierInvoiceNo" placeholder="Original supplier bill no">
-      </div>
-
-      <div class="form-group">
-        <label>Purchase Date</label>
+      <div>
+        <label>Date</label>
         <input type="date" id="purchaseDate">
       </div>
 
-      <div class="form-group">
-        <label>Due Date</label>
-        <input type="date" id="dueDate">
+      <div>
+        <label>Supplier Invoice No</label>
+        <input id="supplierInvoiceNo">
       </div>
 
-      <div class="form-group">
-        <label>Purchase Type</label>
-        <select id="purchaseType" onchange="calculateTotals()">
+      <div>
+        <label>Reference</label>
+        <input id="reference">
+      </div>
+
+      <div>
+        <label>VAT Type</label>
+        <select id="vatType" onchange="calc()">
           <option>VAT Exclusive</option>
           <option>VAT Inclusive</option>
-          <option>Non-VAT Purchase</option>
-          <option>Zero Rated Purchase</option>
-          <option>Exempt Purchase</option>
+          <option>Non-VAT</option>
+          <option>Zero Rated</option>
+          <option>Exempt</option>
         </select>
       </div>
 
-      <div class="form-group">
+      <div>
         <label>VAT %</label>
-        <input type="number" id="vatPercent" value="5" oninput="calculateTotals()">
+        <input type="number" id="vatPercent" value="5" oninput="calc()">
       </div>
 
-      <div class="form-group">
-        <label>Purchase Category</label>
-        <select id="purchaseCategory">
-          <option>Inventory Purchase</option>
-          <option>Expense Purchase</option>
-          <option>Service Purchase</option>
-          <option>Asset Purchase</option>
-          <option>Other Purchase</option>
-        </select>
+      <div>
+        <label>Less Discount</label>
+        <input type="number" step=".001" id="discount" value="0.000" oninput="calc()">
       </div>
 
-      <div class="form-group">
-        <label>Payment Status</label>
-        <select id="paymentStatus">
-          <option>Unpaid</option>
-          <option>Partial</option>
-          <option>Paid</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Payment Mode</label>
-        <select id="paymentMode">
-          <option>Credit</option>
-          <option>Cash</option>
-          <option>Bank Transfer</option>
-          <option>Card</option>
-          <option>Cheque</option>
-        </select>
-      </div>
-
-      <div class="form-group">
+      <div>
         <label>Status</label>
-        <select id="status">
-          <option>Recorded</option>
+        <select id="docStatus">
           <option>Draft</option>
-          <option>Cancelled</option>
+          <option>Submitted</option>
         </select>
       </div>
+
     </div>
   </div>
 
 </div>
 
 <div class="card">
-  <h2>Purchase Items / Expense Lines</h2>
-
-  <div class="btn-row" style="margin-bottom:15px;">
-    <a href="/items.html" target="_blank" class="quick-create">+ New Item / Service</a>
-    <a href="/suppliers.html" target="_blank" class="quick-create">+ New Supplier</a>
-  </div>
+  <h2>Items</h2>
 
   <table>
     <thead>
       <tr>
-        <th style="width:70px;">SR.NO</th>
-        <th style="width:250px;">ITEM</th>
-        <th>DESCRIPTION</th>
-        <th style="width:100px;">QTY</th>
-        <th style="width:130px;">UNIT COST</th>
-        <th style="width:140px;">AMOUNT</th>
-        <th style="width:90px;">ACTION</th>
+        <th style="width:60px;">SR</th>
+        <th style="width:220px;">Item</th>
+        <th>Description</th>
+        <th style="width:90px;">Qty</th>
+        <th style="width:90px;">Unit</th>
+        <th style="width:120px;">Purchase Rate</th>
+        <th style="width:130px;">Amount</th>
+        <th style="width:80px;">Action</th>
       </tr>
     </thead>
+
     <tbody id="itemsBody"></tbody>
   </table>
 
   <div class="btn-row">
-    <button type="button" class="btn btn-light" onclick="addRow()">+ Add Line</button>
+    <button type="button" class="btn btn-light" onclick="addRow()">+ Add Item</button>
   </div>
 
   <div class="total-box">
-    <div class="total-row"><span>Total Before Tax</span><span id="subtotalText">OMR 0.000</span></div>
-    <div class="total-row"><span>VAT Amount</span><span id="vatText">OMR 0.000</span></div>
+    <div class="total-row"><span>Total</span><span id="totalText">OMR 0.000</span></div>
+    <div class="total-row"><span>Less Discount</span><span id="discountText">OMR 0.000</span></div>
+    <div class="total-row"><span>Total Before VAT</span><span id="beforeText">OMR 0.000</span></div>
+    <div class="total-row"><span>VAT</span><span id="vatText">OMR 0.000</span></div>
     <div class="total-row grand"><span>Grand Total</span><span id="grandText">OMR 0.000</span></div>
   </div>
 
-  <div class="grid" style="margin-top:20px;">
-    <div class="form-group full">
-      <label>Notes</label>
-      <textarea id="notes" placeholder="Purchase notes / internal remarks"></textarea>
+  <br>
+
+  <div class="grid">
+    <div class="full">
+      <label>Remarks</label>
+      <textarea id="remarks"></textarea>
     </div>
   </div>
 
   <div class="btn-row">
-    <button type="submit" class="btn">Save Purchase Invoice</button>
-    <button type="button" class="btn btn-light" onclick="resetForm()">Clear</button>
+    <button class="btn">Save Purchase Invoice</button>
+    <button type="button" class="btn btn-light" onclick="setDefaults()">Clear</button>
   </div>
 </div>
 
 </form>
 
-<div class="card saved-card">
+<div class="card">
   <h2>Saved Purchase Invoices</h2>
+
+  <input id="savedSearch" placeholder="Search saved..." oninput="loadSaved()">
+
+  <br><br>
 
   <table>
     <thead>
       <tr>
-        <th>Purchase No</th>
-        <th>Supplier Inv No</th>
+        <th>No</th>
         <th>Date</th>
         <th>Supplier</th>
-        <th>Type</th>
         <th>Total</th>
-        <th>Payment</th>
+        <th>Status</th>
         <th>Action</th>
       </tr>
     </thead>
-    <tbody id="savedTable"></tbody>
+
+    <tbody id="savedBody"></tbody>
   </table>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="/firebase-config.js"></script>
+<script src="/data-sync.js"></script>
+
 <script>
-function getSuppliers(){return JSON.parse(localStorage.getItem("post91Suppliers") || "[]");}
-function getItems(){return JSON.parse(localStorage.getItem("post91Items") || "[]");}
-function getPurchases(){return JSON.parse(localStorage.getItem("post91PurchaseInvoices") || "[]");}
-function savePurchases(data){localStorage.setItem("post91PurchaseInvoices", JSON.stringify(data));}
-function today(){return new Date().toISOString().split("T")[0];}
-function moneyValue(num){return Number(num || 0).toFixed(3);}
-function moneyText(num){return "OMR " + Number(num || 0).toFixed(3);}
+const STORE='post91PurchaseInvoices';
+let EDIT='';
 
-function loadSuppliers(){
-  const select=document.getElementById("supplierSelect");
-  select.innerHTML=`<option value="">Select Supplier</option>`;
+function gd(k){return JSON.parse(localStorage.getItem(k)||'[]')}
+function sd(k,d){localStorage.setItem(k,JSON.stringify(d))}
+function today(){return new Date().toISOString().split('T')[0]}
+function mv(n){return Number(n||0).toFixed(3)}
+function mt(n){return 'OMR '+mv(n)}
 
-  getSuppliers().forEach((s,index)=>{
-    const opt=document.createElement("option");
-    opt.value=index;
-    opt.textContent=s.supplierName;
-    select.appendChild(opt);
+function supplierSearch(){
+
+  let q=supplierName.value.toLowerCase();
+
+  let list=gd('post91Suppliers')
+    .filter(s=>JSON.stringify(s).toLowerCase().includes(q))
+    .slice(0,40);
+
+  supplierPanel.innerHTML=list.map((s,i)=>`
+    <div class="opt" data-i="${i}">
+      <b>${s.supplierName||s.name||'-'}</b>
+      <span>${s.mobile||''}</span>
+    </div>
+  `).join('');
+
+  supplierPanel.classList.add('show');
+
+  [...supplierPanel.querySelectorAll('[data-i]')]
+  .forEach((e,i)=>{
+
+    e.onclick=()=>{
+
+      let s=list[i];
+
+      supplierName.value=s.supplierName||s.name||'';
+      supplierAddress.value=s.address||'';
+      attention.value=s.contactPerson||'';
+      mobile.value=s.mobile||'';
+      email.value=s.email||'';
+      supplierVatNo.value=s.vatNumber||'';
+
+      supplierPanel.classList.remove('show');
+    };
   });
 }
 
-function loadSupplierData(){
-  const index=document.getElementById("supplierSelect").value;
-  if(index==="") return;
+function addRow(d=null){
 
-  const s=getSuppliers()[index];
-
-  document.getElementById("supplierName").value=s.supplierName || "";
-  document.getElementById("supplierAddress").value=s.address || "";
-  document.getElementById("mobile").value=s.mobile || "";
-  document.getElementById("email").value=s.email || "";
-  document.getElementById("supplierVatNo").value=s.vatNumber || "";
-  document.getElementById("paymentTerms").value=s.paymentTerms || "";
-
-  setDueDateFromTerms(s.paymentTerms || "");
-}
-
-function setDueDateFromTerms(terms){
-  const purchaseDate=document.getElementById("purchaseDate").value || today();
-  const date=new Date(purchaseDate);
-  let days=0;
-
-  if(terms.includes("7")) days=7;
-  else if(terms.includes("15")) days=15;
-  else if(terms.includes("30")) days=30;
-  else if(terms.includes("45")) days=45;
-  else if(terms.includes("60")) days=60;
-  else if(terms.includes("90")) days=90;
-  else if(terms.includes("120")) days=120;
-
-  date.setDate(date.getDate()+days);
-  document.getElementById("dueDate").value=date.toISOString().split("T")[0];
-}
-
-function itemOptions(){
-  const items=getItems().filter(i=>i.status!=="Inactive");
-
-  return `<option value="">Select Item</option>` + items.map((i,index)=>{
-    return `<option value="${index}">${i.itemName}</option>`;
-  }).join("");
-}
-
-function addRow(data=null){
-  const tbody=document.getElementById("itemsBody");
-  const tr=document.createElement("tr");
+  let tr=document.createElement('tr');
 
   tr.innerHTML=`
-    <td><input type="number" class="sr" value="${tbody.children.length+1}" readonly></td>
     <td>
-      <select class="itemSelect" onchange="loadItemToRow(this)">
-        ${itemOptions()}
-      </select>
-      <div class="small itemMeta"></div>
+      <input class="sr" value="${itemsBody.children.length+1}" readonly>
     </td>
-    <td><textarea class="desc" placeholder="Item / expense description"></textarea></td>
-    <td><input type="number" step="0.001" class="qty" value="1" oninput="calculateTotals()"></td>
-    <td><input type="number" step="0.001" class="rate" value="0.000" oninput="calculateTotals()"></td>
-    <td><input type="text" class="amount" value="0.000" readonly></td>
-    <td><button type="button" class="btn btn-danger" onclick="removeRow(this)">X</button></td>
+
+    <td>
+      <input class="itemName">
+    </td>
+
+    <td>
+      <textarea class="desc"></textarea>
+    </td>
+
+    <td>
+      <input type="number" step=".001" class="qty" value="1" oninput="calc()">
+    </td>
+
+    <td>
+      <input class="unit" value="PCS">
+    </td>
+
+    <td>
+      <input type="number" step=".001" class="rate" value="0.000" oninput="calc()">
+    </td>
+
+    <td>
+      <input class="amount" value="0.000" readonly>
+    </td>
+
+    <td>
+      <button type="button" class="btn btn-danger" onclick="remRow(this)">X</button>
+    </td>
   `;
 
-  tbody.appendChild(tr);
+  itemsBody.appendChild(tr);
 
-  if(data){
-    tr.querySelector(".itemSelect").value=data.itemIndex || "";
-    tr.querySelector(".desc").value=data.description || "";
-    tr.querySelector(".qty").value=data.qty || 1;
-    tr.querySelector(".rate").value=moneyValue(data.rate || 0);
-    updateRowMeta(tr,data.itemIndex);
+  if(d){
+
+    tr.querySelector('.itemName').value=d.itemName||'';
+    tr.querySelector('.desc').value=d.description||'';
+    tr.querySelector('.qty').value=d.qty||1;
+    tr.querySelector('.unit').value=d.unit||'PCS';
+    tr.querySelector('.rate').value=d.rate||'0.000';
+    tr.querySelector('.amount').value=d.amount||'0.000';
   }
 
-  calculateTotals();
+  calc();
 }
 
-function loadItemToRow(select){
-  const index=select.value;
-  if(index==="") return;
+function remRow(b){
 
-  const item=getItems()[index];
-  const row=select.closest("tr");
+  b.closest('tr').remove();
 
-  let desc=item.itemName || "";
-
-  if(item.partNumber) desc += `\nPart No: ${item.partNumber}`;
-  if(item.oemNumber) desc += `\nOEM No: ${item.oemNumber}`;
-  if(item.vehicleCompatibility) desc += `\nVehicle: ${item.vehicleCompatibility}`;
-
-  row.querySelector(".desc").value=desc;
-  row.querySelector(".rate").value=moneyValue(item.costPrice || item.sellingPrice || 0);
-  updateRowMeta(row,index);
-
-  calculateTotals();
-}
-
-function updateRowMeta(row,index){
-  if(index==="" || index===undefined){
-    row.querySelector(".itemMeta").innerHTML="";
-    return;
-  }
-
-  const item=getItems()[index];
-  let meta=[];
-
-  if(item.mainCategory) meta.push(`Category: ${item.mainCategory}`);
-  if(item.subCategory) meta.push(`Sub: ${item.subCategory}`);
-  if(item.partNumber) meta.push(`Part: ${item.partNumber}`);
-  if(item.oemNumber) meta.push(`OEM: ${item.oemNumber}`);
-
-  row.querySelector(".itemMeta").innerHTML=meta.join("<br>");
-}
-
-function removeRow(btn){
-  btn.closest("tr").remove();
-  refreshSrNo();
-  calculateTotals();
-}
-
-function refreshSrNo(){
-  document.querySelectorAll("#itemsBody tr").forEach((row,index)=>{
-    row.querySelector(".sr").value=index+1;
+  [...document.querySelectorAll('#itemsBody tr')]
+  .forEach((r,i)=>{
+    r.querySelector('.sr').value=i+1;
   });
+
+  calc();
 }
 
-function calculateTotals(){
+function calc(){
+
   let total=0;
 
-  document.querySelectorAll("#itemsBody tr").forEach(row=>{
-    const qty=Number(row.querySelector(".qty").value || 0);
-    const rate=Number(row.querySelector(".rate").value || 0);
-    const amount=qty*rate;
+  document.querySelectorAll('#itemsBody tr')
+  .forEach(r=>{
 
-    row.querySelector(".amount").value=moneyValue(amount);
-    total+=amount;
+    let q=+r.querySelector('.qty').value||0;
+    let rate=+r.querySelector('.rate').value||0;
+
+    let am=q*rate;
+
+    r.querySelector('.amount').value=mv(am);
+
+    total+=am;
   });
 
-  const purchaseType=document.getElementById("purchaseType").value;
-  const vatPercent=Number(document.getElementById("vatPercent").value || 0);
+  let disc=+discount.value||0;
 
-  let beforeTax=total;
-  let vatAmount=0;
-  let grandTotal=total;
+  let after=Math.max(total-disc,0);
 
-  if(purchaseType==="VAT Exclusive"){
-    vatAmount=beforeTax*vatPercent/100;
-    grandTotal=beforeTax+vatAmount;
+  let v=+vatPercent.value||0;
+
+  let type=vatType.value;
+
+  let vat=0,before=after,grand=after;
+
+  if(type==='VAT Exclusive'){
+    vat=before*v/100;
+    grand=before+vat;
   }
 
-  if(purchaseType==="VAT Inclusive"){
-    vatAmount=total-(total/(1+vatPercent/100));
-    beforeTax=total-vatAmount;
-    grandTotal=total;
+  if(type==='VAT Inclusive'){
+    vat=after-(after/(1+v/100));
+    before=after-vat;
+    grand=after;
   }
 
-  if(purchaseType==="Non-VAT Purchase" || purchaseType==="Zero Rated Purchase" || purchaseType==="Exempt Purchase"){
-    vatAmount=0;
-    beforeTax=total;
-    grandTotal=total;
-  }
+  totalText.textContent=mt(total);
+  discountText.textContent=mt(disc);
+  beforeText.textContent=mt(before);
+  vatText.textContent=mt(vat);
+  grandText.textContent=mt(grand);
 
-  document.getElementById("subtotalText").textContent=moneyText(beforeTax);
-  document.getElementById("vatText").textContent=moneyText(vatAmount);
-  document.getElementById("grandText").textContent=moneyText(grandTotal);
-
-  return {total,beforeTax,vatAmount,grandTotal};
+  return{
+    total,
+    discountAmount:disc,
+    beforeTax:before,
+    vatAmount:vat,
+    grandTotal:grand
+  };
 }
 
-document.getElementById("purchaseForm").addEventListener("input", function(){
-  calculateTotals();
-});
+function saveDoc(e){
 
-document.getElementById("purchaseForm").addEventListener("submit", function(e){
   e.preventDefault();
 
-  const purchases=getPurchases();
-  const totals=calculateTotals();
-  const items=[];
+  let list=gd(STORE);
 
-  document.querySelectorAll("#itemsBody tr").forEach(row=>{
-    const desc=row.querySelector(".desc").value;
+  let totals=calc();
 
-    if(desc.trim()!==""){
-      items.push({
-        sr:row.querySelector(".sr").value,
-        itemIndex:row.querySelector(".itemSelect").value,
-        description:desc,
-        qty:row.querySelector(".qty").value,
-        rate:row.querySelector(".rate").value,
-        amount:row.querySelector(".amount").value
-      });
-    }
+  let items=[];
+
+  document.querySelectorAll('#itemsBody tr')
+  .forEach(r=>{
+
+    items.push({
+
+      itemName:r.querySelector('.itemName').value,
+      description:r.querySelector('.desc').value,
+      qty:r.querySelector('.qty').value,
+      unit:r.querySelector('.unit').value,
+      rate:r.querySelector('.rate').value,
+      amount:r.querySelector('.amount').value
+    });
   });
 
-  if(items.length===0){
-    alert("Please add at least one purchase line.");
-    return;
-  }
+  let rec={
 
-  const purchase={
-    purchaseNo:document.getElementById("purchaseNo").value,
-    supplierInvoiceNo:document.getElementById("supplierInvoiceNo").value,
-    purchaseDate:document.getElementById("purchaseDate").value,
-    dueDate:document.getElementById("dueDate").value,
-    supplierName:document.getElementById("supplierName").value,
-    supplierAddress:document.getElementById("supplierAddress").value,
-    mobile:document.getElementById("mobile").value,
-    email:document.getElementById("email").value,
-    supplierVatNo:document.getElementById("supplierVatNo").value,
-    paymentTerms:document.getElementById("paymentTerms").value,
-    purchaseType:document.getElementById("purchaseType").value,
-    purchaseCategory:document.getElementById("purchaseCategory").value,
-    vatPercent:document.getElementById("vatPercent").value,
-    paymentStatus:document.getElementById("paymentStatus").value,
-    paymentMode:document.getElementById("paymentMode").value,
-    status:document.getElementById("status").value,
-    notes:document.getElementById("notes").value,
+    purchaseNo:purchaseNo.value,
+    purchaseDate:purchaseDate.value,
+
+    supplierName:supplierName.value,
+    supplierAddress:supplierAddress.value,
+    attention:attention.value,
+    mobile:mobile.value,
+    email:email.value,
+    supplierVatNo:supplierVatNo.value,
+
+    supplierInvoiceNo:supplierInvoiceNo.value,
+    reference:reference.value,
+
+    vatType:vatType.value,
+    vatPercent:vatPercent.value,
+    discountAmount:discount.value,
+
+    docStatus:docStatus.value,
+
+    remarks:remarks.value,
+
     items,
-    total:totals.total,
-    beforeTax:totals.beforeTax,
-    vatAmount:totals.vatAmount,
-    grandTotal:totals.grandTotal,
-    purchaseReportCategory:
-      document.getElementById("purchaseType").value==="VAT Exclusive" || document.getElementById("purchaseType").value==="VAT Inclusive"
-      ? "VAT Purchase"
-      : document.getElementById("purchaseType").value
+
+    ...totals,
+
+    updatedAt:new Date().toISOString()
   };
 
-  purchases.push(purchase);
-  savePurchases(purchases);
+  if(EDIT===''){
 
-  alert("Purchase Invoice saved successfully.");
-  loadSavedPurchases();
-});
+    list.push(rec);
 
-function loadSavedPurchases(){
-  const tbody=document.getElementById("savedTable");
-  tbody.innerHTML="";
+    alert('Purchase Invoice saved.');
 
-  getPurchases().forEach((p,index)=>{
-    const statusClass=p.paymentStatus==="Paid" ? "paid" : "pending";
+  }else{
 
-    const tr=document.createElement("tr");
+    list[EDIT]={...list[EDIT],...rec};
+
+    alert('Purchase Invoice updated.');
+  }
+
+  sd(STORE,list);
+
+  EDIT='';
+
+  loadSaved();
+}
+
+function badge(s){
+
+  return `
+    <span class="badge ${(s||'Draft')==='Submitted'?'submitted':'draft'}">
+      ${s||'Draft'}
+    </span>
+  `;
+}
+
+function loadSaved(){
+
+  let q=(savedSearch.value||'').toLowerCase();
+
+  savedBody.innerHTML='';
+
+  gd(STORE).forEach((d,i)=>{
+
+    if(q && !JSON.stringify(d).toLowerCase().includes(q)) return;
+
+    let tr=document.createElement('tr');
 
     tr.innerHTML=`
-      <td>${p.purchaseNo || "-"}</td>
-      <td>${p.supplierInvoiceNo || "-"}</td>
-      <td>${p.purchaseDate || "-"}</td>
-      <td>${p.supplierName || "-"}</td>
-      <td>${p.purchaseType || "-"}</td>
-      <td>${moneyText(p.grandTotal)}</td>
-      <td><span class="badge ${statusClass}">${p.paymentStatus || "-"}</span></td>
-      <td><button class="btn btn-danger" type="button" onclick="deletePurchase(${index})">Delete</button></td>
+
+      <td>${d.purchaseNo||'-'}</td>
+
+      <td>${d.purchaseDate||'-'}</td>
+
+      <td>${d.supplierName||'-'}</td>
+
+      <td>${mt(d.grandTotal)}</td>
+
+      <td>${badge(d.docStatus)}</td>
+
+      <td>
+        <button class="btn btn-light"
+        onclick="editDoc(${i})">
+          Edit
+        </button>
+
+        <button class="btn btn-danger"
+        onclick="delDoc(${i})">
+          Delete
+        </button>
+      </td>
     `;
 
-    tbody.appendChild(tr);
+    savedBody.appendChild(tr);
   });
 }
 
-function deletePurchase(index){
-  if(confirm("Delete this purchase invoice?")){
-    const purchases=getPurchases();
-    purchases.splice(index,1);
-    savePurchases(purchases);
-    loadSavedPurchases();
-  }
+function editDoc(i){
+
+  let d=gd(STORE)[i];
+
+  EDIT=i;
+
+  purchaseNo.value=d.purchaseNo||'';
+  purchaseDate.value=d.purchaseDate||today();
+
+  supplierName.value=d.supplierName||'';
+  supplierAddress.value=d.supplierAddress||'';
+  attention.value=d.attention||'';
+  mobile.value=d.mobile||'';
+  email.value=d.email||'';
+  supplierVatNo.value=d.supplierVatNo||'';
+
+  supplierInvoiceNo.value=d.supplierInvoiceNo||'';
+  reference.value=d.reference||'';
+
+  vatType.value=d.vatType||'VAT Exclusive';
+  vatPercent.value=d.vatPercent||5;
+  discount.value=d.discountAmount||'0.000';
+
+  docStatus.value=d.docStatus||'Draft';
+
+  remarks.value=d.remarks||'';
+
+  itemsBody.innerHTML='';
+
+  (d.items||[]).forEach(x=>addRow(x));
+
+  if((d.items||[]).length===0)addRow();
+
+  calc();
+
+  scrollTo({top:0,behavior:'smooth'});
 }
 
-function resetForm(){
-  document.getElementById("purchaseForm").reset();
-  document.getElementById("itemsBody").innerHTML="";
-  setDefaults();
-  addRow();
-  calculateTotals();
+function delDoc(i){
+
+  if(confirm('Delete Purchase Invoice?')){
+
+    let list=gd(STORE);
+
+    list.splice(i,1);
+
+    sd(STORE,list);
+
+    loadSaved();
+  }
 }
 
 function setDefaults(){
-  document.getElementById("purchaseDate").value=today();
-  document.getElementById("dueDate").value=today();
-  document.getElementById("purchaseNo").value="PUR-"+(1001+getPurchases().length);
-  document.getElementById("vatPercent").value=5;
-  document.getElementById("purchaseType").value="VAT Exclusive";
-  document.getElementById("paymentMode").value="Credit";
+
+  EDIT='';
+
+  docForm.reset();
+
+  itemsBody.innerHTML='';
+
+  purchaseNo.value='PINV-'+(1001+gd(STORE).length);
+  purchaseDate.value=today();
+
+  vatType.value='VAT Exclusive';
+  vatPercent.value=5;
+  discount.value='0.000';
+  docStatus.value='Draft';
+
+  addRow();
+
+  calc();
 }
 
-loadSuppliers();
+document.addEventListener('click',e=>{
+
+  if(!supplierPanel.contains(e.target)
+  && e.target!==supplierName){
+
+    supplierPanel.classList.remove('show');
+  }
+});
+
 setDefaults();
-addRow();
-loadSavedPurchases();
-calculateTotals();
+loadSaved();
 </script>
 
 </body>

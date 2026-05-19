@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Ledger | Post91 Accounts</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.header h1{margin:0;color:#0d6efd}
+.back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+label{display:block;font-weight:800;margin-bottom:6px}
+input,select{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
+.btn{border:0;background:#0d6efd;color:white;padding:11px 15px;border-radius:11px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #dbe4f0;padding:8px;vertical-align:top}
+th{background:#f8fbff;text-align:left}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.box{background:#f8fbff;border:1px solid #dbe4f0;border-radius:15px;padding:16px}
+.box b{display:block;font-size:13px;color:#64748b}
+.box span{font-size:22px;font-weight:900;color:#0d6efd}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+.debit{color:#b91c1c;font-weight:900}
+.credit{color:#166534;font-weight:900}
+.balance{font-weight:900;color:#0d6efd}
+@media(max-width:900px){.grid,.summary{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Customer Ledger</h1>
+    <p>Customer-wise invoice, receipt and balance report.</p>
+  </div>
+  <a class="back" href="/dashboard.html">Back</a>
+</div>
+
+<div class="note">
+  Ledger is generated automatically from Sales Invoices and Receipt Vouchers.
+</div>
+
+<div class="card">
+  <h2>Filters</h2>
+
+  <div class="grid">
+    <div>
+      <label>Customer</label>
+      <select id="customerSelect" onchange="generateLedger()">
+        <option value="">All Customers</option>
+      </select>
+    </div>
+
+    <div>
+      <label>From Date</label>
+      <input type="date" id="fromDate" onchange="generateLedger()">
+    </div>
+
+    <div>
+      <label>To Date</label>
+      <input type="date" id="toDate" onchange="generateLedger()">
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="generateLedger()">Refresh Ledger</button>
+    <button class="btn btn-light" onclick="clearFilters()">Clear Filter</button>
+  </div>
+</div>
+
+<div class="summary">
+  <div class="box">
+    <b>Total Invoices</b>
+    <span id="totalInvoices">OMR 0.000</span>
+  </div>
+
+  <div class="box">
+    <b>Total Receipts</b>
+    <span id="totalReceipts">OMR 0.000</span>
+  </div>
+
+  <div class="box">
+    <b>Advance / Unallocated</b>
+    <span id="totalAdvance">OMR 0.000</span>
+  </div>
+
+  <div class="box">
+    <b>Net Balance</b>
+    <span id="netBalance">OMR 0.000</span>
+  </div>
+</div>
+
+<br>
+
+<div class="card">
+  <h2>Ledger Details</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Customer</th>
+        <th>Type</th>
+        <th>Document No</th>
+        <th>Reference</th>
+        <th>Debit</th>
+        <th>Credit</th>
+        <th>Running Balance</th>
+      </tr>
+    </thead>
+    <tbody id="ledgerBody"></tbody>
+  </table>
+</div>
+
+<script>
+function gd(k){return JSON.parse(localStorage.getItem(k)||"[]")}
+function mv(n){return Number(n||0).toFixed(3)}
+function mt(n){return "OMR "+mv(n)}
+
+function loadCustomers(){
+  customerSelect.innerHTML='<option value="">All Customers</option>';
+
+  gd("post91Customers").forEach(c=>{
+    let name=c.customerName||c.name||"";
+    if(!name)return;
+
+    let o=document.createElement("option");
+    o.value=name;
+    o.textContent=name;
+    customerSelect.appendChild(o);
+  });
+}
+
+function dateOk(date){
+  if(!date)return true;
+
+  let d=new Date(date);
+  let f=fromDate.value ? new Date(fromDate.value) : null;
+  let t=toDate.value ? new Date(toDate.value) : null;
+
+  if(f && d<f)return false;
+  if(t && d>t)return false;
+
+  return true;
+}
+
+function customerOk(name){
+  if(!customerSelect.value)return true;
+  return (name||"").toLowerCase()===customerSelect.value.toLowerCase();
+}
+
+function generateLedger(){
+  let rows=[];
+
+  gd("post91SalesInvoices").forEach(inv=>{
+    if((inv.docStatus||"Submitted")==="Cancelled")return;
+    if(!customerOk(inv.customerName))return;
+    if(!dateOk(inv.invoiceDate))return;
+
+    rows.push({
+      date:inv.invoiceDate||"",
+      customer:inv.customerName||"",
+      type:"Sales Invoice",
+      docNo:inv.invoiceNo||"",
+      ref:inv.referenceNo||"",
+      debit:Number(inv.grandTotal||0),
+      credit:0
+    });
+  });
+
+  gd("post91ReceiptVouchers").forEach(rv=>{
+    if((rv.docStatus||"Posted")==="Cancelled")return;
+    if(!customerOk(rv.customerName))return;
+    if(!dateOk(rv.receiptDate))return;
+
+    rows.push({
+      date:rv.receiptDate||"",
+      customer:rv.customerName||"",
+      type:"Receipt Voucher",
+      docNo:rv.receiptNo||"",
+      ref:(rv.allocations||[]).map(a=>a.invoiceNo).join(", ") || rv.manualAgainst || "",
+      debit:0,
+      credit:Number(rv.totalReceiptAmount||0),
+      advance:Number(rv.unallocatedAmount||0)
+    });
+  });
+
+  rows.sort((a,b)=>{
+    let da=new Date(a.date||"1900-01-01");
+    let db=new Date(b.date||"1900-01-01");
+    return da-db;
+  });
+
+  let debitTotal=0;
+  let creditTotal=0;
+  let advanceTotal=0;
+  let running=0;
+
+  ledgerBody.innerHTML="";
+
+  rows.forEach(r=>{
+    debitTotal+=r.debit;
+    creditTotal+=r.credit;
+    advanceTotal+=Number(r.advance||0);
+    running+=r.debit-r.credit;
+
+    let tr=document.createElement("tr");
+
+    tr.innerHTML=`
+      <td>${r.date||"-"}</td>
+      <td>${r.customer||"-"}</td>
+      <td>${r.type}</td>
+      <td>${r.docNo||"-"}</td>
+      <td>${r.ref||"-"}</td>
+      <td class="debit">${r.debit?mt(r.debit):"-"}</td>
+      <td class="credit">${r.credit?mt(r.credit):"-"}</td>
+      <td class="balance">${mt(running)}</td>
+    `;
+
+    ledgerBody.appendChild(tr);
+  });
+
+  totalInvoices.textContent=mt(debitTotal);
+  totalReceipts.textContent=mt(creditTotal);
+  totalAdvance.textContent=mt(advanceTotal);
+  netBalance.textContent=mt(running);
+}
+
+function clearFilters(){
+  customerSelect.value="";
+  fromDate.value="";
+  toDate.value="";
+  generateLedger();
+}
+
+loadCustomers();
+generateLedger();
+</script>
+
+</body>
+</html>

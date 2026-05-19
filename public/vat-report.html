@@ -6,36 +6,46 @@
 <title>VAT Report | Post91 Accounts</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
-body{background:#eef3f8;color:#061833;padding:28px;}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
-.header h1{font-size:34px}.header p{color:#64748b;margin-top:6px}
-.back{background:white;color:#0d6efd;text-decoration:none;padding:12px 16px;border-radius:13px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08);}
-.card{background:white;border-radius:22px;padding:26px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:22px;}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
-label{display:block;margin-bottom:7px;font-weight:800;}
-input,select{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #dbe4f0;font-size:15px;}
-.btn{border:none;background:#0d6efd;color:white;padding:13px 19px;border-radius:13px;font-weight:900;cursor:pointer;}
-.btn-light{background:#e2e8f0;color:#0f172a;margin-left:8px;}
-.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
-.summary{background:white;border-radius:22px;padding:20px;border:1px solid #e5edf7;box-shadow:0 12px 28px rgba(15,23,42,.06);}
-.summary span{color:#64748b;font-size:13px;font-weight:800;}
-.summary h2{margin-top:8px;color:#0d6efd;}
-table{width:100%;border-collapse:collapse;margin-top:15px;}
-th{text-align:left;color:#64748b;padding:12px;border-bottom:1px solid #e5edf7;font-size:14px;}
-td{padding:12px;border-bottom:1px solid #eef2f7;font-weight:700;vertical-align:top;}
-.badge{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:900;display:inline-block;}
-.sales{background:#dcfce7;color:#166534;}
-.purchase{background:#dbeafe;color:#1d4ed8;}
-.expense{background:#fee2e2;color:#991b1b;}
-.vat{background:#fef3c7;color:#92400e;}
-.nonvat{background:#f1f5f9;color:#334155;}
-.payable{color:#991b1b;}
-.refund{color:#166534;}
-.section-title{font-size:22px;color:#0d6efd;margin-bottom:12px;}
-@media(max-width:1000px){.grid,.summary-grid{grid-template-columns:1fr 1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
-@media(max-width:650px){.grid,.summary-grid{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}}
-@media print{.header,.filter-card,.btn{display:none!important}body{background:white;padding:10px}.card{box-shadow:none;border:none}.summary-grid{grid-template-columns:repeat(4,1fr)}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.header h1{margin:0;color:#0d6efd}
+.back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+label{display:block;font-weight:800;margin-bottom:6px}
+input{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
+.btn{border:0;background:#0d6efd;color:white;padding:11px 15px;border-radius:11px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.box{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:18px;box-shadow:0 14px 34px #0001}
+.box b{display:block;font-size:13px;color:#64748b}
+.box span{font-size:23px;font-weight:900;color:#0d6efd}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+.report{background:#fff;border:1px solid #111;border-radius:12px;padding:20px;color:#000}
+.report-head{text-align:center;border-bottom:3px double #111;padding-bottom:12px;margin-bottom:12px}
+.report-head h2{margin:0;font-size:24px;text-decoration:underline}
+.report-head p{margin:6px 0 0;font-weight:700}
+.row{display:grid;grid-template-columns:1fr 160px;border-bottom:1px solid #ddd}
+.row div{padding:9px;font-size:14px}
+.label{font-weight:800}
+.amount{text-align:right;font-weight:900}
+.section-title{background:#f1f5f9;font-weight:900;border:1px solid #111;margin-top:12px;padding:9px}
+.total-row{background:#f8fbff;border:1px solid #111;font-weight:900}
+.payable{color:#b91c1c!important}
+.refund{color:#166534!important}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #dbe4f0;padding:8px;text-align:left;vertical-align:top}
+th{background:#f8fbff}
+@media(max-width:900px){.grid,.summary{grid-template-columns:1fr}.row{grid-template-columns:1fr 130px}table{display:block;overflow-x:auto;white-space:nowrap}}
+@media print{
+  @page{size:A4;margin:10mm}
+  body{background:#fff;padding:0}
+  .header,.note,.filters,.summary,.btn-row,.details-card{display:none!important}
+  .card{box-shadow:none;border:0;padding:0;margin:0}
+  .report{border:0;border-radius:0;padding:0}
+}
 </style>
 </head>
 
@@ -44,320 +54,347 @@ td{padding:12px;border-bottom:1px solid #eef2f7;font-weight:700;vertical-align:t
 <div class="header">
   <div>
     <h1>VAT Report</h1>
-    <p>VAT output, input, non-VAT, zero-rated and exempt transaction report.</p>
+    <p>Output VAT, input VAT and net VAT payable/refundable.</p>
   </div>
-  <a href="/dashboard.html" class="back">Back to Dashboard</a>
+  <a class="back" href="/dashboard.html">Back</a>
 </div>
 
-<div class="card filter-card">
+<div class="note">
+  VAT Report reads from Sales Invoices, Purchase Invoices and Expense Entries. Use this as management report; verify final figures before tax filing.
+</div>
+
+<div class="card filters">
+  <h2>Filters</h2>
+
   <div class="grid">
     <div>
       <label>From Date</label>
-      <input type="date" id="fromDate">
+      <input type="date" id="fromDate" onchange="generateVAT()">
     </div>
 
     <div>
       <label>To Date</label>
-      <input type="date" id="toDate">
+      <input type="date" id="toDate" onchange="generateVAT()">
     </div>
 
     <div>
-      <label>Report Type</label>
-      <select id="reportType">
-        <option>VAT Transactions Only</option>
-        <option>All Transactions</option>
-        <option>Sales Only</option>
-        <option>Purchase Only</option>
-        <option>Expenses Only</option>
-        <option>Non-VAT Only</option>
-        <option>Zero Rated Only</option>
-        <option>Exempt Only</option>
-      </select>
-    </div>
-
-    <div>
-      <label>&nbsp;</label>
-      <button class="btn" onclick="generateVATReport()">Generate</button>
-      <button class="btn btn-light" onclick="window.print()">Print</button>
+      <label>Report Name</label>
+      <input id="reportName" value="VAT Report" oninput="generateVAT()">
     </div>
   </div>
-</div>
 
-<div class="summary-grid">
-  <div class="summary">
-    <span>Output VAT</span>
-    <h2 id="outputVat">OMR 0.000</h2>
-  </div>
-
-  <div class="summary">
-    <span>Input VAT</span>
-    <h2 id="inputVat">OMR 0.000</h2>
-  </div>
-
-  <div class="summary">
-    <span>Net VAT Payable</span>
-    <h2 id="netVat">OMR 0.000</h2>
-  </div>
-
-  <div class="summary">
-    <span>Transactions</span>
-    <h2 id="transactionCount">0</h2>
+  <div class="btn-row">
+    <button class="btn" onclick="generateVAT()">Refresh Report</button>
+    <button class="btn btn-light" onclick="clearFilters()">Clear Filter</button>
+    <button class="btn btn-light" onclick="window.print()">Print</button>
   </div>
 </div>
+
+<div class="summary">
+  <div class="box"><b>Taxable Sales</b><span id="summaryTaxableSales">OMR 0.000</span></div>
+  <div class="box"><b>Output VAT</b><span id="summaryOutputVAT">OMR 0.000</span></div>
+  <div class="box"><b>Input VAT</b><span id="summaryInputVAT">OMR 0.000</span></div>
+  <div class="box"><b>Net VAT</b><span id="summaryNetVAT">OMR 0.000</span></div>
+</div>
+
+<br>
 
 <div class="card">
-  <div class="section-title">VAT Summary</div>
+  <div class="report">
 
-  <table>
-    <thead>
-      <tr>
-        <th>Section</th>
-        <th>Before VAT</th>
-        <th>VAT Amount</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody id="summaryTable"></tbody>
-  </table>
+    <div class="report-head">
+      <h2 id="pReportName">VAT Report</h2>
+      <p id="pPeriod">For all periods</p>
+    </div>
+
+    <div class="section-title">Output VAT - Sales</div>
+
+    <div class="row">
+      <div class="label">Taxable Sales Before VAT</div>
+      <div class="amount" id="pTaxableSales">0.000</div>
+    </div>
+
+    <div class="row">
+      <div class="label">Output VAT on Sales</div>
+      <div class="amount" id="pOutputVAT">0.000</div>
+    </div>
+
+    <div class="row total-row">
+      <div class="label">Total Sales Including VAT</div>
+      <div class="amount" id="pSalesGross">0.000</div>
+    </div>
+
+    <div class="section-title">Input VAT - Purchases</div>
+
+    <div class="row">
+      <div class="label">Taxable Purchases Before VAT</div>
+      <div class="amount" id="pTaxablePurchases">0.000</div>
+    </div>
+
+    <div class="row">
+      <div class="label">Input VAT on Purchases</div>
+      <div class="amount" id="pPurchaseVAT">0.000</div>
+    </div>
+
+    <div class="section-title">Input VAT - Expenses</div>
+
+    <div class="row">
+      <div class="label">Taxable Expenses Before VAT</div>
+      <div class="amount" id="pTaxableExpenses">0.000</div>
+    </div>
+
+    <div class="row">
+      <div class="label">Input VAT on Expenses</div>
+      <div class="amount" id="pExpenseVAT">0.000</div>
+    </div>
+
+    <div class="row total-row">
+      <div class="label">Total Input VAT</div>
+      <div class="amount" id="pInputVAT">0.000</div>
+    </div>
+
+    <div class="section-title">Net VAT Position</div>
+
+    <div class="row total-row">
+      <div class="label" id="netVatLabel">VAT Payable / Refundable</div>
+      <div class="amount" id="pNetVAT">0.000</div>
+    </div>
+
+  </div>
 </div>
 
-<div class="card">
-  <div class="section-title">Transaction Details</div>
-
+<div class="card details-card">
+  <h2>Sales VAT Details</h2>
   <table>
     <thead>
       <tr>
         <th>Date</th>
-        <th>Document</th>
-        <th>Type</th>
-        <th>Party</th>
-        <th>Tax Category</th>
+        <th>Invoice No</th>
+        <th>Customer</th>
+        <th>VAT Type</th>
+        <th>Before VAT</th>
+        <th>VAT</th>
+        <th>Grand Total</th>
+      </tr>
+    </thead>
+    <tbody id="salesBody"></tbody>
+  </table>
+</div>
+
+<div class="card details-card">
+  <h2>Purchase VAT Details</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Purchase No</th>
+        <th>Supplier</th>
+        <th>VAT Type</th>
+        <th>Before VAT</th>
+        <th>VAT</th>
+        <th>Grand Total</th>
+      </tr>
+    </thead>
+    <tbody id="purchaseBody"></tbody>
+  </table>
+</div>
+
+<div class="card details-card">
+  <h2>Expense VAT Details</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Expense No</th>
+        <th>Category</th>
+        <th>Paid To</th>
+        <th>VAT Type</th>
         <th>Before VAT</th>
         <th>VAT</th>
         <th>Total</th>
       </tr>
     </thead>
-    <tbody id="detailTable"></tbody>
+    <tbody id="expenseBody"></tbody>
   </table>
 </div>
 
 <script>
-function getSales(){return JSON.parse(localStorage.getItem("post91SalesInvoices") || "[]");}
-function getPurchases(){return JSON.parse(localStorage.getItem("post91PurchaseInvoices") || "[]");}
-function getExpenses(){return JSON.parse(localStorage.getItem("post91Expenses") || "[]");}
-function money(n){return "OMR " + Number(n || 0).toFixed(3);}
+function gd(k){return JSON.parse(localStorage.getItem(k)||"[]")}
+function mv(n){return Number(n||0).toFixed(3)}
+function mt(n){return "OMR "+mv(n)}
 
-function inDate(date,from,to){
-  if(!date) return true;
-  const d = new Date(date);
-  if(from && d < new Date(from)) return false;
-  if(to && d > new Date(to)) return false;
+function isCancelled(status){
+  return (status||"").toLowerCase()==="cancelled";
+}
+
+function dateOk(date){
+  if(!date)return true;
+
+  let d=new Date(date);
+  let f=fromDate.value ? new Date(fromDate.value) : null;
+  let t=toDate.value ? new Date(toDate.value) : null;
+
+  if(f && d<f)return false;
+  if(t && d>t)return false;
+
   return true;
 }
 
-function getSalesCategory(type){
-  if(type === "VAT Exclusive" || type === "VAT Inclusive") return "VAT Sales";
-  if(type === "Non-VAT Sales") return "Non-VAT Sales";
-  if(type === "Zero Rated Sales") return "Zero Rated Sales";
-  if(type === "Exempt Sales") return "Exempt Sales";
-  return type || "-";
-}
-
-function getPurchaseCategory(type){
-  if(type === "VAT Exclusive" || type === "VAT Inclusive") return "VAT Purchase";
-  if(type === "Non-VAT Purchase") return "Non-VAT Purchase";
-  if(type === "Zero Rated Purchase") return "Zero Rated Purchase";
-  if(type === "Exempt Purchase") return "Exempt Purchase";
-  return type || "-";
-}
-
-function getExpenseCategory(type){
-  if(type === "VAT Exclusive" || type === "VAT Inclusive") return "VAT Expense";
-  if(type === "Non-VAT Expense") return "Non-VAT Expense";
-  if(type === "Zero Rated Expense") return "Zero Rated Expense";
-  if(type === "Exempt Expense") return "Exempt Expense";
-  return type || "-";
-}
-
-function buildTransactions(){
-  const from = document.getElementById("fromDate").value;
-  const to = document.getElementById("toDate").value;
-
-  let tx = [];
-
-  getSales().forEach(s=>{
-    if(!inDate(s.invoiceDate,from,to)) return;
-
-    tx.push({
-      date:s.invoiceDate,
-      document:s.invoiceNo,
-      section:"Sales",
-      party:s.customerName,
-      category:getSalesCategory(s.invoiceType),
-      beforeTax:Number(s.beforeTax || 0),
-      vatAmount:Number(s.vatAmount || 0),
-      total:Number(s.grandTotal || 0),
-      vatDirection:"Output"
-    });
-  });
-
-  getPurchases().forEach(p=>{
-    if(!inDate(p.purchaseDate,from,to)) return;
-
-    tx.push({
-      date:p.purchaseDate,
-      document:p.purchaseNo,
-      section:"Purchase",
-      party:p.supplierName,
-      category:getPurchaseCategory(p.purchaseType),
-      beforeTax:Number(p.beforeTax || 0),
-      vatAmount:Number(p.vatAmount || 0),
-      total:Number(p.grandTotal || 0),
-      vatDirection:"Input"
-    });
-  });
-
-  getExpenses().forEach(e=>{
-    if(!inDate(e.expenseDate,from,to)) return;
-
-    tx.push({
-      date:e.expenseDate,
-      document:e.expenseNo,
-      section:"Expense",
-      party:e.vendorName || e.staffName || "-",
-      category:getExpenseCategory(e.expenseType),
-      beforeTax:Number(e.beforeTax || 0),
-      vatAmount:Number(e.vatAmount || 0),
-      total:Number(e.grandTotal || 0),
-      vatDirection:"Input"
-    });
-  });
-
-  return tx;
-}
-
-function filterTransactions(tx){
-  const type = document.getElementById("reportType").value;
-
-  if(type === "VAT Transactions Only"){
-    return tx.filter(t => Number(t.vatAmount || 0) > 0);
+function periodText(){
+  if(fromDate.value && toDate.value){
+    return `From ${fromDate.value} to ${toDate.value}`;
   }
 
-  if(type === "All Transactions") return tx;
+  if(fromDate.value){
+    return `From ${fromDate.value}`;
+  }
 
-  if(type === "Sales Only") return tx.filter(t => t.section === "Sales");
-  if(type === "Purchase Only") return tx.filter(t => t.section === "Purchase");
-  if(type === "Expenses Only") return tx.filter(t => t.section === "Expense");
+  if(toDate.value){
+    return `Up to ${toDate.value}`;
+  }
 
-  if(type === "Non-VAT Only") return tx.filter(t => t.category.includes("Non-VAT"));
-  if(type === "Zero Rated Only") return tx.filter(t => t.category.includes("Zero Rated"));
-  if(type === "Exempt Only") return tx.filter(t => t.category.includes("Exempt"));
-
-  return tx;
+  return "For all periods";
 }
 
-function groupByCategory(tx){
-  const map = {};
+function isVatApplicable(type){
+  return ["VAT Exclusive","VAT Inclusive"].includes(type||"");
+}
 
-  tx.forEach(t=>{
-    if(!map[t.category]){
-      map[t.category] = {beforeTax:0, vatAmount:0, total:0};
+function generateVAT(){
+  let sales=gd("post91SalesInvoices")
+    .filter(x=>!isCancelled(x.docStatus))
+    .filter(x=>dateOk(x.invoiceDate));
+
+  let purchases=gd("post91PurchaseInvoices")
+    .filter(x=>!isCancelled(x.docStatus))
+    .filter(x=>dateOk(x.purchaseDate));
+
+  let expenses=gd("post91ExpenseEntries")
+    .filter(x=>!isCancelled(x.status))
+    .filter(x=>dateOk(x.expenseDate));
+
+  let taxableSales=0;
+  let outputVAT=0;
+  let salesGross=0;
+
+  let taxablePurchases=0;
+  let purchaseVAT=0;
+
+  let taxableExpenses=0;
+  let expenseVAT=0;
+
+  salesBody.innerHTML="";
+  purchaseBody.innerHTML="";
+  expenseBody.innerHTML="";
+
+  sales.forEach(s=>{
+    let before=Number(s.beforeTax||0);
+    let vat=Number(s.vatAmount||0);
+    let grand=Number(s.grandTotal||0);
+
+    if(isVatApplicable(s.vatType)){
+      taxableSales+=before;
+      outputVAT+=vat;
     }
 
-    map[t.category].beforeTax += t.beforeTax;
-    map[t.category].vatAmount += t.vatAmount;
-    map[t.category].total += t.total;
-  });
+    salesGross+=grand;
 
-  return map;
-}
-
-function generateVATReport(){
-  const allTx = buildTransactions();
-  const tx = filterTransactions(allTx);
-
-  tx.sort((a,b)=>new Date(a.date)-new Date(b.date));
-
-  const outputVat = tx
-    .filter(t => t.vatDirection === "Output")
-    .reduce((s,t)=>s + Number(t.vatAmount || 0),0);
-
-  const inputVat = tx
-    .filter(t => t.vatDirection === "Input")
-    .reduce((s,t)=>s + Number(t.vatAmount || 0),0);
-
-  const netVat = outputVat - inputVat;
-
-  document.getElementById("outputVat").textContent = money(outputVat);
-  document.getElementById("inputVat").textContent = money(inputVat);
-  document.getElementById("netVat").textContent = money(netVat);
-  document.getElementById("netVat").className = netVat >= 0 ? "payable" : "refund";
-  document.getElementById("transactionCount").textContent = tx.length;
-
-  renderSummary(groupByCategory(tx));
-  renderDetails(tx);
-}
-
-function renderSummary(map){
-  const tbody = document.getElementById("summaryTable");
-  tbody.innerHTML = "";
-
-  const keys = Object.keys(map);
-
-  if(keys.length === 0){
-    tbody.innerHTML = `<tr><td colspan="4">No VAT data found.</td></tr>`;
-    return;
-  }
-
-  keys.forEach(k=>{
-    const row = map[k];
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${k}</td>
-      <td>${money(row.beforeTax)}</td>
-      <td>${money(row.vatAmount)}</td>
-      <td>${money(row.total)}</td>
+    let tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${s.invoiceDate||"-"}</td>
+      <td>${s.invoiceNo||"-"}</td>
+      <td>${s.customerName||"-"}</td>
+      <td>${s.vatType||"-"}</td>
+      <td>${mt(before)}</td>
+      <td>${mt(vat)}</td>
+      <td>${mt(grand)}</td>
     `;
-
-    tbody.appendChild(tr);
+    salesBody.appendChild(tr);
   });
-}
 
-function renderDetails(tx){
-  const tbody = document.getElementById("detailTable");
-  tbody.innerHTML = "";
+  purchases.forEach(p=>{
+    let before=Number(p.beforeTax||0);
+    let vat=Number(p.vatAmount||0);
+    let grand=Number(p.grandTotal||0);
 
-  if(tx.length === 0){
-    tbody.innerHTML = `<tr><td colspan="8">No transactions found.</td></tr>`;
-    return;
-  }
+    if(isVatApplicable(p.vatType)){
+      taxablePurchases+=before;
+      purchaseVAT+=vat;
+    }
 
-  tx.forEach(t=>{
-    const cls =
-      t.section === "Sales" ? "sales" :
-      t.section === "Purchase" ? "purchase" : "expense";
-
-    const vatCls = Number(t.vatAmount || 0) > 0 ? "vat" : "nonvat";
-
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${t.date || "-"}</td>
-      <td>${t.document || "-"}</td>
-      <td><span class="badge ${cls}">${t.section}</span></td>
-      <td>${t.party || "-"}</td>
-      <td><span class="badge ${vatCls}">${t.category}</span></td>
-      <td>${money(t.beforeTax)}</td>
-      <td>${money(t.vatAmount)}</td>
-      <td>${money(t.total)}</td>
+    let tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${p.purchaseDate||"-"}</td>
+      <td>${p.purchaseNo||"-"}</td>
+      <td>${p.supplierName||"-"}</td>
+      <td>${p.vatType||"-"}</td>
+      <td>${mt(before)}</td>
+      <td>${mt(vat)}</td>
+      <td>${mt(grand)}</td>
     `;
-
-    tbody.appendChild(tr);
+    purchaseBody.appendChild(tr);
   });
+
+  expenses.forEach(e=>{
+    let before=Number(e.baseAmount||0);
+    let vat=Number(e.vatAmount||0);
+    let total=Number(e.totalAmount||0);
+
+    if(isVatApplicable(e.vatType)){
+      taxableExpenses+=before;
+      expenseVAT+=vat;
+    }
+
+    let tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${e.expenseDate||"-"}</td>
+      <td>${e.expenseNo||"-"}</td>
+      <td>${e.expenseCategory||"-"}</td>
+      <td>${e.paidTo||"-"}</td>
+      <td>${e.vatType||"-"}</td>
+      <td>${mt(before)}</td>
+      <td>${mt(vat)}</td>
+      <td>${mt(total)}</td>
+    `;
+    expenseBody.appendChild(tr);
+  });
+
+  let inputVAT=purchaseVAT+expenseVAT;
+  let netVAT=outputVAT-inputVAT;
+
+  summaryTaxableSales.textContent=mt(taxableSales);
+  summaryOutputVAT.textContent=mt(outputVAT);
+  summaryInputVAT.textContent=mt(inputVAT);
+  summaryNetVAT.textContent=mt(netVAT);
+  summaryNetVAT.className=netVAT>=0?"payable":"refund";
+
+  pReportName.textContent=reportName.value||"VAT Report";
+  pPeriod.textContent=periodText();
+
+  pTaxableSales.textContent=mv(taxableSales);
+  pOutputVAT.textContent=mv(outputVAT);
+  pSalesGross.textContent=mv(salesGross);
+
+  pTaxablePurchases.textContent=mv(taxablePurchases);
+  pPurchaseVAT.textContent=mv(purchaseVAT);
+
+  pTaxableExpenses.textContent=mv(taxableExpenses);
+  pExpenseVAT.textContent=mv(expenseVAT);
+  pInputVAT.textContent=mv(inputVAT);
+
+  pNetVAT.textContent=mv(netVAT);
+  pNetVAT.className="amount " + (netVAT>=0?"payable":"refund");
+  netVatLabel.textContent=netVAT>=0 ? "Net VAT Payable" : "Net VAT Refundable / Credit";
 }
 
-generateVATReport();
+function clearFilters(){
+  fromDate.value="";
+  toDate.value="";
+  reportName.value="VAT Report";
+  generateVAT();
+}
+
+generateVAT();
 </script>
 
 </body>
