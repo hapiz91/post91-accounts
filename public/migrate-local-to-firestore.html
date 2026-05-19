@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Post91 Migration Tool</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+  margin:0;
+  padding:25px;
+  background:#eef3f8;
+  font-family:Segoe UI,Arial,sans-serif;
+  color:#061833;
+}
+
+.card{
+  background:white;
+  border-radius:22px;
+  padding:24px;
+  margin-bottom:20px;
+  box-shadow:0 15px 35px rgba(0,0,0,.06);
+}
+
+h1{
+  margin-top:0;
+  color:#0d6efd;
+}
+
+button{
+  background:#0d6efd;
+  color:white;
+  border:none;
+  border-radius:12px;
+  padding:14px 18px;
+  font-weight:900;
+  cursor:pointer;
+  margin-right:10px;
+  margin-top:10px;
+}
+
+button:hover{
+  opacity:.92;
+}
+
+.danger{
+  background:#dc2626;
+}
+
+.success{
+  background:#16a34a;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
+
+th,td{
+  border:1px solid #dbe4f0;
+  padding:10px;
+  text-align:left;
+}
+
+th{
+  background:#f8fbff;
+}
+
+pre{
+  background:#061833;
+  color:#dbeafe;
+  border-radius:14px;
+  padding:18px;
+  min-height:180px;
+  white-space:pre-wrap;
+  overflow:auto;
+}
+
+.loader-wrap{
+  display:none;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  margin-top:20px;
+}
+
+.loader{
+  width:70px;
+  height:70px;
+  border:8px solid #dbeafe;
+  border-top:8px solid #0d6efd;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+
+.loader-text{
+  margin-top:15px;
+  font-weight:800;
+  color:#0d6efd;
+}
+
+@keyframes spin{
+  100%{
+    transform:rotate(360deg);
+  }
+}
+
+.stat{
+  display:inline-block;
+  background:#f1f5f9;
+  padding:10px 16px;
+  border-radius:12px;
+  margin-right:10px;
+  margin-top:10px;
+  font-weight:800;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <h1>Post91 LocalStorage → Firebase Migration</h1>
+
+  <p>
+    This tool uploads existing local browser data to Firestore safely.
+  </p>
+
+  <button onclick="scanLocalData()">
+    Scan Local Data
+  </button>
+
+  <button class="success" onclick="migrateData()">
+    Start Migration
+  </button>
+
+  <button class="danger" onclick="location.href='/dashboard.html'">
+    Back Dashboard
+  </button>
+
+  <div style="margin-top:20px;">
+    <span class="stat" id="totalCollections">Collections: 0</span>
+    <span class="stat" id="totalRecords">Records: 0</span>
+  </div>
+
+</div>
+
+<div class="card">
+
+  <h2>Detected Data</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>LocalStorage Key</th>
+        <th>Firestore Collection</th>
+        <th>Records</th>
+      </tr>
+    </thead>
+
+    <tbody id="scanBody"></tbody>
+
+  </table>
+
+</div>
+
+<div class="card">
+
+  <h2>Migration Progress</h2>
+
+  <div class="loader-wrap" id="loaderWrap">
+    <div class="loader"></div>
+    <div class="loader-text" id="loaderText">
+      Processing Migration...
+    </div>
+  </div>
+
+  <pre id="logBox">Ready...</pre>
+
+</div>
+
+<script type="module">
+
+import {
+  db,
+  collection,
+  doc,
+  setDoc,
+  serverTimestamp
+} from "/post91-firebase.js";
+
+const map = [
+  ["post91Customers","customers"],
+  ["post91Items","items"],
+  ["post91Categories","categories"],
+  ["post91Brands","brands"],
+  ["post91MachineTypes","machineTypes"],
+  ["post91SalesInvoices","salesInvoices"],
+  ["post91DeliveryOrders","deliveryOrders"],
+  ["post91CompanyProfile","companyProfile"]
+];
+
+const scanBody=document.getElementById("scanBody");
+const logBox=document.getElementById("logBox");
+const loaderWrap=document.getElementById("loaderWrap");
+const loaderText=document.getElementById("loaderText");
+
+function log(msg){
+  logBox.textContent += "\\n" + msg;
+  logBox.scrollTop = logBox.scrollHeight;
+}
+
+function safeParse(key){
+
+  try{
+
+    const raw = localStorage.getItem(key);
+
+    if(!raw)return [];
+
+    const parsed = JSON.parse(raw);
+
+    // Array
+    if(Array.isArray(parsed)){
+      return parsed;
+    }
+
+    // Object with nested array
+    if(parsed && typeof parsed === "object"){
+
+      // detect common array containers
+      if(Array.isArray(parsed.data)) return parsed.data;
+      if(Array.isArray(parsed.items)) return parsed.items;
+      if(Array.isArray(parsed.records)) return parsed.records;
+      if(Array.isArray(parsed.list)) return parsed.list;
+
+      // single object
+      return [parsed];
+    }
+
+    return [];
+
+  }catch(e){
+
+    console.error("Parse error:",key,e);
+
+    return [];
+  }
+}
+function makeDocId(collectionName, record, index){
+
+  let rawId =
+    record.id ||
+    record.docId ||
+    record.customerId ||
+    record.supplierId ||
+    record.itemId ||
+    record.invoiceNo ||
+    record.doNo ||
+    record.deliveryOrderNo ||
+    record.receiptNo ||
+    record.purchaseNo ||
+    record.paymentNo ||
+    record.expenseNo ||
+    collectionName + "-" + Date.now() + "-" + index;
+
+  return String(rawId)
+    .replace(/\//g,"-")
+    .replace(/#/g,"-")
+    .replace(/\?/g,"-")
+    .replace(/\[/g,"-")
+    .replace(/\]/g,"-")
+    .trim();
+}
+
+function getCompanyId(){
+
+  try{
+
+    const user = JSON.parse(
+      localStorage.getItem("post91CurrentUser") || "{}"
+    );
+
+    return (
+      user.companyId ||
+      user.businessId ||
+      user.email ||
+      "default-company"
+    );
+
+  }catch(e){
+
+    return "default-company";
+  }
+}
+
+window.scanLocalData = function(){
+
+  scanBody.innerHTML="";
+
+  let totalCollections=0;
+  let totalRecords=0;
+
+  map.forEach(([key,col])=>{
+
+    const data=safeParse(key);
+
+    totalCollections++;
+    totalRecords += data.length;
+
+    const tr=document.createElement("tr");
+
+    tr.innerHTML=`
+      <td>${key}</td>
+      <td>${col}</td>
+      <td>${data.length}</td>
+    `;
+
+    scanBody.appendChild(tr);
+  });
+
+  document.getElementById("totalCollections").innerHTML =
+    "Collections: " + totalCollections;
+
+  document.getElementById("totalRecords").innerHTML =
+    "Records: " + totalRecords;
+
+  logBox.textContent="Scan completed successfully.";
+}
+
+window.migrateData = async function(){
+
+  if(!confirm("Start migration to Firebase Firestore?")){
+    return;
+  }
+
+  loaderWrap.style.display="flex";
+
+  logBox.textContent="Migration started...";
+
+  const companyId=getCompanyId();
+
+  let uploaded=0;
+
+  try{
+
+    for(const [key,col] of map){
+
+      const data=safeParse(key);
+
+      log("\\n" + key + " → " + col + " : " + data.length + " records");
+
+      for(let i=0;i<data.length;i++){
+
+        const record=data[i] || {};
+
+        const id=makeDocId(col,record,i);
+
+        loaderText.innerHTML =
+          "Uploading " + col + " (" + (i+1) + "/" + data.length + ")";
+
+        await setDoc(
+          doc(collection(db,col),id),
+          {
+            ...record,
+            companyId,
+            migratedFromLocalStorage:true,
+            migratedAt:serverTimestamp(),
+            updatedAt:serverTimestamp()
+          },
+          {merge:true}
+        );
+
+        uploaded++;
+
+        log("Uploaded → " + col + "/" + id);
+      }
+    }
+
+    loaderWrap.style.display="none";
+
+    log("\\n✅ Migration completed successfully.");
+    log("\\nTotal uploaded records: " + uploaded);
+
+    alert("Migration completed successfully.");
+
+  }catch(error){
+
+    loaderWrap.style.display="none";
+
+    console.error(error);
+
+    log("\\n❌ ERROR: " + error.message);
+
+    alert("Migration failed. Check console.");
+  }
+}
+
+scanLocalData();
+
+</script>
+
+</body>
+</html>
