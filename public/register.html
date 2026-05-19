@@ -250,22 +250,19 @@ function savePost91Requests(requests){
   localStorage.setItem("post91RegistrationRequests", JSON.stringify(requests));
 }
 
-document.getElementById("registerForm").addEventListener("submit", function(e){
+document.getElementById("registerForm")
+.addEventListener("submit", async function(e){
+
   e.preventDefault();
 
-  const pass = document.getElementById("password").value;
-  const confirm = document.getElementById("confirmPassword").value;
+  const pass =
+    document.getElementById("password").value;
+
+  const confirm =
+    document.getElementById("confirmPassword").value;
 
   if(pass !== confirm){
     alert("Password and Confirm Password do not match.");
-    return;
-  }
-
-  const emailValue = document.getElementById("email").value.trim().toLowerCase();
-  const users = getPost91Users();
-
-  if(users.some(u => (u.email || "").toLowerCase() === emailValue)){
-    alert("This email is already registered.");
     return;
   }
 
@@ -273,41 +270,77 @@ document.getElementById("registerForm").addEventListener("submit", function(e){
   const vat = price * 0.05;
   const total = price + vat;
 
-  const requestNo = "P91-REQ-" + Date.now();
+  try {
 
-  const user = {
-    requestNo,
-    businessName: document.getElementById("businessName").value.trim(),
-    ownerName: document.getElementById("ownerName").value.trim(),
-    mobile: document.getElementById("mobile").value.trim(),
-    whatsapp: document.getElementById("whatsapp").value.trim(),
-    email: emailValue,
-    vatNumber: document.getElementById("vatNumber").value.trim(),
-    address: document.getElementById("address").value.trim(),
-    password: pass,
+    const response = await fetch("/api/post91/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
 
-    selectedPlan,
-    monthlyPrice: price,
-    vatAmount: vat,
-    totalAmount: total,
+      body: JSON.stringify({
 
-    registrationStatus: "pending",
-    accountActive: false,
-    paymentStatus: "pending",
-    createdAt: new Date().toISOString()
-  };
+        businessName:
+          document.getElementById("businessName").value.trim(),
 
-  users.push(user);
-  savePost91Users(users);
+        ownerName:
+          document.getElementById("ownerName").value.trim(),
 
-  const requests = getPost91Requests();
-  requests.push(user);
-  savePost91Requests(requests);
+        mobile:
+          document.getElementById("mobile").value.trim(),
 
-  document.getElementById("successBox").style.display = "block";
-  document.getElementById("registerForm").reset();
+        whatsapp:
+          document.getElementById("whatsapp").value.trim(),
 
-  selectPlan(selectedPlan);
+        email:
+          document.getElementById("email").value.trim(),
+
+        vatNumber:
+          document.getElementById("vatNumber").value.trim(),
+
+        address:
+          document.getElementById("address").value.trim(),
+
+        password: pass,
+
+        selectedPlan,
+
+        monthlyPrice: price,
+        vatAmount: vat,
+        totalAmount: total
+
+      })
+    });
+
+    const data = await response.json();
+
+    if(!response.ok){
+      alert(data.message || "Registration failed");
+      return;
+    }
+
+    document.getElementById("successBox").style.display = "block";
+
+    document.getElementById("successBox").innerHTML = `
+      Registration request submitted successfully.<br><br>
+
+      Request No: ${data.requestNo}<br><br>
+
+      Status: Pending Vehicall Admin Approval.
+    `;
+
+    document.getElementById("registerForm").reset();
+
+    selectPlan(selectedPlan);
+
+  } catch(error){
+
+    console.error(error);
+
+    alert("Unable to submit registration request.");
+
+  }
+
 });
 
 selectPlan(getParamPlan());

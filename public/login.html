@@ -212,7 +212,7 @@ function showSuccess(msg){
 }
 
 document.getElementById("loginForm")
-.addEventListener("submit", function(e){
+.addEventListener("submit", async function(e){
 
   e.preventDefault();
 
@@ -226,50 +226,56 @@ document.getElementById("loginForm")
     document.getElementById("password")
     .value;
 
-  const users = getUsers();
+  try {
 
-  const user = users.find(u =>
-    (u.email || "").toLowerCase() === email &&
-    u.password === password
-  );
+    const response = await fetch("/api/post91/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email,
+        password
+      })
+    });
 
-  if(!user){
-    showError("Invalid email or password.");
-    return;
+    const data = await response.json();
+
+    const planBox = document.getElementById("planBox");
+
+    if(data.user){
+      planBox.style.display = "block";
+      planBox.innerHTML = `
+        <strong>Business:</strong> ${data.user.businessName || "-"}<br>
+        <strong>Selected Plan:</strong> ${data.user.selectedPlan || "-"}<br>
+        <strong>Registration Status:</strong> ${data.user.registrationStatus || "-"}<br>
+        <strong>Account Status:</strong>
+        ${data.user.accountActive ? "Active" : "Inactive"}
+      `;
+    }
+
+    if(!response.ok){
+      showError(data.message || "Login failed.");
+      return;
+    }
+
+    localStorage.setItem(
+      "post91CurrentUser",
+      JSON.stringify(data.user)
+    );
+
+    showSuccess("Login successful. Redirecting...");
+
+    setTimeout(()=>{
+      window.location.href = "/dashboard.html";
+    },1200);
+
+  } catch(error){
+
+    console.error(error);
+    showError("Unable to login. Please try again.");
+
   }
-
-  const planBox = document.getElementById("planBox");
-
-  planBox.style.display = "block";
-
-  planBox.innerHTML = `
-    <strong>Business:</strong> ${user.businessName}<br>
-    <strong>Selected Plan:</strong> ${user.selectedPlan}<br>
-    <strong>Registration Status:</strong> ${user.registrationStatus}<br>
-    <strong>Account Status:</strong>
-    ${user.accountActive ? "Active" : "Inactive"}
-  `;
-
-  if(!user.accountActive){
-
-    showError(`
-      Login not active.<br><br>
-      Your registration is pending Vehicall Admin approval.
-    `);
-
-    return;
-  }
-
-  localStorage.setItem(
-    "post91CurrentUser",
-    JSON.stringify(user)
-  );
-
-  showSuccess("Login successful. Redirecting...");
-
-  setTimeout(()=>{
-    window.location.href = "/dashboard.html";
-  },1200);
 
 });
 </script>
