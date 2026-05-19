@@ -384,7 +384,7 @@ if(currentUser && !currentUser.accountActive){
       <a href="/supplier-master.html">Supplier Master</a>
       <a href="/item-master.html">Item Master</a>
       <a href="/cash-bank-master.html">Cash / Bank Master</a>
-      <a href="/theme-branding.html">Theme & Branding</a>
+      <!-- Theme Branding Hidden -->
 
       <div class="nav-title">Sales</div>
       <a href="/quotation.html">Quotation</a>
@@ -414,7 +414,23 @@ if(currentUser && !currentUser.accountActive){
         <h1>Dashboard</h1>
         <p>Business overview, quick access and module navigation.</p>
       </div>
-      <div class="badge">MVP READY</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+
+  <div class="badge">MVP READY</div>
+
+  <button onclick="logout()" style="
+    background:#dc2626;
+    color:white;
+    border:0;
+    padding:10px 16px;
+    border-radius:10px;
+    font-weight:900;
+    cursor:pointer;
+  ">
+    Logout
+  </button>
+
+</div>
     </div>
 
     <div class="grid">
@@ -445,7 +461,7 @@ if(currentUser && !currentUser.accountActive){
         <a class="module" href="/supplier-master.html"><h3>Supplier Master</h3><p>Create, edit and manage supplier records.</p></a>
         <a class="module" href="/item-master.html"><h3>Item Master</h3><p>Items, parts, OEM, brands, categories and pricing.</p></a>
         <a class="module" href="/cash-bank-master.html"><h3>Cash / Bank Master</h3><p>Manage bank and cash accounts.</p></a>
-        <a class="module" href="/theme-branding.html"><h3>Theme & Branding</h3><p>Logo, colors, theme and brand identity.</p></a>
+        <!-- Theme Branding Hidden -->
       </div>
     </div>
 
@@ -608,6 +624,16 @@ function applyBranding(){
       el.style.color="#cbd5e1";
     });
   }
+}
+
+function logout(){
+
+  localStorage.removeItem("post91CurrentUser");
+  localStorage.removeItem("post91LoggedInUser");
+
+  sessionStorage.clear();
+
+  window.location.href="/login.html";
 }
 
 applyBranding();
