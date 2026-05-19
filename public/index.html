@@ -418,12 +418,12 @@
     }
 
     .plan-grid {
-      max-width: 1050px;
-      margin: auto;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 30px;
-    }
+  max-width: 1250px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
 
     .plan-card {
       background: white;
@@ -724,38 +724,215 @@
 </section>
 
 <section class="plans" id="plans">
+
   <div class="section-title">
     <h2>Choose Your Plan</h2>
-    <p>Start simple. Upgrade when your business grows.</p>
+    <p>
+      Simple pricing for Oman businesses.
+      Activate your account after admin approval.
+    </p>
   </div>
 
   <div class="plan-grid">
+
+    <!-- BASIC -->
     <div class="plan-card">
+
+      <div style="
+        background:#e0f2fe;
+        color:#0369a1;
+        display:inline-block;
+        padding:8px 14px;
+        border-radius:999px;
+        font-size:13px;
+        font-weight:900;
+        margin-bottom:18px;
+      ">
+        STARTER PLAN
+      </div>
+
       <h3>Basic</h3>
-      <h2>For Small Shops</h2>
+
+      <h1 style="
+        font-size:56px;
+        margin:10px 0;
+        color:#0d6efd;
+      ">
+        3 OMR
+      </h1>
+
+      <p style="
+        color:#64748b;
+        margin-bottom:24px;
+        line-height:1.7;
+      ">
+        Perfect for small shops and startup businesses.
+      </p>
+
       <ul>
         <li>Sales Invoice</li>
-        <li>Purchase Invoice</li>
-        <li>Expenses</li>
-        <li>Customer/Supplier SOA</li>
-        <li>Basic PDF & Excel Reports</li>
+        <li>Quotation</li>
+        <li>Delivery Order</li>
+        <li>Customer Management</li>
+        <li>Item Master</li>
+        <li>Basic Reports</li>
       </ul>
-      <a href="/register.html" class="btn-primary">Start Basic</a>
+
+      <div style="
+        margin-top:20px;
+        color:#64748b;
+        font-size:14px;
+      ">
+        + 5% VAT
+      </div>
+
+      <a href="/register.html?plan=Basic"
+         class="btn-primary"
+         style="margin-top:24px;display:inline-block;">
+        Start Basic
+      </a>
+
     </div>
 
-    <div class="plan-card premium">
-      <h3>Premium</h3>
-      <h2>For Growing Businesses</h2>
+    <!-- PLUS -->
+    <div class="plan-card premium"
+         style="
+           position:relative;
+           overflow:hidden;
+         ">
+
+      <div style="
+        position:absolute;
+        top:18px;
+        right:18px;
+        background:#22c55e;
+        color:white;
+        padding:8px 16px;
+        border-radius:999px;
+        font-size:12px;
+        font-weight:900;
+      ">
+        MOST POPULAR
+      </div>
+
+      <h3>Plus</h3>
+
+      <h1 style="
+        font-size:56px;
+        margin:10px 0;
+        color:white;
+      ">
+        5 OMR
+      </h1>
+
+      <p style="
+        color:#dbeafe;
+        margin-bottom:24px;
+        line-height:1.7;
+      ">
+        Best for workshops and growing trading businesses.
+      </p>
+
       <ul>
         <li>Everything in Basic</li>
-        <li>Quotation & Delivery Order</li>
-        <li>Bank & Petty Cash Ledger</li>
-        <li>Advanced Reports</li>
-        <li>Multi-user Access</li>
+        <li>VAT Reports</li>
+        <li>Purchase Invoice</li>
+        <li>Expense Management</li>
+        <li>Bank & Petty Cash</li>
+        <li>Customer/Supplier SOA</li>
       </ul>
-      <a href="/register.html" class="btn-primary">Start Premium</a>
+
+      <div style="
+        margin-top:20px;
+        color:#dbeafe;
+        font-size:14px;
+      ">
+        + 5% VAT
+      </div>
+
+      <a href="/register.html?plan=Plus"
+         class="btn-primary"
+         style="
+           margin-top:24px;
+           display:inline-block;
+           background:white;
+           color:#0d6efd;
+         ">
+        Start Plus
+      </a>
+
     </div>
+
+    <!-- PREMIUM -->
+    <div class="plan-card">
+
+      <div style="
+        background:#ede9fe;
+        color:#6d28d9;
+        display:inline-block;
+        padding:8px 14px;
+        border-radius:999px;
+        font-size:13px;
+        font-weight:900;
+        margin-bottom:18px;
+      ">
+        ADVANCED
+      </div>
+
+      <h3>Premium</h3>
+
+      <h1 style="
+        font-size:56px;
+        margin:10px 0;
+        color:#061833;
+      ">
+        10 OMR
+      </h1>
+
+      <p style="
+        color:#64748b;
+        margin-bottom:24px;
+        line-height:1.7;
+      ">
+        Full accounting solution for serious business operations.
+      </p>
+
+      <ul>
+        <li>Everything in Plus</li>
+        <li>Profit & Loss</li>
+        <li>Inventory Ledger</li>
+        <li>Advanced Dashboard</li>
+        <li>Multi-user Access</li>
+        <li>Priority Support</li>
+      </ul>
+
+      <div style="
+        margin-top:20px;
+        color:#64748b;
+        font-size:14px;
+      ">
+        + 5% VAT
+      </div>
+
+      <a href="/register.html?plan=Premium"
+         class="btn-primary"
+         style="margin-top:24px;display:inline-block;">
+        Start Premium
+      </a>
+
+    </div>
+
   </div>
+
+  <div style="
+    text-align:center;
+    margin-top:40px;
+    color:#64748b;
+    font-weight:700;
+  ">
+    Account activation is subject to admin approval.
+  </div>
+
 </section>
 
 <section class="cta-wrap">

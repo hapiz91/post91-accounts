@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login | Post91 Accounts</title>
 
 <style>
-
 *{
   margin:0;
   padding:0;
@@ -15,364 +14,265 @@
 }
 
 body{
+  background:linear-gradient(135deg,#061833,#0d6efd);
   min-height:100vh;
-  background:
-  linear-gradient(rgba(2,8,23,0.76),rgba(2,8,23,0.84)),
-  url("https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1600&q=80");
-  background-size:cover;
-  background-position:center;
   display:flex;
-  align-items:center;
   justify-content:center;
-  padding:30px;
+  align-items:center;
+  padding:20px;
 }
 
-.container{
+.card{
   width:100%;
-  max-width:1150px;
-  display:grid;
-  grid-template-columns:1fr 480px;
+  max-width:460px;
   background:white;
-  border-radius:34px;
-  overflow:hidden;
-  box-shadow:0 35px 80px rgba(0,0,0,0.3);
-}
-
-.left{
-  background:
-  linear-gradient(rgba(6,24,51,0.82),rgba(13,110,253,0.78)),
-  url("https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1400&q=80");
-  background-size:cover;
-  background-position:center;
-  padding:70px 60px;
-  color:white;
-  position:relative;
+  border-radius:28px;
+  padding:40px;
+  box-shadow:0 25px 60px rgba(0,0,0,.2);
 }
 
 .logo{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:45px;
+  text-align:center;
+  margin-bottom:30px;
 }
 
 .logo img{
-  height:58px;
-  background:white;
-  border-radius:12px;
-  padding:5px;
-}
-
-.logo-text h2{
-  font-size:28px;
-}
-
-.logo-text p{
-  font-size:13px;
-  color:#bfdbfe;
-}
-
-.left h1{
-  font-size:52px;
-  line-height:1.1;
-  margin-bottom:25px;
-}
-
-.left h1 span{
-  color:#7dd3fc;
-}
-
-.left-description{
-  font-size:18px;
-  line-height:1.8;
-  color:#dbeafe;
-  margin-bottom:40px;
-}
-
-.info-boxes{
-  display:grid;
-  gap:18px;
-}
-
-.info{
-  background:rgba(255,255,255,0.12);
-  border:1px solid rgba(255,255,255,0.14);
-  padding:18px;
+  height:72px;
+  background:#fff;
+  padding:8px;
   border-radius:18px;
-  backdrop-filter:blur(8px);
 }
 
-.info h3{
-  margin-bottom:8px;
-}
-
-.info p{
-  color:#dbeafe;
-  font-size:14px;
-  line-height:1.6;
-}
-
-.right{
-  background:#f8fbff;
-  padding:55px 45px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-}
-
-.form-title{
-  margin-bottom:32px;
-}
-
-.form-title h2{
-  font-size:38px;
+.logo h1{
+  margin-top:14px;
   color:#061833;
-  margin-bottom:10px;
 }
 
-.form-title p{
+.logo p{
   color:#64748b;
-  line-height:1.7;
+  margin-top:6px;
 }
 
-.form-group{
-  margin-bottom:20px;
+.field{
+  margin-bottom:18px;
 }
 
-.form-group label{
+label{
   display:block;
   margin-bottom:8px;
-  font-weight:700;
-  color:#0f172a;
+  font-weight:900;
+  color:#061833;
 }
 
-.form-group input{
+input{
   width:100%;
-  padding:15px 16px;
-  border-radius:14px;
+  padding:14px;
   border:1px solid #dbe4f0;
-  background:white;
+  border-radius:14px;
   font-size:15px;
-  outline:none;
-  transition:0.3s;
 }
 
-.form-group input:focus{
-  border-color:#0d6efd;
-  box-shadow:0 0 0 4px rgba(13,110,253,0.1);
-}
-
-.login-btn{
+button{
   width:100%;
   border:none;
   background:#0d6efd;
   color:white;
-  padding:17px;
+  padding:16px;
   border-radius:14px;
   font-size:16px;
   font-weight:900;
   cursor:pointer;
   margin-top:10px;
-  transition:0.3s;
-  box-shadow:0 18px 40px rgba(13,110,253,0.28);
 }
 
-.login-btn:hover{
-  transform:translateY(-3px);
+button:hover{
+  background:#0056d6;
+}
+
+.note{
+  margin-top:20px;
+  background:#eff6ff;
+  border:1px solid #bfdbfe;
+  color:#1e3a8a;
+  padding:16px;
+  border-radius:14px;
+  line-height:1.6;
+  font-weight:700;
+}
+
+.error{
+  margin-top:18px;
+  background:#fef2f2;
+  border:1px solid #fecaca;
+  color:#991b1b;
+  padding:14px;
+  border-radius:14px;
+  display:none;
+  font-weight:800;
+}
+
+.success{
+  margin-top:18px;
+  background:#dcfce7;
+  border:1px solid #86efac;
+  color:#166534;
+  padding:14px;
+  border-radius:14px;
+  display:none;
+  font-weight:800;
 }
 
 .links{
-  margin-top:24px;
-  display:flex;
-  justify-content:space-between;
-  flex-wrap:wrap;
-  gap:10px;
+  margin-top:25px;
+  text-align:center;
 }
 
 .links a{
   color:#0d6efd;
   text-decoration:none;
-  font-weight:700;
-  font-size:14px;
+  font-weight:900;
 }
 
-.quick-stats{
-  margin-top:30px;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-}
-
-.stat{
-  background:white;
-  border:1px solid #e5edf7;
+.plan-box{
+  margin-top:18px;
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
   padding:16px;
-  border-radius:18px;
-  text-align:center;
-  box-shadow:0 10px 25px rgba(15,23,42,0.05);
+  border-radius:14px;
+  line-height:1.7;
+  display:none;
 }
-
-.stat h3{
-  color:#0d6efd;
-  margin-bottom:5px;
-}
-
-.stat p{
-  color:#64748b;
-  font-size:13px;
-  font-weight:700;
-}
-
-@media(max-width:950px){
-
-  .container{
-    grid-template-columns:1fr;
-  }
-
-  .left{
-    padding:45px 30px;
-  }
-
-  .left h1{
-    font-size:38px;
-  }
-
-  .right{
-    padding:40px 25px;
-  }
-
-  .quick-stats{
-    grid-template-columns:1fr;
-  }
-
-}
-
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="card">
 
-  <div class="left">
-
-    <div class="logo">
-      <img src="/images/post91-logo.png" alt="logo">
-      <div class="logo-text">
-        <h2>Post91 Accounts</h2>
-        <p>Simple Accounting for Smart Businesses</p>
-      </div>
-    </div>
-
-    <h1>
-      Welcome back to your
-      <span>business dashboard.</span>
-    </h1>
-
-    <p class="left-description">
-      Manage invoices, expenses, bank transactions,
-      petty cash, supplier statements and reports
-      from one secure accounting platform.
-    </p>
-
-    <div class="info-boxes">
-
-      <div class="info">
-        <h3>📄 Professional Invoices</h3>
-        <p>Create and manage VAT-ready invoices quickly.</p>
-      </div>
-
-      <div class="info">
-        <h3>📊 Smart Reports</h3>
-        <p>Generate PDF and Excel business reports instantly.</p>
-      </div>
-
-      <div class="info">
-        <h3>🏦 Financial Tracking</h3>
-        <p>Track business expenses, bank ledger and cash flow easily.</p>
-      </div>
-
-    </div>
-
+  <div class="logo">
+    <img src="/images/post91-logo.png" onerror="this.style.display='none'">
+    <h1>Post91 Accounts</h1>
+    <p>Simple Accounting for Smart Businesses</p>
   </div>
 
-  <div class="right">
+  <form id="loginForm">
 
-    <div class="form-title">
-      <h2>Login</h2>
-      <p>Access your Post91 Accounts dashboard securely.</p>
+    <div class="field">
+      <label>Email Address</label>
+      <input type="email" id="email" required>
     </div>
 
-    <form id="loginForm">
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="password" required>
+    </div>
 
-  <div class="form-group">
-    <label>Email Address</label>
-    <input type="email" id="email" placeholder="Enter your email" required>
+    <button type="submit">
+      Login to Dashboard
+    </button>
+
+  </form>
+
+  <div class="error" id="errorBox"></div>
+
+  <div class="success" id="successBox"></div>
+
+  <div class="plan-box" id="planBox"></div>
+
+  <div class="note">
+    Accounts are activated only after Vehicall Admin approval.
   </div>
 
-  <div class="form-group">
-    <label>Password</label>
-    <input type="password" id="password" placeholder="Enter your password" required>
-  </div>
-
-  <button class="login-btn" type="submit">
-    Login to Dashboard
-  </button>
-
-</form>
-
-<script>
-
-document.getElementById("loginForm").addEventListener("submit", function(e){
-
-  e.preventDefault();
-
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  if(email && password){
-
-    localStorage.setItem("post91User", email);
-
-    window.location.href = "/dashboard.html";
-
-  } else {
-
-    alert("Please enter email and password");
-
-  }
-
-});
-
-</script>
-
-    <div class="links">
-      <a href="/register.html">Create Business Account</a>
-      <a href="#">Forgot Password?</a>
-    </div>
-
-    <div class="quick-stats">
-
-      <div class="stat">
-        <h3>VAT</h3>
-        <p>Invoice Ready</p>
-      </div>
-
-      <div class="stat">
-        <h3>PDF</h3>
-        <p>Export Reports</p>
-      </div>
-
-      <div class="stat">
-        <h3>SOA</h3>
-        <p>Statements</p>
-      </div>
-
-    </div>
-
+  <div class="links">
+    Don’t have account?
+    <a href="/register.html">Register Business</a>
   </div>
 
 </div>
+
+<script>
+function getUsers(){
+  return JSON.parse(localStorage.getItem("post91Users") || "[]");
+}
+
+function showError(msg){
+  const box = document.getElementById("errorBox");
+  box.style.display = "block";
+  box.innerHTML = msg;
+
+  document.getElementById("successBox").style.display = "none";
+}
+
+function showSuccess(msg){
+  const box = document.getElementById("successBox");
+  box.style.display = "block";
+  box.innerHTML = msg;
+
+  document.getElementById("errorBox").style.display = "none";
+}
+
+document.getElementById("loginForm")
+.addEventListener("submit", function(e){
+
+  e.preventDefault();
+
+  const email =
+    document.getElementById("email")
+    .value
+    .trim()
+    .toLowerCase();
+
+  const password =
+    document.getElementById("password")
+    .value;
+
+  const users = getUsers();
+
+  const user = users.find(u =>
+    (u.email || "").toLowerCase() === email &&
+    u.password === password
+  );
+
+  if(!user){
+    showError("Invalid email or password.");
+    return;
+  }
+
+  const planBox = document.getElementById("planBox");
+
+  planBox.style.display = "block";
+
+  planBox.innerHTML = `
+    <strong>Business:</strong> ${user.businessName}<br>
+    <strong>Selected Plan:</strong> ${user.selectedPlan}<br>
+    <strong>Registration Status:</strong> ${user.registrationStatus}<br>
+    <strong>Account Status:</strong>
+    ${user.accountActive ? "Active" : "Inactive"}
+  `;
+
+  if(!user.accountActive){
+
+    showError(`
+      Login not active.<br><br>
+      Your registration is pending Vehicall Admin approval.
+    `);
+
+    return;
+  }
+
+  localStorage.setItem(
+    "post91CurrentUser",
+    JSON.stringify(user)
+  );
+
+  showSuccess("Login successful. Redirecting...");
+
+  setTimeout(()=>{
+    window.location.href = "/dashboard.html";
+  },1200);
+
+});
+</script>
 
 </body>
 </html>

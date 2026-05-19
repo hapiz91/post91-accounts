@@ -1,380 +1,317 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Register Business | Post91 Accounts</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register | Post91 Accounts</title>
 
 <style>
-
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Segoe UI,Arial,sans-serif;
-}
-
-body{
-  background:
-  linear-gradient(rgba(2,8,23,0.75),rgba(2,8,23,0.82)),
-  url("https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80");
-  background-size:cover;
-  background-position:center;
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:40px 20px;
-}
-
-.container{
-  width:100%;
-  max-width:1200px;
-  display:grid;
-  grid-template-columns:1fr 520px;
-  background:white;
-  border-radius:34px;
-  overflow:hidden;
-  box-shadow:0 30px 70px rgba(0,0,0,0.28);
-}
-
-.left{
-  background:
-  linear-gradient(rgba(5,23,55,0.86),rgba(13,110,253,0.82)),
-  url("https://images.unsplash.com/photo-1554224154-26032fced8bd?auto=format&fit=crop&w=1400&q=80");
-  background-size:cover;
-  background-position:center;
-  padding:70px 60px;
-  color:white;
-  position:relative;
-}
-
-.logo{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:40px;
-}
-
-.logo img{
-  height:58px;
-  background:white;
-  border-radius:12px;
-  padding:5px;
-}
-
-.logo-text h2{
-  font-size:28px;
-}
-
-.logo-text p{
-  color:#bfdbfe;
-  font-size:14px;
-}
-
-.left h1{
-  font-size:52px;
-  line-height:1.1;
-  margin-bottom:25px;
-}
-
-.left h1 span{
-  color:#7dd3fc;
-}
-
-.left p{
-  font-size:18px;
-  line-height:1.8;
-  color:#dbeafe;
-  margin-bottom:35px;
-}
-
-.features{
-  display:grid;
-  gap:18px;
-}
-
-.feature{
-  background:rgba(255,255,255,0.12);
-  border:1px solid rgba(255,255,255,0.14);
-  padding:18px;
-  border-radius:18px;
-  backdrop-filter:blur(8px);
-}
-
-.feature h3{
-  margin-bottom:8px;
-}
-
-.feature p{
-  font-size:14px;
-  margin:0;
-  color:#dbeafe;
-}
-
-.right{
-  padding:55px 45px;
-  background:#f8fbff;
-}
-
-.form-title{
-  margin-bottom:30px;
-}
-
-.form-title h2{
-  font-size:36px;
-  color:#061833;
-  margin-bottom:10px;
-}
-
-.form-title p{
-  color:#64748b;
-  line-height:1.7;
-}
-
-.form-group{
-  margin-bottom:20px;
-}
-
-.form-group label{
-  display:block;
-  margin-bottom:8px;
-  font-weight:700;
-  color:#0f172a;
-}
-
-.form-group input,
-.form-group select{
-  width:100%;
-  padding:15px 16px;
-  border-radius:14px;
-  border:1px solid #dbe4f0;
-  background:white;
-  font-size:15px;
-  outline:none;
-  transition:0.3s;
-}
-
-.form-group input:focus,
-.form-group select:focus{
-  border-color:#0d6efd;
-  box-shadow:0 0 0 4px rgba(13,110,253,0.1);
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-}
-
-.register-btn{
-  width:100%;
-  border:none;
-  background:#0d6efd;
-  color:white;
-  padding:17px;
-  border-radius:14px;
-  font-size:16px;
-  font-weight:900;
-  cursor:pointer;
-  margin-top:10px;
-  transition:0.3s;
-  box-shadow:0 18px 40px rgba(13,110,253,0.28);
-}
-
-.register-btn:hover{
-  transform:translateY(-3px);
-}
-
-.login-link{
-  text-align:center;
-  margin-top:22px;
-  color:#64748b;
-}
-
-.login-link a{
-  color:#0d6efd;
-  text-decoration:none;
-  font-weight:800;
-}
-
-.note{
-  margin-top:25px;
-  background:#e0f2fe;
-  border:1px solid #bae6fd;
-  padding:18px;
-  border-radius:16px;
-}
-
-.note h4{
-  color:#0369a1;
-  margin-bottom:8px;
-}
-
-.note p{
-  color:#075985;
-  line-height:1.6;
-  font-size:14px;
-}
-
-@media(max-width:980px){
-
-  .container{
-    grid-template-columns:1fr;
-  }
-
-  .left{
-    padding:45px 30px;
-  }
-
-  .left h1{
-    font-size:38px;
-  }
-
-  .right{
-    padding:40px 25px;
-  }
-
-  .grid{
-    grid-template-columns:1fr;
-  }
-
-}
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif}
+body{background:#eef3f8;color:#061833;min-height:100vh;padding:35px}
+.wrapper{max-width:1150px;margin:auto}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo img{height:56px;background:white;border-radius:14px;padding:6px}
+.logo h2{font-size:28px}
+.logo span{color:#0d6efd;font-weight:800}
+.back{background:white;color:#0d6efd;text-decoration:none;padding:12px 18px;border-radius:14px;font-weight:900;box-shadow:0 10px 25px rgba(15,23,42,.08)}
+.grid{display:grid;grid-template-columns:1fr 1.1fr;gap:24px}
+.card{background:white;border-radius:24px;padding:28px;box-shadow:0 18px 45px rgba(15,23,42,.08);border:1px solid #e5edf7}
+.card h1,.card h2{color:#061833;margin-bottom:12px}
+.card p{color:#64748b;line-height:1.7;margin-bottom:18px}
+.plan-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.plan-card{border:2px solid #e5edf7;border-radius:18px;padding:18px;cursor:pointer;transition:.25s;position:relative}
+.plan-card.active{border-color:#0d6efd;background:#eff6ff}
+.plan-card h3{font-size:22px;margin-bottom:6px}
+.price{font-size:34px;color:#0d6efd;font-weight:900;margin:8px 0}
+.plan-card ul{list-style:none;margin-top:12px}
+.plan-card li{padding:6px 0;color:#334155;font-weight:700}
+.badge{position:absolute;top:14px;right:14px;background:#22c55e;color:white;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:900}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.full{grid-column:1/-1}
+label{display:block;margin-bottom:7px;font-weight:900}
+input,select,textarea{width:100%;padding:13px 14px;border:1px solid #dbe4f0;border-radius:12px;font-size:15px}
+textarea{min-height:78px;resize:vertical}
+.summary{background:#f8fbff;border:1px solid #dbe4f0;border-radius:18px;padding:18px;margin:20px 0}
+.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5edf7;font-weight:900}
+.row:last-child{border-bottom:none}
+.total{font-size:20px;color:#0d6efd}
+.btn{border:none;background:#0d6efd;color:white;padding:15px 24px;border-radius:14px;font-weight:900;cursor:pointer;font-size:15px;width:100%}
+.note{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:14px;border-radius:14px;font-weight:800;line-height:1.6;margin-top:15px}
+.success{display:none;background:#dcfce7;border:1px solid #86efac;color:#166534;padding:18px;border-radius:16px;font-weight:900;line-height:1.7;margin-top:18px}
+@media(max-width:900px){.grid,.form-grid{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}}
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="wrapper">
 
-  <div class="left">
-
+  <div class="header">
     <div class="logo">
-      <img src="/images/post91-logo.png" alt="logo">
-      <div class="logo-text">
+      <img src="/images/post91-logo.png" onerror="this.style.display='none'">
+      <div>
         <h2>Post91 Accounts</h2>
-        <p>Simple Accounting for Smart Businesses</p>
+        <span>Simple Accounting for Smart Businesses</span>
       </div>
     </div>
 
-    <h1>
-      Start managing your business
-      <span>professionally.</span>
-    </h1>
-
-    <p>
-      Create invoices, manage expenses, track payments,
-      maintain bank ledger and generate customer statements
-      from one simple accounting platform.
-    </p>
-
-    <div class="features">
-
-      <div class="feature">
-        <h3>📄 Smart Invoicing</h3>
-        <p>Create professional VAT-ready invoices in seconds.</p>
-      </div>
-
-      <div class="feature">
-        <h3>📊 Reports & SOA</h3>
-        <p>Generate customer and supplier statements instantly.</p>
-      </div>
-
-      <div class="feature">
-        <h3>🏦 Bank & Cash Tracking</h3>
-        <p>Track business transactions with proper accounting records.</p>
-      </div>
-
-    </div>
-
+    <a href="/index.html" class="back">Back to Home</a>
   </div>
 
-  <div class="right">
+  <div class="grid">
 
-    <div class="form-title">
-      <h2>Register Business</h2>
-      <p>Create your company account and access your accounting dashboard.</p>
+    <div class="card">
+      <h1>Choose Your Plan</h1>
+      <p>Select your package. Your account will be activated after Vehicall Admin approval.</p>
+
+      <div class="plan-grid">
+
+        <div class="plan-card" onclick="selectPlan('Basic')" id="planBasic">
+          <h3>Basic</h3>
+          <div class="price">OMR 3</div>
+          <p>For small shops and starter businesses.</p>
+          <ul>
+            <li>✓ Sales Invoice</li>
+            <li>✓ Quotation</li>
+            <li>✓ Delivery Order</li>
+            <li>✓ Customer Management</li>
+            <li>✓ Item Master</li>
+            <li>✓ Basic Reports</li>
+          </ul>
+        </div>
+
+        <div class="plan-card" onclick="selectPlan('Plus')" id="planPlus">
+          <div class="badge">Most Popular</div>
+          <h3>Plus</h3>
+          <div class="price">OMR 5</div>
+          <p>For workshops and growing businesses.</p>
+          <ul>
+            <li>✓ Everything in Basic</li>
+            <li>✓ VAT Reports</li>
+            <li>✓ Purchase Invoice</li>
+            <li>✓ Expense Management</li>
+            <li>✓ Cash & Bank Book</li>
+            <li>✓ Customer/Supplier SOA</li>
+          </ul>
+        </div>
+
+        <div class="plan-card" onclick="selectPlan('Premium')" id="planPremium">
+          <h3>Premium</h3>
+          <div class="price">OMR 10</div>
+          <p>For full business operations.</p>
+          <ul>
+            <li>✓ Everything in Plus</li>
+            <li>✓ Profit & Loss</li>
+            <li>✓ Inventory Ledger</li>
+            <li>✓ Advanced Dashboard</li>
+            <li>✓ Multi-user Access</li>
+            <li>✓ Priority Support</li>
+          </ul>
+        </div>
+
+      </div>
     </div>
 
-    <form>
+    <div class="card">
+      <h2>Business Registration</h2>
+      <p>Submit your business details. Login will remain inactive until admin approval.</p>
 
-      <div class="form-group">
-        <label>Business Name</label>
-        <input type="text" placeholder="Enter business name">
-      </div>
+      <form id="registerForm">
 
-      <div class="grid">
+        <div class="form-grid">
 
-        <div class="form-group">
-          <label>Owner Name</label>
-          <input type="text" placeholder="Enter owner name">
+          <div>
+            <label>Business Name *</label>
+            <input id="businessName" required>
+          </div>
+
+          <div>
+            <label>Owner Name *</label>
+            <input id="ownerName" required>
+          </div>
+
+          <div>
+            <label>Mobile Number *</label>
+            <input id="mobile" required>
+          </div>
+
+          <div>
+            <label>WhatsApp Number</label>
+            <input id="whatsapp">
+          </div>
+
+          <div>
+            <label>Email *</label>
+            <input type="email" id="email" required>
+          </div>
+
+          <div>
+            <label>VAT Number Optional</label>
+            <input id="vatNumber">
+          </div>
+
+          <div class="full">
+            <label>Business Address</label>
+            <textarea id="address"></textarea>
+          </div>
+
+          <div>
+            <label>Password *</label>
+            <input type="password" id="password" required>
+          </div>
+
+          <div>
+            <label>Confirm Password *</label>
+            <input type="password" id="confirmPassword" required>
+          </div>
+
         </div>
 
-        <div class="form-group">
-          <label>Mobile Number</label>
-          <input type="text" placeholder="+968 XXXXXXXX">
+        <div class="summary">
+          <div class="row"><span>Selected Plan</span><span id="selectedPlanText">Plus</span></div>
+          <div class="row"><span>Monthly Price</span><span id="priceText">OMR 5.000</span></div>
+          <div class="row"><span>VAT 5%</span><span id="vatText">OMR 0.250</span></div>
+          <div class="row total"><span>Total Payable</span><span id="totalText">OMR 5.250</span></div>
         </div>
 
-      </div>
+        <button class="btn" type="submit">Submit Registration Request</button>
 
-      <div class="grid">
-
-        <div class="form-group">
-          <label>Email Address</label>
-          <input type="email" placeholder="Enter email">
+        <div class="note">
+          Your account status will be Pending after registration.
+          Vehicall Admin must approve your request before login is activated.
         </div>
 
-        <div class="form-group">
-          <label>Business Type</label>
-          <select>
-            <option>Select Type</option>
-            <option>Trading</option>
-            <option>Garage</option>
-            <option>Spare Parts</option>
-            <option>Transport</option>
-            <option>Services</option>
-          </select>
+        <div class="success" id="successBox">
+          Registration request submitted successfully.<br>
+          Status: Pending Admin Approval.<br>
+          You can try login after approval.
         </div>
 
-      </div>
-
-      <div class="grid">
-
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" placeholder="Create password">
-        </div>
-
-        <div class="form-group">
-          <label>Confirm Password</label>
-          <input type="password" placeholder="Confirm password">
-        </div>
-
-      </div>
-
-      <button class="register-btn" type="submit">
-        Create Business Account
-      </button>
-
-    </form>
-
-    <div class="note">
-      <h4>Why Post91 Accounts?</h4>
-      <p>
-        Designed for small and growing businesses in Oman
-        that need simple accounting without complicated ERP systems.
-      </p>
-    </div>
-
-    <div class="login-link">
-      Already have account?
-      <a href="/login.html">Login Now</a>
+      </form>
     </div>
 
   </div>
 
 </div>
+
+<script>
+const PLAN_PRICES = {
+  Basic: 3,
+  Plus: 5,
+  Premium: 10
+};
+
+let selectedPlan = "Plus";
+
+function getParamPlan(){
+  const params = new URLSearchParams(window.location.search);
+  const plan = params.get("plan");
+  if(PLAN_PRICES[plan]) return plan;
+  return "Plus";
+}
+
+function money(n){
+  return "OMR " + Number(n || 0).toFixed(3);
+}
+
+function selectPlan(plan){
+  selectedPlan = plan;
+
+  document.querySelectorAll(".plan-card").forEach(card=>{
+    card.classList.remove("active");
+  });
+
+  document.getElementById("plan" + plan).classList.add("active");
+
+  const price = PLAN_PRICES[plan];
+  const vat = price * 0.05;
+  const total = price + vat;
+
+  document.getElementById("selectedPlanText").textContent = plan;
+  document.getElementById("priceText").textContent = money(price);
+  document.getElementById("vatText").textContent = money(vat);
+  document.getElementById("totalText").textContent = money(total);
+}
+
+function getPost91Users(){
+  return JSON.parse(localStorage.getItem("post91Users") || "[]");
+}
+
+function savePost91Users(users){
+  localStorage.setItem("post91Users", JSON.stringify(users));
+}
+
+function getPost91Requests(){
+  return JSON.parse(localStorage.getItem("post91RegistrationRequests") || "[]");
+}
+
+function savePost91Requests(requests){
+  localStorage.setItem("post91RegistrationRequests", JSON.stringify(requests));
+}
+
+document.getElementById("registerForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  const pass = document.getElementById("password").value;
+  const confirm = document.getElementById("confirmPassword").value;
+
+  if(pass !== confirm){
+    alert("Password and Confirm Password do not match.");
+    return;
+  }
+
+  const emailValue = document.getElementById("email").value.trim().toLowerCase();
+  const users = getPost91Users();
+
+  if(users.some(u => (u.email || "").toLowerCase() === emailValue)){
+    alert("This email is already registered.");
+    return;
+  }
+
+  const price = PLAN_PRICES[selectedPlan];
+  const vat = price * 0.05;
+  const total = price + vat;
+
+  const requestNo = "P91-REQ-" + Date.now();
+
+  const user = {
+    requestNo,
+    businessName: document.getElementById("businessName").value.trim(),
+    ownerName: document.getElementById("ownerName").value.trim(),
+    mobile: document.getElementById("mobile").value.trim(),
+    whatsapp: document.getElementById("whatsapp").value.trim(),
+    email: emailValue,
+    vatNumber: document.getElementById("vatNumber").value.trim(),
+    address: document.getElementById("address").value.trim(),
+    password: pass,
+
+    selectedPlan,
+    monthlyPrice: price,
+    vatAmount: vat,
+    totalAmount: total,
+
+    registrationStatus: "pending",
+    accountActive: false,
+    paymentStatus: "pending",
+    createdAt: new Date().toISOString()
+  };
+
+  users.push(user);
+  savePost91Users(users);
+
+  const requests = getPost91Requests();
+  requests.push(user);
+  savePost91Requests(requests);
+
+  document.getElementById("successBox").style.display = "block";
+  document.getElementById("registerForm").reset();
+
+  selectPlan(selectedPlan);
+});
+
+selectPlan(getParamPlan());
+</script>
 
 </body>
 </html>

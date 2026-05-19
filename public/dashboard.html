@@ -328,6 +328,21 @@ th{
 
 <body>
 
+<script>
+const currentUser = JSON.parse(localStorage.getItem("post91CurrentUser") || "null");
+
+if(!currentUser){
+  alert("Please login first.");
+  window.location.href = "/login.html";
+}
+
+if(currentUser && !currentUser.accountActive){
+  alert("Login not active. Pending Vehicall Admin approval.");
+  localStorage.removeItem("post91CurrentUser");
+  window.location.href = "/login.html";
+}
+</script>
+
 <div class="mobile-menu">
   <b id="mobileBrand">Post91 Accounts</b>
   <button onclick="toggleMenu()">Menu</button>
