@@ -60,7 +60,7 @@ th{background:#f8fbff}
 </div>
 
 <div class="note">
-  This report is generated from Sales Invoices, Purchase Invoices and Expense Entries.
+  This report is generated from Firebase Sales Invoices, Purchase Invoices and Expense Entries.
 </div>
 
 <div class="card filters">
@@ -104,7 +104,7 @@ th{background:#f8fbff}
 
     <div class="report-head">
       <h2 id="pReportName">Profit & Loss Report</h2>
-      <p id="pPeriod">For the selected period</p>
+      <p id="pPeriod">For all periods</p>
     </div>
 
     <div class="section-title">Income</div>
@@ -164,8 +164,12 @@ th{background:#f8fbff}
   </table>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/firebase-db.js"></script>
+
 <script>
-function gd(k){return JSON.parse(localStorage.getItem(k)||"[]")}
 function mv(n){return Number(n||0).toFixed(3)}
 function mt(n){return "OMR "+mv(n)}
 
@@ -176,12 +180,12 @@ function isCancelled(status){
 function dateOk(date){
   if(!date)return true;
 
-  let d=new Date(date);
-  let f=fromDate.value ? new Date(fromDate.value) : null;
-  let t=toDate.value ? new Date(toDate.value) : null;
+  let d = new Date(date);
+  let f = fromDate.value ? new Date(fromDate.value) : null;
+  let t = toDate.value ? new Date(toDate.value) : null;
 
-  if(f && d<f)return false;
-  if(t && d>t)return false;
+  if(f && d < f)return false;
+  if(t && d > t)return false;
 
   return true;
 }
@@ -202,76 +206,129 @@ function periodText(){
   return "For all periods";
 }
 
-function generatePL(){
-  let sales=gd("post91SalesInvoices")
+async function smartLoad(collection){
+  try{
+    if(typeof loadFromCloudSmart === "function"){
+      return await loadFromCloudSmart(collection);
+    }
+
+    if(typeof loadFromCloud === "function"){
+      return await loadFromCloud(collection);
+    }
+
+    return [];
+  }catch(err){
+    console.error("Report load error:", collection, err);
+    return [];
+  }
+}
+
+async function generatePL(){
+
+  summaryRevenue.textContent = "Loading...";
+  summaryCogs.textContent = "Loading...";
+  summaryExpenses.textContent = "Loading...";
+  summaryNet.textContent = "Loading...";
+
+  let sales = await smartLoad(COLLECTIONS.SALES_INVOICES);
+  let purchases = await smartLoad(COLLECTIONS.PURCHASE_INVOICES);
+  let expenses = await smartLoad(COLLECTIONS.EXPENSES);
+
+  sales = sales
     .filter(x=>!isCancelled(x.docStatus))
     .filter(x=>dateOk(x.invoiceDate));
 
-  let purchases=gd("post91PurchaseInvoices")
+  purchases = purchases
     .filter(x=>!isCancelled(x.docStatus))
-    .filter(x=>dateOk(x.purchaseDate));
+    .filter(x=>dateOk(x.purchaseDate || x.invoiceDate || x.date));
 
-  let expenses=gd("post91ExpenseEntries")
+  expenses = expenses
     .filter(x=>!isCancelled(x.status))
-    .filter(x=>dateOk(x.expenseDate));
+    .filter(x=>dateOk(x.expenseDate || x.date));
 
-  let salesRevenue=sales.reduce((s,x)=>s+Number(x.beforeTax||x.grandTotal||0),0);
+  let salesRevenue = sales.reduce(
+    (s,x)=>s + Number(x.beforeTax || x.grandTotal || x.total || 0), 0
+  );
 
-  let purchaseCost=purchases.reduce((s,x)=>s+Number(x.beforeTax||x.grandTotal||0),0);
+  let purchaseCost = purchases.reduce(
+    (s,x)=>s + Number(x.beforeTax || x.grandTotal || x.total || 0), 0
+  );
 
-  let expenseMap={};
-  let expenseTotal=0;
+  let expenseMap = {};
+  let expenseTotal = 0;
 
   expenses.forEach(e=>{
-    let cat=e.expenseCategory||"Miscellaneous Expense";
-    let amt=Number(e.baseAmount||e.totalAmount||0);
+    let cat = e.expenseCategory || e.category || "Miscellaneous Expense";
 
-    if(!expenseMap[cat])expenseMap[cat]=0;
-    expenseMap[cat]+=amt;
-    expenseTotal+=amt;
+    let amt = Number(
+      e.baseAmount ||
+      e.totalAmount ||
+      e.amount ||
+      e.grandTotal ||
+      0
+    );
+
+    if(!expenseMap[cat]){
+      expenseMap[cat] = 0;
+    }
+
+    expenseMap[cat] += amt;
+    expenseTotal += amt;
   });
 
-  let grossProfit=salesRevenue-purchaseCost;
-  let netProfit=grossProfit-expenseTotal;
+  let grossProfit = salesRevenue - purchaseCost;
+  let netProfit = grossProfit - expenseTotal;
 
-  summaryRevenue.textContent=mt(salesRevenue);
-  summaryCogs.textContent=mt(purchaseCost);
-  summaryExpenses.textContent=mt(expenseTotal);
-  summaryNet.textContent=mt(netProfit);
-  summaryNet.className=netProfit>=0?"profit":"loss";
+  summaryRevenue.textContent = mt(salesRevenue);
+  summaryCogs.textContent = mt(purchaseCost);
+  summaryExpenses.textContent = mt(expenseTotal);
+  summaryNet.textContent = mt(netProfit);
+  summaryNet.className = netProfit >= 0 ? "profit" : "loss";
 
-  pReportName.textContent=reportName.value||"Profit & Loss Report";
-  pPeriod.textContent=periodText();
+  pReportName.textContent = reportName.value || "Profit & Loss Report";
+  pPeriod.textContent = periodText();
 
-  pSalesRevenue.textContent=mv(salesRevenue);
-  pTotalIncome.textContent=mv(salesRevenue);
-  pPurchaseCost.textContent=mv(purchaseCost);
-  pGrossProfit.textContent=mv(grossProfit);
-  pTotalExpenses.textContent=mv(expenseTotal);
-  pNetProfit.textContent=mv(netProfit);
+  pSalesRevenue.textContent = mv(salesRevenue);
+  pTotalIncome.textContent = mv(salesRevenue);
+  pPurchaseCost.textContent = mv(purchaseCost);
+  pGrossProfit.textContent = mv(grossProfit);
+  pTotalExpenses.textContent = mv(expenseTotal);
+  pNetProfit.textContent = mv(netProfit);
 
-  pGrossProfit.className="amount "+(grossProfit>=0?"profit":"loss");
-  pNetProfit.className="amount "+(netProfit>=0?"profit":"loss");
-  netLabel.textContent=netProfit>=0?"Net Profit":"Net Loss";
+  pGrossProfit.className = "amount " + (grossProfit >= 0 ? "profit" : "loss");
+  pNetProfit.className = "amount " + (netProfit >= 0 ? "profit" : "loss");
+
+  netLabel.textContent = netProfit >= 0 ? "Net Profit" : "Net Loss";
 
   renderExpenseRows(expenseMap);
+
+  console.log("P&L Loaded:", {
+    salesCount: sales.length,
+    purchaseCount: purchases.length,
+    expenseCount: expenses.length,
+    salesRevenue,
+    purchaseCost,
+    expenseTotal,
+    netProfit
+  });
 }
 
 function renderExpenseRows(expenseMap){
-  expenseRows.innerHTML="";
-  expenseBreakupBody.innerHTML="";
 
-  let cats=Object.keys(expenseMap).sort();
+  expenseRows.innerHTML = "";
+  expenseBreakupBody.innerHTML = "";
 
-  if(cats.length===0){
-    expenseRows.innerHTML=`
+  let cats = Object.keys(expenseMap).sort();
+
+  if(cats.length === 0){
+    expenseRows.innerHTML = `
       <div class="row">
         <div class="label">No expenses recorded</div>
         <div class="amount">0.000</div>
       </div>
     `;
 
-    expenseBreakupBody.innerHTML=`
+    expenseBreakupBody.innerHTML = `
       <tr>
         <td>No expenses recorded</td>
         <td>OMR 0.000</td>
@@ -282,29 +339,31 @@ function renderExpenseRows(expenseMap){
   }
 
   cats.forEach(cat=>{
-    let amt=expenseMap[cat];
+    let amt = expenseMap[cat];
 
-    let row=document.createElement("div");
-    row.className="row";
-    row.innerHTML=`
+    let row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `
       <div class="label">${cat}</div>
       <div class="amount">${mv(amt)}</div>
     `;
+
     expenseRows.appendChild(row);
 
-    let tr=document.createElement("tr");
-    tr.innerHTML=`
+    let tr = document.createElement("tr");
+    tr.innerHTML = `
       <td>${cat}</td>
       <td>${mt(amt)}</td>
     `;
+
     expenseBreakupBody.appendChild(tr);
   });
 }
 
 function clearFilters(){
-  fromDate.value="";
-  toDate.value="";
-  reportName.value="Profit & Loss Report";
+  fromDate.value = "";
+  toDate.value = "";
+  reportName.value = "Profit & Loss Report";
   generatePL();
 }
 

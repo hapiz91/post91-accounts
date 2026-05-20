@@ -131,7 +131,17 @@ th{background:#f8fbff;text-align:left}
 </div>
 
 <script>
-function gd(k){return JSON.parse(localStorage.getItem(k)||"[]")}
+function getData(keys){
+  for(let key of keys){
+    let data = JSON.parse(localStorage.getItem(key) || "[]");
+    if(Array.isArray(data) && data.length > 0){
+      console.log("Loaded:", key, data.length);
+      return data;
+    }
+  }
+  return [];
+}
+
 function mv(n){return Number(n||0).toFixed(3)}
 function mt(n){return "OMR "+mv(n)}
 
@@ -140,18 +150,58 @@ function isCancelled(s){
 }
 
 function generateDashboard(){
-  let sales=gd("post91SalesInvoices").filter(x=>!isCancelled(x.docStatus));
-  let purchases=gd("post91PurchaseInvoices").filter(x=>!isCancelled(x.docStatus));
-  let receipts=gd("post91ReceiptVouchers").filter(x=>!isCancelled(x.docStatus));
-  let payments=gd("post91PaymentVouchers").filter(x=>!isCancelled(x.docStatus));
-  let expenses=gd("post91ExpenseEntries").filter(x=>!isCancelled(x.status));
-  let accounts=gd("post91CashBankAccounts");
 
-  let salesTotal=sales.reduce((s,x)=>s+Number(x.grandTotal||0),0);
-  let receiptTotal=receipts.reduce((s,x)=>s+Number(x.totalReceiptAmount||0),0);
-  let purchaseTotal=purchases.reduce((s,x)=>s+Number(x.grandTotal||0),0);
-  let paymentTotal=payments.reduce((s,x)=>s+Number(x.totalPaymentAmount||0),0);
-  let expenseTotal=expenses.reduce((s,x)=>s+Number(x.totalAmount||0),0);
+  // =========================
+  // AUTO DETECT STORAGE KEYS
+  // =========================
+
+  let sales = getData([
+    "post91SalesInvoices",
+    "salesInvoices",
+    "sales",
+    "post91_sales",
+    "invoices"
+  ]).filter(x=>!isCancelled(x.docStatus));
+
+  let purchases = getData([
+    "post91PurchaseInvoices",
+    "purchaseInvoices",
+    "purchases",
+    "post91_purchases"
+  ]).filter(x=>!isCancelled(x.docStatus));
+
+  let receipts = getData([
+    "post91ReceiptVouchers",
+    "receiptVouchers",
+    "receipts"
+  ]).filter(x=>!isCancelled(x.docStatus));
+
+  let payments = getData([
+    "post91PaymentVouchers",
+    "paymentVouchers",
+    "payments"
+  ]).filter(x=>!isCancelled(x.docStatus));
+
+  let expenses = getData([
+    "post91ExpenseEntries",
+    "expenseEntries",
+    "expenses"
+  ]).filter(x=>!isCancelled(x.status));
+
+  let accounts = getData([
+    "post91CashBankAccounts",
+    "cashBankAccounts",
+    "bankAccounts"
+  ]);
+
+  console.log("Sales:", sales);
+  console.log("Purchases:", purchases);
+
+  let salesTotal=sales.reduce((s,x)=>s+Number(x.grandTotal||x.total||0),0);
+  let receiptTotal=receipts.reduce((s,x)=>s+Number(x.totalReceiptAmount||x.amount||0),0);
+  let purchaseTotal=purchases.reduce((s,x)=>s+Number(x.grandTotal||x.total||0),0);
+  let paymentTotal=payments.reduce((s,x)=>s+Number(x.totalPaymentAmount||x.amount||0),0);
+  let expenseTotal=expenses.reduce((s,x)=>s+Number(x.totalAmount||x.amount||0),0);
 
   totalSales.textContent=mt(salesTotal);
   totalReceipts.textContent=mt(receiptTotal);
@@ -166,6 +216,7 @@ function generateDashboard(){
   totalExpenses.textContent=mt(expenseTotal);
 
   let stockIn=0;
+
   purchases.forEach(p=>{
     (p.items||[]).forEach(i=>{
       stockIn+=Number(i.qty||0);
@@ -173,6 +224,7 @@ function generateDashboard(){
   });
 
   let stockOut=0;
+
   sales.forEach(s=>{
     (s.items||[]).forEach(i=>{
       stockOut+=Number(i.qty||0);
@@ -196,13 +248,14 @@ function generateRecentSales(sales){
     .sort((a,b)=>new Date(b.invoiceDate||"1900-01-01")-new Date(a.invoiceDate||"1900-01-01"))
     .slice(0,10)
     .forEach(s=>{
+
       let tr=document.createElement("tr");
 
       tr.innerHTML=`
-        <td>${s.invoiceNo||"-"}</td>
+        <td>${s.invoiceNo||s.salesInvoiceNo||"-"}</td>
         <td>${s.invoiceDate||"-"}</td>
-        <td>${s.customerName||"-"}</td>
-        <td>${mt(s.grandTotal)}</td>
+        <td>${s.customerName||s.customer||"-"}</td>
+        <td>${mt(s.grandTotal||s.total||0)}</td>
         <td>${s.paymentStatus||"Unpaid"}</td>
       `;
 
@@ -211,27 +264,41 @@ function generateRecentSales(sales){
 }
 
 function generateCustomerOutstanding(sales,receipts){
+
   let map={};
 
   sales.forEach(s=>{
-    let c=s.customerName||"Unknown";
+
+    let c=s.customerName||s.customer||"Unknown";
+
     if(!map[c])map[c]={sales:0,receipts:0};
-    map[c].sales+=Number(s.grandTotal||0);
+
+    map[c].sales+=Number(s.grandTotal||s.total||0);
+
   });
 
   receipts.forEach(r=>{
-    let c=r.customerName||"Unknown";
+
+    let c=r.customerName||r.customer||"Unknown";
+
     if(!map[c])map[c]={sales:0,receipts:0};
-    map[c].receipts+=Number(r.totalReceiptAmount||0);
+
+    map[c].receipts+=Number(r.totalReceiptAmount||r.amount||0);
+
   });
 
   customerOutstandingBody.innerHTML="";
 
   Object.keys(map)
-    .map(c=>({customer:c,...map[c],balance:map[c].sales-map[c].receipts}))
+    .map(c=>({
+      customer:c,
+      ...map[c],
+      balance:map[c].sales-map[c].receipts
+    }))
     .filter(x=>Math.abs(x.balance)>0.0001)
     .sort((a,b)=>b.balance-a.balance)
     .forEach(x=>{
+
       let tr=document.createElement("tr");
 
       tr.innerHTML=`
@@ -246,27 +313,41 @@ function generateCustomerOutstanding(sales,receipts){
 }
 
 function generateSupplierOutstanding(purchases,payments){
+
   let map={};
 
   purchases.forEach(p=>{
-    let s=p.supplierName||"Unknown";
+
+    let s=p.supplierName||p.supplier||"Unknown";
+
     if(!map[s])map[s]={purchases:0,payments:0};
-    map[s].purchases+=Number(p.grandTotal||0);
+
+    map[s].purchases+=Number(p.grandTotal||p.total||0);
+
   });
 
   payments.forEach(p=>{
-    let s=p.supplierName||"Unknown";
+
+    let s=p.supplierName||p.supplier||"Unknown";
+
     if(!map[s])map[s]={purchases:0,payments:0};
-    map[s].payments+=Number(p.totalPaymentAmount||0);
+
+    map[s].payments+=Number(p.totalPaymentAmount||p.amount||0);
+
   });
 
   supplierOutstandingBody.innerHTML="";
 
   Object.keys(map)
-    .map(s=>({supplier:s,...map[s],balance:map[s].purchases-map[s].payments}))
+    .map(s=>({
+      supplier:s,
+      ...map[s],
+      balance:map[s].purchases-map[s].payments
+    }))
     .filter(x=>Math.abs(x.balance)>0.0001)
     .sort((a,b)=>b.balance-a.balance)
     .forEach(x=>{
+
       let tr=document.createElement("tr");
 
       tr.innerHTML=`
@@ -286,27 +367,31 @@ function openingOf(a){
 }
 
 function generateCashBankSummary(accounts,receipts,payments,expenses){
+
   cashBankBody.innerHTML="";
 
   let grandBalance=0;
 
   accounts.forEach(a=>{
+
     let name=a.accountName||a.name||"";
+
     let opening=openingOf(a);
 
     let moneyIn=receipts
       .filter(r=>(r.cashBankAccountName||"")===name)
-      .reduce((s,r)=>s+Number(r.totalReceiptAmount||0),0);
+      .reduce((s,r)=>s+Number(r.totalReceiptAmount||r.amount||0),0);
 
     let paymentOut=payments
       .filter(p=>(p.cashBankAccountName||"")===name)
-      .reduce((s,p)=>s+Number(p.totalPaymentAmount||0),0);
+      .reduce((s,p)=>s+Number(p.totalPaymentAmount||p.amount||0),0);
 
     let expenseOut=expenses
       .filter(e=>(e.cashBankAccountName||"")===name)
-      .reduce((s,e)=>s+Number(e.totalAmount||0),0);
+      .reduce((s,e)=>s+Number(e.totalAmount||e.amount||0),0);
 
     let moneyOut=paymentOut+expenseOut;
+
     let balance=opening+moneyIn-moneyOut;
 
     grandBalance+=balance;
@@ -322,6 +407,7 @@ function generateCashBankSummary(accounts,receipts,payments,expenses){
     `;
 
     cashBankBody.appendChild(tr);
+
   });
 
   cashBankBalance.textContent=mt(grandBalance);
@@ -329,6 +415,5 @@ function generateCashBankSummary(accounts,receipts,payments,expenses){
 
 generateDashboard();
 </script>
-
 </body>
 </html>
