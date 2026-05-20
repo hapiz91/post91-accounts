@@ -1135,7 +1135,8 @@ function updatePreview(){
   pRef.textContent=reference.value||"-";
   pDoDate.textContent=doDate.value||"-";
 
-  pPumpType.textContent=pumpType.value||"-";
+  pPumpType.textContent =pumpType.value? `${pumpType.value}${brandName.value ? " (" + brandName.value + ")" : ""}`
+    : "-";
   pCylinderNo.textContent=cylinderNo.value||"-";
   pNoOfNozzles.textContent=noOfNozzles.value||"-";
   pPumpNo.textContent=pumpNo.value||"-";
