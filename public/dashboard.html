@@ -7,322 +7,52 @@
 
 <style>
 *{box-sizing:border-box}
-
-:root{
-  --primary:#0d6efd;
-  --sidebar:#061833;
-  --bg:#eef3f8;
-  --card:#ffffff;
-}
-
-body{
-  margin:0;
-  font-family:Segoe UI,Arial,sans-serif;
-  background:var(--bg);
-  color:#061833;
-}
-
-.app-header{
-  position:sticky;
-  top:0;
-  z-index:50;
-  height:118px;
-  background:linear-gradient(90deg,#061833,#082b57);
-  color:#fff;
-  display:grid;
-  grid-template-columns:260px 1fr 300px;
-  align-items:center;
-  border-bottom:1px solid #123b70;
-  box-shadow:0 8px 25px #0002;
-}
-
-.header-brand{
-  padding:18px 24px;
-  border-right:1px solid #ffffff22;
-}
-
-.header-brand h2{
-  margin:0;
-  font-size:24px;
-  font-weight:900;
-}
-
-.header-brand p{
-  margin:6px 0 0;
-  font-size:12px;
-  color:#cfe0ff;
-  font-weight:700;
-}
-
-.header-company{
-  padding:14px 28px;
-  display:flex;
-  gap:16px;
-  align-items:center;
-}
-
-.company-icon{
-  width:54px;
-  height:54px;
-  border:2px solid #ffffff99;
-  border-radius:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:28px;
-}
-
-.company-info h3{
-  margin:0;
-  font-size:22px;
-  font-weight:900;
-}
-
-.company-info p{
-  margin:4px 0 0;
-  font-size:13px;
-  color:#e7efff;
-  font-weight:700;
-}
-
-.company-info small{
-  display:block;
-  margin-top:4px;
-  color:#ffdba0;
-  font-weight:800;
-}
-
-.header-logo-box{
-  padding:14px 24px;
-  text-align:right;
-}
-
-.header-logo{
-  max-width:230px;
-  max-height:86px;
-  object-fit:contain;
-}
-
-.header-logo-text{
-  font-size:42px;
-  font-weight:900;
-  letter-spacing:-1px;
-}
-
-.header-logo-text span{
-  color:#ff3333;
-}
-
-.layout{
-  display:grid;
-  grid-template-columns:260px 1fr;
-  min-height:calc(100vh - 118px);
-}
-
-.sidebar{
-  background:var(--sidebar);
-  color:white;
-  padding:20px 16px;
-  position:sticky;
-  top:118px;
-  height:calc(100vh - 118px);
-  overflow:auto;
-}
-
-.nav-title{
-  font-size:12px;
-  text-transform:uppercase;
-  color:#7ea6d9;
-  font-weight:900;
-  margin:22px 0 8px;
-}
-
-.nav a{
-  display:block;
-  color:#eaf2ff;
-  text-decoration:none;
-  padding:11px 12px;
-  border-radius:12px;
-  font-weight:750;
-  margin-bottom:6px;
-}
-
-.nav a:hover,
-.nav a.active{
-  background:var(--primary);
-}
-
-.main{
-  padding:26px;
-}
-
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:22px;
-}
-
-.topbar h1{
-  margin:0;
-  color:var(--primary);
-  font-size:34px;
-}
-
-.badge{
-  background:#dcfce7;
-  color:#166534;
-  padding:8px 12px;
-  border-radius:99px;
-  font-weight:900;
-  font-size:13px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:16px;
-}
-
-.card{
-  background:var(--card);
-  border:1px solid #e5edf7;
-  border-radius:20px;
-  padding:20px;
-  box-shadow:0 14px 34px #0001;
-}
-
-.card b{
-  display:block;
-  font-size:13px;
-  color:#64748b;
-}
-
-.card span{
-  font-size:24px;
-  font-weight:900;
-  color:var(--primary);
-}
-
-.section{
-  background:var(--card);
-  border:1px solid #e5edf7;
-  border-radius:20px;
-  padding:22px;
-  margin-top:22px;
-  box-shadow:0 14px 34px #0001;
-}
-
-.section h2{
-  margin-top:0;
-}
-
-.module-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:14px;
-}
-
-.module{
-  display:block;
-  text-decoration:none;
-  background:#f8fbff;
-  border:1px solid #dbe4f0;
-  border-radius:17px;
-  padding:16px;
-  color:#061833;
-  transition:.2s;
-}
-
-.module:hover{
-  transform:translateY(-2px);
-  border-color:var(--primary);
-  box-shadow:0 12px 28px #0001;
-}
-
-.module h3{
-  margin:0 0 7px;
-  color:var(--primary);
-}
-
-.module p{
-  margin:0;
-  color:#64748b;
-  font-size:13px;
-  line-height:1.35;
-}
-
-.quick-row{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.btn{
-  border:0;
-  background:var(--primary);
-  color:white;
-  padding:12px 15px;
-  border-radius:12px;
-  font-weight:900;
-  text-decoration:none;
-  display:inline-block;
-}
-
-.btn-light{
-  background:#e2e8f0;
-  color:#0f172a;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th,td{
-  border:1px solid #dbe4f0;
-  padding:8px;
-  vertical-align:top;
-}
-
-th{
-  background:#f8fbff;
-  text-align:left;
-}
-
-.mobile-menu{
-  display:none;
-  background:#061833;
-  color:white;
-  padding:12px 16px;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.mobile-menu button{
-  background:var(--primary);
-  color:white;
-  border:0;
-  border-radius:10px;
-  padding:8px 12px;
-  font-weight:900;
-}
-
-@media(max-width:1100px){
-  .grid,.module-grid{grid-template-columns:repeat(2,1fr)}
-  .app-header{grid-template-columns:220px 1fr 220px}
-}
-
-@media(max-width:800px){
-  .app-header{display:none}
-  .mobile-menu{display:flex}
-  .layout{display:block}
-  .sidebar{display:none;position:static;height:auto}
-  .sidebar.show{display:block}
-  .main{padding:18px}
-  .grid,.module-grid{grid-template-columns:1fr}
-  table{display:block;overflow-x:auto;white-space:nowrap}
-}
+:root{--primary:#0d6efd;--sidebar:#061833;--bg:#eef3f8;--card:#ffffff}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:#061833}
+.app-header{position:sticky;top:0;z-index:50;height:118px;background:linear-gradient(90deg,#061833,#082b57);color:#fff;display:grid;grid-template-columns:260px 1fr 300px;align-items:center;border-bottom:1px solid #123b70;box-shadow:0 8px 25px #0002}
+.header-brand{padding:18px 24px;border-right:1px solid #ffffff22}
+.header-brand h2{margin:0;font-size:24px;font-weight:900}
+.header-brand p{margin:6px 0 0;font-size:12px;color:#cfe0ff;font-weight:700}
+.header-company{padding:14px 28px;display:flex;gap:16px;align-items:center}
+.company-icon{width:54px;height:54px;border:2px solid #ffffff99;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px}
+.company-info h3{margin:0;font-size:22px;font-weight:900}
+.company-info p{margin:4px 0 0;font-size:13px;color:#e7efff;font-weight:700}
+.company-info small{display:block;margin-top:4px;color:#ffdba0;font-weight:800}
+.header-logo-box{padding:14px 24px;text-align:right}
+.header-logo{max-width:230px;max-height:86px;object-fit:contain}
+.header-logo-text{font-size:42px;font-weight:900;letter-spacing:-1px}
+.header-logo-text span{color:#ff3333}
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 118px)}
+.sidebar{background:var(--sidebar);color:white;padding:20px 16px;position:sticky;top:118px;height:calc(100vh - 118px);overflow:auto}
+.nav-title{font-size:12px;text-transform:uppercase;color:#7ea6d9;font-weight:900;margin:22px 0 8px}
+.nav a{display:block;color:#eaf2ff;text-decoration:none;padding:11px 12px;border-radius:12px;font-weight:750;margin-bottom:6px}
+.nav a:hover,.nav a.active{background:var(--primary)}
+.main{padding:26px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+.topbar h1{margin:0;color:var(--primary);font-size:34px}
+.badge{background:#dcfce7;color:#166534;padding:8px 12px;border-radius:99px;font-weight:900;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{background:var(--card);border:1px solid #e5edf7;border-radius:20px;padding:20px;box-shadow:0 14px 34px #0001}
+.card b{display:block;font-size:13px;color:#64748b}
+.card span{font-size:24px;font-weight:900;color:var(--primary)}
+.section{background:var(--card);border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-top:22px;box-shadow:0 14px 34px #0001}
+.section h2{margin-top:0}
+.module-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.module{display:block;text-decoration:none;background:#f8fbff;border:1px solid #dbe4f0;border-radius:17px;padding:16px;color:#061833;transition:.2s}
+.module:hover{transform:translateY(-2px);border-color:var(--primary);box-shadow:0 12px 28px #0001}
+.module h3{margin:0 0 7px;color:var(--primary)}
+.module p{margin:0;color:#64748b;font-size:13px;line-height:1.35}
+.quick-row{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:0;background:var(--primary);color:white;padding:12px 15px;border-radius:12px;font-weight:900;text-decoration:none;display:inline-block}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.logout-btn{background:#dc2626;color:white;border:0;padding:10px 16px;border-radius:10px;font-weight:900;cursor:pointer}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #dbe4f0;padding:8px;vertical-align:top}
+th{background:#f8fbff;text-align:left}
+.mobile-menu{display:none;background:#061833;color:white;padding:12px 16px;justify-content:space-between;align-items:center}
+.mobile-menu button{background:var(--primary);color:white;border:0;border-radius:10px;padding:8px 12px;font-weight:900}
+@media(max-width:1100px){.grid,.module-grid{grid-template-columns:repeat(2,1fr)}.app-header{grid-template-columns:220px 1fr 220px}}
+@media(max-width:800px){.app-header{display:none}.mobile-menu{display:flex}.layout{display:block}.sidebar{display:none;position:static;height:auto}.sidebar.show{display:block}.main{padding:18px}.grid,.module-grid{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
 </style>
 </head>
 
@@ -336,7 +66,7 @@ if(!currentUser){
   window.location.href = "/login.html";
 }
 
-if(currentUser && !currentUser.accountActive){
+if(currentUser && currentUser.accountActive === false){
   alert("Login not active. Pending Vehicall Admin approval.");
   localStorage.removeItem("post91CurrentUser");
   window.location.href = "/login.html";
@@ -371,454 +101,259 @@ if(currentUser && !currentUser.accountActive){
 
 <div class="layout">
 
-  <aside class="sidebar" id="sidebar">
-    <div class="nav">
-      <div class="nav-title">Main</div>
-      <a class="active" href="/dashboard.html">Dashboard</a>
-      <a href="/dashboard-report.html">Dashboard Report</a>
-      <a href="/backup-restore.html">Backup & Restore</a>
+<aside class="sidebar" id="sidebar">
+  <div class="nav">
+    <div class="nav-title">Main</div>
+    <a class="active" href="/dashboard.html">Dashboard</a>
+    <a href="/dashboard-report.html">Dashboard Report</a>
+    <a href="/backup-restore.html">Backup & Restore</a>
 
-      <div class="nav-title">Masters</div>
-      <a href="/company-profile.html">Company Profile</a>
-      <a href="/user-management.html">User Management</a>
-      <a href="/customer-master.html">Customer Master</a>
-      <a href="/supplier-master.html">Supplier Master</a>
-      <a href="/item-master.html">Item Master</a>
-      <a href="/cash-bank-master.html">Cash / Bank Master</a>
-      <!-- Theme Branding Hidden -->
+    <div class="nav-title">Masters</div>
+    <a href="/company-profile.html">Company Profile</a>
+    <a href="/user-management.html">User Management</a>
+    <a href="/customer-master.html">Customer Master</a>
+    <a href="/supplier-master.html">Supplier Master</a>
+    <a href="/item-master.html">Item Master</a>
+    <a href="/cash-bank-master.html">Cash / Bank Master</a>
 
-      <div class="nav-title">Sales</div>
-      <a href="/quotation.html">Quotation</a>
-      <a href="/delivery-order.html">Delivery Order</a>
-      <a href="/sales-invoice.html">Sales Invoice</a>
-      <a href="/receipt-voucher.html">Receipt Voucher</a>
+    <div class="nav-title">Sales</div>
+    <a href="/quotation.html">Quotation</a>
+    <a href="/delivery-order.html">Delivery Order</a>
+    <a href="/sales-invoice.html">Sales Invoice</a>
+    <a href="/receipt-voucher.html">Receipt Voucher</a>
 
-      <div class="nav-title">Purchase</div>
-      <a href="/purchase-invoice.html">Purchase Invoice</a>
-      <a href="/payment-voucher.html">Payment Voucher</a>
-      <a href="/expense-entry.html">Expense Entry</a>
+    <div class="nav-title">Purchase</div>
+    <a href="/purchase-invoice.html">Purchase Invoice</a>
+    <a href="/payment-voucher.html">Payment Voucher</a>
+    <a href="/expense-entry.html">Expense Entry</a>
 
-      <div class="nav-title">Reports</div>
-      <a href="/customer-ledger.html">Customer Ledger</a>
-      <a href="/supplier-ledger.html">Supplier Ledger</a>
-      <a href="/stock-ledger.html">Stock Ledger</a>
-      <a href="/cash-bank-ledger.html">Cash / Bank Ledger</a>
-      <a href="/profit-loss.html">Profit & Loss</a>
-      <a href="/vat-report.html">VAT Report</a>
-    </div>
-  </aside>
+    <div class="nav-title">Reports</div>
+    <a href="/customer-ledger.html">Customer Ledger</a>
+    <a href="/supplier-ledger.html">Supplier Ledger</a>
+    <a href="/stock-ledger.html">Stock Ledger</a>
+    <a href="/cash-bank-ledger.html">Cash / Bank Ledger</a>
+    <a href="/profit-loss.html">Profit & Loss</a>
+    <a href="/vat-report.html">VAT Report</a>
+  </div>
+</aside>
 
-  <main class="main">
+<main class="main">
 
-    <div class="topbar">
-      <div>
-        <h1>Dashboard</h1>
-        <p>Business overview, quick access and module navigation.</p>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center;">
-
-  <div class="badge">MVP READY</div>
-
-  <button onclick="logout()" style="
-    background:#dc2626;
-    color:white;
-    border:0;
-    padding:10px 16px;
-    border-radius:10px;
-    font-weight:900;
-    cursor:pointer;
-  ">
-    Logout
-  </button>
-
-</div>
-    </div>
-
-    <div class="grid">
-      <div class="card"><b>Total Sales</b><span id="totalSales">OMR 0.000</span></div>
-      <div class="card"><b>Total Receipts</b><span id="totalReceipts">OMR 0.000</span></div>
-      <div class="card"><b>Total Purchases</b><span id="totalPurchases">OMR 0.000</span></div>
-      <div class="card"><b>Total Expenses</b><span id="totalExpenses">OMR 0.000</span></div>
-    </div>
-
-    <div class="section">
-      <h2>Quick Actions</h2>
-      <div class="quick-row">
-        <a class="btn" href="/quotation.html">New Quotation</a>
-        <a class="btn" href="/delivery-order.html">New Delivery Order</a>
-        <a class="btn" href="/sales-invoice.html">New Sales Invoice</a>
-        <a class="btn" href="/receipt-voucher.html">New Receipt</a>
-        <a class="btn btn-light" href="/purchase-invoice.html">New Purchase</a>
-        <a class="btn btn-light" href="/payment-voucher.html">New Payment</a>
-        <a class="btn btn-light" href="/expense-entry.html">New Expense</a>
-      </div>
-    </div>
-
-    <div class="section">
-      <h2>Masters</h2>
-      <div class="module-grid">
-        <a class="module" href="/company-profile.html"><h3>Company Profile</h3><p>Company details, VAT, CR, contacts and letterhead.</p></a>
-       <a class="module" href="/user-management.html"><h3>User Management</h3><p>Create users and control module access limitations.</p>
-</a>
-        <a class="module" href="/customer-master.html"><h3>Customer Master</h3><p>Create, edit and manage customer records.</p></a>
-        <a class="module" href="/supplier-master.html"><h3>Supplier Master</h3><p>Create, edit and manage supplier records.</p></a>
-        <a class="module" href="/item-master.html"><h3>Item Master</h3><p>Items, parts, OEM, brands, categories and pricing.</p></a>
-        <a class="module" href="/cash-bank-master.html"><h3>Cash / Bank Master</h3><p>Manage bank and cash accounts.</p></a>
-        <!-- Theme Branding Hidden -->
-      </div>
-    </div>
-
-    <div class="section">
-      <h2>Sales & Purchase</h2>
-      <div class="module-grid">
-        <a class="module" href="/quotation.html"><h3>Quotation</h3><p>Create and print customer quotations.</p></a>
-        <a class="module" href="/delivery-order.html"><h3>Delivery Order</h3><p>Manual or quotation-based delivery order.</p></a>
-        <a class="module" href="/sales-invoice.html"><h3>Sales Invoice</h3><p>Manual or D/O-based invoice with VAT.</p></a>
-        <a class="module" href="/purchase-invoice.html"><h3>Purchase Invoice</h3><p>Supplier purchase and stock inward entry.</p></a>
-        <a class="module" href="/receipt-voucher.html"><h3>Receipt Voucher</h3><p>Customer receipt against one or multiple invoices.</p></a>
-        <a class="module" href="/payment-voucher.html"><h3>Payment Voucher</h3><p>Supplier payment against one or multiple purchases.</p></a>
-        <a class="module" href="/expense-entry.html"><h3>Expense Entry</h3><p>Office, bank, fuel, rent and other expenses.</p></a>
-      </div>
-    </div>
-
-    <div class="section">
-      <h2>Reports</h2>
-      <div class="module-grid">
-        <a class="module" href="/dashboard-report.html"><h3>Dashboard Report</h3><p>Overall MIS summary and outstanding reports.</p></a>
-        <a class="module" href="/customer-ledger.html"><h3>Customer Ledger</h3><p>Sales, receipts and receivable balance.</p></a>
-        <a class="module" href="/supplier-ledger.html"><h3>Supplier Ledger</h3><p>Purchases, payments and payable balance.</p></a>
-        <a class="module" href="/stock-ledger.html"><h3>Stock Ledger</h3><p>Purchase inward, sales outward and stock balance.</p></a>
-        <a class="module" href="/cash-bank-ledger.html"><h3>Cash / Bank Ledger</h3><p>Money in, money out and account-wise balance.</p></a>
-        <a class="module" href="/profit-loss.html"><h3>Profit & Loss</h3><p>Revenue, purchase cost, expenses and net result.</p></a>
-        <a class="module" href="/vat-report.html"><h3>VAT Report</h3><p>Output VAT, input VAT and net VAT payable.</p></a>
-        <a class="module" href="/backup-restore.html"><h3>Backup & Restore</h3><p>Export, import and cloud backup options.</p></a>
-      </div>
-    </div>
-
-    <div class="section">
-      <h2>Recent Sales</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Invoice No</th>
-            <th>Date</th>
-            <th>Customer</th>
-            <th>Total</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="recentSalesBody"></tbody>
-      </table>
-    </div>
-
-  </main>
-
+<div class="topbar">
+  <div>
+    <h1>Dashboard</h1>
+    <p>Business overview, quick access and module navigation.</p>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <div class="badge">MVP READY</div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
 </div>
 
-<script>
+<div class="grid">
+  <div class="card"><b>Total Sales</b><span id="totalSales">OMR 0.000</span></div>
+  <div class="card"><b>Total Receipts</b><span id="totalReceipts">OMR 0.000</span></div>
+  <div class="card"><b>Total Purchases</b><span id="totalPurchases">OMR 0.000</span></div>
+  <div class="card"><b>Total Expenses</b><span id="totalExpenses">OMR 0.000</span></div>
+</div>
 
-function mv(n){
-  return Number(n||0).toFixed(3);
-}
+<div class="section">
+  <h2>Quick Actions</h2>
+  <div class="quick-row">
+    <a class="btn" href="/quotation.html">New Quotation</a>
+    <a class="btn" href="/delivery-order.html">New Delivery Order</a>
+    <a class="btn" href="/sales-invoice.html">New Sales Invoice</a>
+    <a class="btn" href="/receipt-voucher.html">New Receipt</a>
+    <a class="btn btn-light" href="/purchase-invoice.html">New Purchase</a>
+    <a class="btn btn-light" href="/payment-voucher.html">New Payment</a>
+    <a class="btn btn-light" href="/expense-entry.html">New Expense</a>
+  </div>
+</div>
 
-function mt(n){
-  return "OMR "+mv(n);
-}
+<div class="section">
+  <h2>Masters</h2>
+  <div class="module-grid">
+    <a class="module" href="/company-profile.html"><h3>Company Profile</h3><p>Company details, VAT, CR, contacts and letterhead.</p></a>
+    <a class="module" href="/user-management.html"><h3>User Management</h3><p>Create users and control module access limitations.</p></a>
+    <a class="module" href="/customer-master.html"><h3>Customer Master</h3><p>Create, edit and manage customer records.</p></a>
+    <a class="module" href="/supplier-master.html"><h3>Supplier Master</h3><p>Create, edit and manage supplier records.</p></a>
+    <a class="module" href="/item-master.html"><h3>Item Master</h3><p>Items, parts, OEM, brands, categories and pricing.</p></a>
+    <a class="module" href="/cash-bank-master.html"><h3>Cash / Bank Master</h3><p>Manage bank and cash accounts.</p></a>
+  </div>
+</div>
 
-function toggleMenu(){
-  sidebar.classList.toggle("show");
-}
+<div class="section">
+  <h2>Sales & Purchase</h2>
+  <div class="module-grid">
+    <a class="module" href="/quotation.html"><h3>Quotation</h3><p>Create and print customer quotations.</p></a>
+    <a class="module" href="/delivery-order.html"><h3>Delivery Order</h3><p>Manual or quotation-based delivery order.</p></a>
+    <a class="module" href="/sales-invoice.html"><h3>Sales Invoice</h3><p>Manual or D/O-based invoice with VAT.</p></a>
+    <a class="module" href="/purchase-invoice.html"><h3>Purchase Invoice</h3><p>Supplier purchase and stock inward entry.</p></a>
+    <a class="module" href="/receipt-voucher.html"><h3>Receipt Voucher</h3><p>Customer receipt against one or multiple invoices.</p></a>
+    <a class="module" href="/payment-voucher.html"><h3>Payment Voucher</h3><p>Supplier payment against one or multiple purchases.</p></a>
+    <a class="module" href="/expense-entry.html"><h3>Expense Entry</h3><p>Office, bank, fuel, rent and other expenses.</p></a>
+  </div>
+</div>
 
-function isCancelled(s){
-  return (s||"").toLowerCase()==="cancelled";
-}
+<div class="section">
+  <h2>Reports</h2>
+  <div class="module-grid">
+    <a class="module" href="/dashboard-report.html"><h3>Dashboard Report</h3><p>Overall MIS summary and outstanding reports.</p></a>
+    <a class="module" href="/customer-ledger.html"><h3>Customer Ledger</h3><p>Sales, receipts and receivable balance.</p></a>
+    <a class="module" href="/supplier-ledger.html"><h3>Supplier Ledger</h3><p>Purchases, payments and payable balance.</p></a>
+    <a class="module" href="/stock-ledger.html"><h3>Stock Ledger</h3><p>Purchase inward, sales outward and stock balance.</p></a>
+    <a class="module" href="/cash-bank-ledger.html"><h3>Cash / Bank Ledger</h3><p>Money in, money out and account-wise balance.</p></a>
+    <a class="module" href="/profit-loss.html"><h3>Profit & Loss</h3><p>Revenue, purchase cost, expenses and net result.</p></a>
+    <a class="module" href="/vat-report.html"><h3>VAT Report</h3><p>Output VAT, input VAT and net VAT payable.</p></a>
+    <a class="module" href="/backup-restore.html"><h3>Backup & Restore</h3><p>Export, import and cloud backup options.</p></a>
+  </div>
+</div>
 
-function moneyFromAny(obj, keys){
-
-  for(let k of keys){
-
-    if(
-      obj[k] !== undefined &&
-      obj[k] !== null &&
-      obj[k] !== ""
-    ){
-      return Number(obj[k] || 0);
-    }
-  }
-
-  return 0;
-}
-
-async function loadDashboard(){
-
-  recentSalesBody.innerHTML=`
-    <tr>
-      <td colspan="5">Loading dashboard...</td>
-    </tr>
-  `;
-
-  const sales =
-    (await loadFromCloud(COLLECTIONS.SALES_INVOICES))
-    .filter(x=>!isCancelled(x.docStatus));
-
-  const receipts =
-    (await loadFromCloud(COLLECTIONS.RECEIPTS))
-    .filter(x=>!isCancelled(x.docStatus));
-
-  const purchases =
-    (await loadFromCloud(COLLECTIONS.PURCHASE_INVOICES))
-    .filter(x=>!isCancelled(x.docStatus));
-
-  const expenses =
-    (await loadFromCloud(COLLECTIONS.EXPENSES))
-    .filter(x=>!isCancelled(x.status));
-
-  let salesAmount =
-    sales.reduce((s,x)=>
-      s+moneyFromAny(
-        x,
-        ["grandTotal","totalAmount","netTotal","amount"]
-      )
-    ,0);
-
-  let receiptAmount =
-    receipts.reduce((s,x)=>
-      s+moneyFromAny(
-        x,
-        ["totalReceiptAmount","amountReceived","amount"]
-      )
-    ,0);
-
-  let purchaseAmount =
-    purchases.reduce((s,x)=>
-      s+moneyFromAny(
-        x,
-        ["grandTotal","totalAmount","netTotal","amount"]
-      )
-    ,0);
-
-  let expenseAmount =
-    expenses.reduce((s,x)=>
-      s+moneyFromAny(
-        x,
-        ["totalAmount","amount","baseAmount"]
-      )
-    ,0);
-
-  totalSales.textContent =
-    mt(salesAmount);
-
-  totalReceipts.textContent =
-    mt(receiptAmount);
-
-  totalPurchases.textContent =
-    mt(purchaseAmount);
-
-  totalExpenses.textContent =
-    mt(expenseAmount);
-
-  recentSalesBody.innerHTML="";
-
-  sales
-    .slice()
-    .sort((a,b)=>
-      new Date(
-        b.invoiceDate ||
-        b.date ||
-        "1900-01-01"
-      )
-      -
-      new Date(
-        a.invoiceDate ||
-        a.date ||
-        "1900-01-01"
-      )
-    )
-    .slice(0,8)
-    .forEach(s=>{
-
-      let tr=document.createElement("tr");
-
-      tr.innerHTML=`
-
-        <td>
-          ${s.invoiceNo || s.salesInvoiceNo || "-"}
-        </td>
-
-        <td>
-          ${s.invoiceDate || s.date || "-"}
-        </td>
-
-        <td>
-          ${s.customerName || "-"}
-        </td>
-
-        <td>
-          ${mt(
-            moneyFromAny(
-              s,
-              ["grandTotal","totalAmount","netTotal","amount"]
-            )
-          )}
-        </td>
-
-        <td>
-          ${s.paymentStatus || "Unpaid"}
-        </td>
-      `;
-
-      recentSalesBody.appendChild(tr);
-    });
-
-  if(sales.length===0){
-
-    recentSalesBody.innerHTML=`
+<div class="section">
+  <h2>Recent Sales</h2>
+  <table>
+    <thead>
       <tr>
-        <td colspan="5">
-          No sales invoices found.
-        </td>
+        <th>Invoice No</th>
+        <th>Date</th>
+        <th>Customer</th>
+        <th>Total</th>
+        <th>Status</th>
       </tr>
-    `;
-  }
-}
+    </thead>
+    <tbody id="recentSalesBody"></tbody>
+  </table>
+</div>
 
-async function applyBranding(){
+</main>
+</div>
 
-  let companyList =
-    await loadFromCloud("companyProfile");
-
-  let company =
-    companyList[0] ||
-    JSON.parse(
-      localStorage.getItem("post91CompanyProfile") || "{}"
-    );
-
-  let b =
-    JSON.parse(
-      localStorage.getItem("post91ThemeBranding") || "{}"
-    );
-
-  const primary =
-    b.primaryColor || "#0d6efd";
-
-  const sidebarColor =
-    b.sidebarColor || "#061833";
-
-  const bg =
-    b.backgroundColor || "#eef3f8";
-
-  const card =
-    b.cardColor || "#ffffff";
-
-  document.documentElement
-    .style
-    .setProperty("--primary",primary);
-
-  document.documentElement
-    .style
-    .setProperty("--sidebar",sidebarColor);
-
-  document.documentElement
-    .style
-    .setProperty("--bg",bg);
-
-  document.documentElement
-    .style
-    .setProperty("--card",card);
-
-  headerBrandName.textContent =
-    b.brandName || "Post91 Accounts";
-
-  mobileBrand.textContent =
-    b.brandName || "Post91 Accounts";
-
-  headerTagline.textContent =
-    b.tagline ||
-    "Simple Accounting for Smart Businesses";
-
-  companyNameTop.textContent =
-    company.companyName ||
-    company.name ||
-    "Company Name";
-
-  companyAddressTop.textContent =
-    company.address ||
-    "Muscat, Sultanate of Oman";
-
-  companyVatTop.textContent =
-
-    "VAT IN: " +
-
-    (
-      company.vatNumber ||
-      company.vatIn ||
-      "-"
-    )
-
-    +
-
-    " | C.R No: " +
-
-    (
-      company.crNumber ||
-      "-"
-    );
-
-  if(b.logo){
-
-    topLogo.src=b.logo;
-
-    topLogo.style.display="inline-block";
-
-    topLogoText.style.display="none";
-
-  }else{
-
-    topLogo.style.display="none";
-
-    topLogoText.style.display="block";
-  }
-
-  if(b.themeMode==="Dark"){
-
-    document.body.style.background="#0f172a";
-
-    document
-      .querySelectorAll(".card,.section,.module")
-      .forEach(el=>{
-
-        el.style.background="#1e293b";
-        el.style.color="#fff";
-        el.style.borderColor="#334155";
-      });
-
-    document
-      .querySelectorAll(".module p,.card b")
-      .forEach(el=>{
-
-        el.style.color="#cbd5e1";
-      });
-  }
-}
-
-function logout(){
-
-  localStorage.removeItem("post91CurrentUser");
-  localStorage.removeItem("post91LoggedInUser");
-
-  sessionStorage.clear();
-
-  window.location.href="/login.html";
-}
-
-applyBranding();
-loadDashboard();
-
-</script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="/firebase-config.js"></script>
 <script src="/firebase-db.js"></script>
+
+<script>
+function mv(n){return Number(n||0).toFixed(3)}
+function mt(n){return "OMR "+mv(n)}
+
+function toggleMenu(){
+  document.getElementById("sidebar").classList.toggle("show");
+}
+
+function isCancelled(s){
+  return String(s||"").toLowerCase()==="cancelled";
+}
+
+function moneyFromAny(obj,keys){
+  for(let k of keys){
+    if(obj[k]!==undefined && obj[k]!==null && obj[k]!==""){
+      return Number(obj[k]||0);
+    }
+  }
+
+  if(obj.total !== undefined)return Number(obj.total||0);
+  if(obj.grandTotal !== undefined)return Number(obj.grandTotal||0);
+  if(obj.netTotal !== undefined)return Number(obj.netTotal||0);
+  if(obj.totalAmount !== undefined)return Number(obj.totalAmount||0);
+  if(obj.amount !== undefined)return Number(obj.amount||0);
+
+  return 0;
+}
+
+async function safeLoad(collection){
+  if(typeof loadFromCloudSmart==="function"){
+    return await loadFromCloudSmart(collection);
+  }
+  return await loadFromCloud(collection);
+}
+
+async function loadDashboard(){
+  recentSalesBody.innerHTML=`<tr><td colspan="5">Loading dashboard...</td></tr>`;
+
+  const sales=(await safeLoad("salesInvoices")).filter(x=>!isCancelled(x.docStatus || x.status));
+  const receipts=(await safeLoad("receiptVouchers")).filter(x=>!isCancelled(x.docStatus || x.status));
+  const purchases=(await safeLoad("purchaseInvoices")).filter(x=>!isCancelled(x.docStatus));
+  const expenses=(await safeLoad("expenseEntries")).filter(x=>!isCancelled(x.status));
+
+  totalSales.textContent=mt(
+  sales.reduce(
+    (s,x)=>
+      s + moneyFromAny(
+        x,
+        [
+          "grandTotal",
+          "totalAmount",
+          "netTotal",
+          "amount",
+          "total",
+          "invoiceTotal",
+          "finalTotal"
+        ]
+      ),
+    0
+  )
+);
+  totalReceipts.textContent=mt(receipts.reduce((s,x)=>(s,x)=> s + moneyFromAny(x,["totalReceiptAmount","amountReceived","amount"]),0));
+  totalPurchases.textContent=mt(purchases.reduce((s,x)=>(s,x)=> s + moneyFromAny(x,["grandTotal","totalAmount","netTotal","amount"]),0));
+  totalExpenses.textContent=mt(expenses.reduce((s,x)=>s+moneyFromAny(x,["totalAmount","amount","baseAmount"]),0));
+
+  recentSalesBody.innerHTML="";
+
+  sales
+    .sort((a,b)=>new Date(b.invoiceDate||b.date||"1900-01-01")-new Date(a.invoiceDate||a.date||"1900-01-01"))
+    .slice(0,8)
+    .forEach(s=>{
+      let tr=document.createElement("tr");
+      tr.innerHTML=`
+        <td>${s.invoiceNo||s.salesInvoiceNo||"-"}</td>
+        <td>${s.invoiceDate||s.date||"-"}</td>
+        <td>${s.customerName||"-"}</td>
+        <td>${mt(moneyFromAny(s,["grandTotal","totalAmount","netTotal","amount","total"]))}</td>
+        <td>${s.paymentStatus||"Unpaid"}</td>
+      `;
+      recentSalesBody.appendChild(tr);
+    });
+
+  if(sales.length===0){
+    recentSalesBody.innerHTML=`<tr><td colspan="5">No sales invoices found.</td></tr>`;
+  }
+}
+
+async function applyBranding(){
+  const companyList=await safeLoad("companyProfile");
+  const company=companyList[0] || JSON.parse(localStorage.getItem("post91CompanyProfile")||"{}");
+
+  headerBrandName.textContent="Post91 Accounts";
+  mobileBrand.textContent="Post91 Accounts";
+  headerTagline.textContent="Simple Accounting for Smart Businesses";
+
+  companyNameTop.textContent=company.companyName || company.name || "Company Name";
+  companyAddressTop.textContent=company.address || "Muscat, Sultanate of Oman";
+  companyVatTop.textContent="VAT IN: " + (company.vatNumber || company.vatIn || "-") + " | C.R No: " + (company.crNumber || "-");
+}
+
+function logout(){
+  localStorage.removeItem("post91CurrentUser");
+  localStorage.removeItem("post91LoggedInUser");
+  sessionStorage.clear();
+  window.location.href="/login.html";
+}
+
+window.logout=logout;
+window.toggleMenu=toggleMenu;
+
+document.addEventListener("DOMContentLoaded",async()=>{
+  await applyBranding();
+  await loadDashboard();
+
+  if(typeof applyPermissionGuard==="function"){
+    applyPermissionGuard();
+  }
+});
+</script>
+
 <script src="/permission-guard.js"></script>
+
 </body>
 </html>

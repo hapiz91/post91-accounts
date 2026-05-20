@@ -204,7 +204,6 @@ button:hover{
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="/firebase-config.js"></script>
 <script src="/firebase-db.js"></script>
-<script src="/permission-guard.js"></script>
 
 <script>
 
@@ -276,28 +275,78 @@ function showPlan(user){
 
 async function loginUser(email,password){
 
+  let user = null;
+
   /* =====================================================
-     1. CHECK POST91 USERS
+     1. TRY OLD API LOGIN FIRST
   ===================================================== */
 
-  const users =
-    await loadFromCloud("post91Users");
+  try{
 
-  let user =
-    users.find(u=>
+    const response = await fetch("/api/post91/login",{
 
-      String(u.email || "")
-      .toLowerCase()
+      method:"POST",
 
-      ===
+      headers:{
+        "Content-Type":"application/json"
+      },
 
-      String(email || "")
-      .toLowerCase()
+      body:JSON.stringify({
+        email,
+        password
+      })
+    });
 
+    const data = await response.json();
+
+    if(response.ok && data.user){
+
+      user = data.user;
+    }
+
+  }catch(err){
+
+    console.log(
+      "Old API login failed, trying Firebase..."
     );
+  }
 
   /* =====================================================
-     2. CHECK COMPANY REGISTRATION USERS
+     2. CHECK FIREBASE USERS
+  ===================================================== */
+
+  if(!user){
+
+    const users =
+      await loadFromCloud("post91Users");
+
+    user =
+      users.find(u=>
+
+        String(u.email || "")
+        .toLowerCase()
+
+        ===
+
+        String(email || "")
+        .toLowerCase()
+      );
+
+    if(
+      user &&
+      String(user.password || "")
+      !==
+      String(password || "")
+    ){
+
+      showError("Incorrect password.");
+
+      return;
+    }
+  }
+
+  /* =====================================================
+     3. CHECK REGISTRATION USERS
   ===================================================== */
 
   if(!user){
@@ -315,28 +364,28 @@ async function loginUser(email,password){
 
         String(email || "")
         .toLowerCase()
-
       );
+
+    if(
+      user &&
+      String(user.password || "")
+      !==
+      String(password || "")
+    ){
+
+      showError("Incorrect password.");
+
+      return;
+    }
   }
 
   /* =====================================================
-     3. VALIDATE USER
+     4. VALIDATE USER
   ===================================================== */
 
   if(!user){
 
     showError("User not found.");
-
-    return;
-  }
-
-  if(
-    String(user.password || "")
-    !==
-    String(password || "")
-  ){
-
-    showError("Incorrect password.");
 
     return;
   }
@@ -354,18 +403,19 @@ async function loginUser(email,password){
   }
 
   /* =====================================================
-     4. DEFAULT PERMISSIONS FOR MAIN OWNER
+     5. DEFAULT ADMIN PERMISSIONS
   ===================================================== */
 
   if(
-    !user.permissions &&
-    (
-      user.role === "Admin" ||
-      user.registrationStatus === "Approved"
-    )
+    !user.permissions ||
+    user.permissions.length===0
   ){
 
+    user.role =
+      user.role || "Admin";
+
     user.permissions = [
+
       "dashboard",
       "companyProfile",
       "userManagement",
@@ -391,7 +441,7 @@ async function loginUser(email,password){
   }
 
   /* =====================================================
-     5. SAVE SESSION
+     6. SAVE SESSION
   ===================================================== */
 
   localStorage.setItem(
@@ -417,7 +467,6 @@ async function loginUser(email,password){
 
   },1200);
 }
-
 document
   .getElementById("loginForm")
   .addEventListener(
