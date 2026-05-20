@@ -60,7 +60,7 @@ th{background:#f8fbff}
 </div>
 
 <div class="note">
-  VAT Report reads from Sales Invoices, Purchase Invoices and Expense Entries. Use this as management report; verify final figures before tax filing.
+  VAT Report reads from Firebase Sales Invoices, Purchase Invoices and Expense Entries. Verify final figures before tax filing.
 </div>
 
 <div class="card filters">
@@ -218,8 +218,12 @@ th{background:#f8fbff}
   </table>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/firebase-db.js"></script>
+
 <script>
-function gd(k){return JSON.parse(localStorage.getItem(k)||"[]")}
 function mv(n){return Number(n||0).toFixed(3)}
 function mt(n){return "OMR "+mv(n)}
 
@@ -230,12 +234,12 @@ function isCancelled(status){
 function dateOk(date){
   if(!date)return true;
 
-  let d=new Date(date);
-  let f=fromDate.value ? new Date(fromDate.value) : null;
-  let t=toDate.value ? new Date(toDate.value) : null;
+  let d = new Date(date);
+  let f = fromDate.value ? new Date(fromDate.value) : null;
+  let t = toDate.value ? new Date(toDate.value) : null;
 
-  if(f && d<f)return false;
-  if(t && d>t)return false;
+  if(f && d < f)return false;
+  if(t && d > t)return false;
 
   return true;
 }
@@ -257,54 +261,81 @@ function periodText(){
 }
 
 function isVatApplicable(type){
-  return ["VAT Exclusive","VAT Inclusive"].includes(type||"");
+  return ["VAT Exclusive","VAT Inclusive"].includes(type || "");
 }
 
-function generateVAT(){
-  let sales=gd("post91SalesInvoices")
+async function smartLoad(collection){
+  try{
+    if(typeof loadFromCloudSmart === "function"){
+      return await loadFromCloudSmart(collection);
+    }
+
+    if(typeof loadFromCloud === "function"){
+      return await loadFromCloud(collection);
+    }
+
+    return [];
+  }catch(err){
+    console.error("VAT load error:", collection, err);
+    return [];
+  }
+}
+
+async function generateVAT(){
+
+  summaryTaxableSales.textContent = "Loading...";
+  summaryOutputVAT.textContent = "Loading...";
+  summaryInputVAT.textContent = "Loading...";
+  summaryNetVAT.textContent = "Loading...";
+
+  let sales = await smartLoad(COLLECTIONS.SALES_INVOICES);
+  let purchases = await smartLoad(COLLECTIONS.PURCHASE_INVOICES);
+  let expenses = await smartLoad(COLLECTIONS.EXPENSES);
+
+  sales = sales
     .filter(x=>!isCancelled(x.docStatus))
     .filter(x=>dateOk(x.invoiceDate));
 
-  let purchases=gd("post91PurchaseInvoices")
+  purchases = purchases
     .filter(x=>!isCancelled(x.docStatus))
-    .filter(x=>dateOk(x.purchaseDate));
+    .filter(x=>dateOk(x.purchaseDate || x.invoiceDate || x.date));
 
-  let expenses=gd("post91ExpenseEntries")
+  expenses = expenses
     .filter(x=>!isCancelled(x.status))
-    .filter(x=>dateOk(x.expenseDate));
+    .filter(x=>dateOk(x.expenseDate || x.date));
 
-  let taxableSales=0;
-  let outputVAT=0;
-  let salesGross=0;
+  let taxableSales = 0;
+  let outputVAT = 0;
+  let salesGross = 0;
 
-  let taxablePurchases=0;
-  let purchaseVAT=0;
+  let taxablePurchases = 0;
+  let purchaseVAT = 0;
 
-  let taxableExpenses=0;
-  let expenseVAT=0;
+  let taxableExpenses = 0;
+  let expenseVAT = 0;
 
-  salesBody.innerHTML="";
-  purchaseBody.innerHTML="";
-  expenseBody.innerHTML="";
+  salesBody.innerHTML = "";
+  purchaseBody.innerHTML = "";
+  expenseBody.innerHTML = "";
 
   sales.forEach(s=>{
-    let before=Number(s.beforeTax||0);
-    let vat=Number(s.vatAmount||0);
-    let grand=Number(s.grandTotal||0);
+    let before = Number(s.beforeTax || s.taxableAmount || 0);
+    let vat = Number(s.vatAmount || 0);
+    let grand = Number(s.grandTotal || s.total || before + vat || 0);
 
     if(isVatApplicable(s.vatType)){
-      taxableSales+=before;
-      outputVAT+=vat;
+      taxableSales += before;
+      outputVAT += vat;
     }
 
-    salesGross+=grand;
+    salesGross += grand;
 
-    let tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td>${s.invoiceDate||"-"}</td>
-      <td>${s.invoiceNo||"-"}</td>
-      <td>${s.customerName||"-"}</td>
-      <td>${s.vatType||"-"}</td>
+    let tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${s.invoiceDate || "-"}</td>
+      <td>${s.invoiceNo || "-"}</td>
+      <td>${s.customerName || "-"}</td>
+      <td>${s.vatType || "-"}</td>
       <td>${mt(before)}</td>
       <td>${mt(vat)}</td>
       <td>${mt(grand)}</td>
@@ -313,21 +344,21 @@ function generateVAT(){
   });
 
   purchases.forEach(p=>{
-    let before=Number(p.beforeTax||0);
-    let vat=Number(p.vatAmount||0);
-    let grand=Number(p.grandTotal||0);
+    let before = Number(p.beforeTax || p.taxableAmount || 0);
+    let vat = Number(p.vatAmount || 0);
+    let grand = Number(p.grandTotal || p.total || before + vat || 0);
 
     if(isVatApplicable(p.vatType)){
-      taxablePurchases+=before;
-      purchaseVAT+=vat;
+      taxablePurchases += before;
+      purchaseVAT += vat;
     }
 
-    let tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td>${p.purchaseDate||"-"}</td>
-      <td>${p.purchaseNo||"-"}</td>
-      <td>${p.supplierName||"-"}</td>
-      <td>${p.vatType||"-"}</td>
+    let tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${p.purchaseDate || p.invoiceDate || p.date || "-"}</td>
+      <td>${p.purchaseNo || p.invoiceNo || "-"}</td>
+      <td>${p.supplierName || p.supplier || "-"}</td>
+      <td>${p.vatType || "-"}</td>
       <td>${mt(before)}</td>
       <td>${mt(vat)}</td>
       <td>${mt(grand)}</td>
@@ -336,22 +367,22 @@ function generateVAT(){
   });
 
   expenses.forEach(e=>{
-    let before=Number(e.baseAmount||0);
-    let vat=Number(e.vatAmount||0);
-    let total=Number(e.totalAmount||0);
+    let before = Number(e.baseAmount || e.beforeTax || e.taxableAmount || 0);
+    let vat = Number(e.vatAmount || 0);
+    let total = Number(e.totalAmount || e.grandTotal || e.amount || before + vat || 0);
 
     if(isVatApplicable(e.vatType)){
-      taxableExpenses+=before;
-      expenseVAT+=vat;
+      taxableExpenses += before;
+      expenseVAT += vat;
     }
 
-    let tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td>${e.expenseDate||"-"}</td>
-      <td>${e.expenseNo||"-"}</td>
-      <td>${e.expenseCategory||"-"}</td>
-      <td>${e.paidTo||"-"}</td>
-      <td>${e.vatType||"-"}</td>
+    let tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${e.expenseDate || e.date || "-"}</td>
+      <td>${e.expenseNo || "-"}</td>
+      <td>${e.expenseCategory || e.category || "-"}</td>
+      <td>${e.paidTo || e.supplierName || "-"}</td>
+      <td>${e.vatType || "-"}</td>
       <td>${mt(before)}</td>
       <td>${mt(vat)}</td>
       <td>${mt(total)}</td>
@@ -359,38 +390,48 @@ function generateVAT(){
     expenseBody.appendChild(tr);
   });
 
-  let inputVAT=purchaseVAT+expenseVAT;
-  let netVAT=outputVAT-inputVAT;
+  let inputVAT = purchaseVAT + expenseVAT;
+  let netVAT = outputVAT - inputVAT;
 
-  summaryTaxableSales.textContent=mt(taxableSales);
-  summaryOutputVAT.textContent=mt(outputVAT);
-  summaryInputVAT.textContent=mt(inputVAT);
-  summaryNetVAT.textContent=mt(netVAT);
-  summaryNetVAT.className=netVAT>=0?"payable":"refund";
+  summaryTaxableSales.textContent = mt(taxableSales);
+  summaryOutputVAT.textContent = mt(outputVAT);
+  summaryInputVAT.textContent = mt(inputVAT);
+  summaryNetVAT.textContent = mt(netVAT);
+  summaryNetVAT.className = netVAT >= 0 ? "payable" : "refund";
 
-  pReportName.textContent=reportName.value||"VAT Report";
-  pPeriod.textContent=periodText();
+  pReportName.textContent = reportName.value || "VAT Report";
+  pPeriod.textContent = periodText();
 
-  pTaxableSales.textContent=mv(taxableSales);
-  pOutputVAT.textContent=mv(outputVAT);
-  pSalesGross.textContent=mv(salesGross);
+  pTaxableSales.textContent = mv(taxableSales);
+  pOutputVAT.textContent = mv(outputVAT);
+  pSalesGross.textContent = mv(salesGross);
 
-  pTaxablePurchases.textContent=mv(taxablePurchases);
-  pPurchaseVAT.textContent=mv(purchaseVAT);
+  pTaxablePurchases.textContent = mv(taxablePurchases);
+  pPurchaseVAT.textContent = mv(purchaseVAT);
 
-  pTaxableExpenses.textContent=mv(taxableExpenses);
-  pExpenseVAT.textContent=mv(expenseVAT);
-  pInputVAT.textContent=mv(inputVAT);
+  pTaxableExpenses.textContent = mv(taxableExpenses);
+  pExpenseVAT.textContent = mv(expenseVAT);
+  pInputVAT.textContent = mv(inputVAT);
 
-  pNetVAT.textContent=mv(netVAT);
-  pNetVAT.className="amount " + (netVAT>=0?"payable":"refund");
-  netVatLabel.textContent=netVAT>=0 ? "Net VAT Payable" : "Net VAT Refundable / Credit";
+  pNetVAT.textContent = mv(netVAT);
+  pNetVAT.className = "amount " + (netVAT >= 0 ? "payable" : "refund");
+  netVatLabel.textContent = netVAT >= 0 ? "Net VAT Payable" : "Net VAT Refundable / Credit";
+
+  console.log("VAT Loaded:", {
+    salesCount:sales.length,
+    purchaseCount:purchases.length,
+    expenseCount:expenses.length,
+    taxableSales,
+    outputVAT,
+    inputVAT,
+    netVAT
+  });
 }
 
 function clearFilters(){
-  fromDate.value="";
-  toDate.value="";
-  reportName.value="VAT Report";
+  fromDate.value = "";
+  toDate.value = "";
+  reportName.value = "VAT Report";
   generateVAT();
 }
 
