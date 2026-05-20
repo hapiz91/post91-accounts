@@ -6,366 +6,341 @@
 <title>Item Master | Post91 Accounts</title>
 
 <style>
-*{
-  box-sizing:border-box;
-}
-
-body{
-  margin:0;
-  font-family:Segoe UI,Arial,sans-serif;
-  background:#eef3f8;
-  color:#061833;
-  padding:26px;
-}
-
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
-}
-
-.header h1{
-  margin:0;
-  color:#0d6efd;
-}
-
-.back{
-  background:#fff;
-  color:#0d6efd;
-  text-decoration:none;
-  border-radius:12px;
-  padding:10px 14px;
-  font-weight:800;
-  box-shadow:0 8px 20px #0001;
-}
-
-.card{
-  background:#fff;
-  border:1px solid #e5edf7;
-  border-radius:20px;
-  padding:22px;
-  margin-bottom:20px;
-  box-shadow:0 14px 34px #0001;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:14px;
-}
-
-.full{
-  grid-column:1/-1;
-}
-
-label{
-  display:block;
-  font-weight:800;
-  margin-bottom:6px;
-}
-
-input,select,textarea{
-  width:100%;
-  padding:12px;
-  border:1px solid #dbe4f0;
-  border-radius:11px;
-  font-size:14px;
-}
-
-textarea{
-  min-height:80px;
-}
-
-.btn{
-  border:0;
-  background:#0d6efd;
-  color:white;
-  padding:11px 15px;
-  border-radius:11px;
-  font-weight:900;
-  cursor:pointer;
-}
-
-.btn-light{
-  background:#e2e8f0;
-  color:#0f172a;
-}
-
-.btn-danger{
-  background:#dc2626;
-}
-
-.btn-row{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:15px;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th,td{
-  border:1px solid #dbe4f0;
-  padding:8px;
-  vertical-align:top;
-  text-align:left;
-}
-
-th{
-  background:#f8fbff;
-}
-
-.note{
-  background:#e0f2fe;
-  color:#075985;
-  border:1px solid #bae6fd;
-  border-radius:15px;
-  padding:14px;
-  margin-bottom:18px;
-  font-weight:700;
-}
-
-.mode-box{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:12px;
-}
-
-.mode{
-  border:2px solid #dbe4f0;
-  border-radius:16px;
-  padding:14px;
-  cursor:pointer;
-  text-align:center;
-  font-weight:900;
-  background:#fff;
-}
-
-.mode.active{
-  border-color:#0d6efd;
-  background:#eff6ff;
-  color:#0d6efd;
-}
-
-.hidden{
-  display:none;
-}
-
-.loading{
-  color:#0d6efd;
-  font-weight:900;
-  padding:15px;
-}
-
-@media(max-width:1000px){
-
-  .grid,.mode-box{
-    grid-template-columns:repeat(2,1fr);
-  }
-}
-
-@media(max-width:700px){
-
-  .grid,.mode-box{
-    grid-template-columns:1fr;
-  }
-
-  table{
-    display:block;
-    overflow-x:auto;
-    white-space:nowrap;
-  }
-}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.header h1{margin:0;color:#0d6efd}
+.back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.full{grid-column:1/-1}
+label{display:block;font-weight:800;margin-bottom:6px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:14px}
+textarea{min-height:80px}
+.btn{border:0;background:#0d6efd;color:white;padding:10px 14px;border-radius:11px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-danger{background:#dc2626}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #dbe4f0;padding:8px;vertical-align:top;text-align:left}
+th{background:#f8fbff}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+.mode-box{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.mode{border:2px solid #dbe4f0;border-radius:16px;padding:14px;cursor:pointer;text-align:center;font-weight:900;background:#fff}
+.mode.active{border-color:#0d6efd;background:#eff6ff;color:#0d6efd}
+.hidden{display:none!important}
+.loading{color:#0d6efd;font-weight:900;padding:15px}
+.viewbar{display:grid;grid-template-columns:280px 1fr;gap:14px;align-items:end}
+@media(max-width:1000px){.grid,.mode-box,.viewbar{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.grid,.mode-box,.viewbar{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-
   <div>
     <h1>Item Master</h1>
-    <p>Create items, categories, brands and machine/pump types.</p>
+    <p>Create, edit and delete items, categories, brands and pump/machine types.</p>
   </div>
-
-  <a class="back" href="/dashboard.html">
-    Back
-  </a>
-
+  <a class="back" href="/dashboard.html">Back</a>
 </div>
 
 <div class="note">
-  Item Master is now connected to Firebase Firestore.
-  Data will sync between laptop, mobile and cloud automatically.
+  Item Master is connected to Firebase Firestore. Data will sync between laptop, mobile and cloud.
 </div>
 
 <div class="card">
-
   <h2>Create Type</h2>
-
   <div class="mode-box">
-
-    <div class="mode active"
-      onclick="setMode('ITEM')"
-      id="modeITEM">
-
-      Create Item
-
-    </div>
-
-    <div class="mode"
-      onclick="setMode('CATEGORY')"
-      id="modeCATEGORY">
-
-      Create Category
-
-    </div>
-
-    <div class="mode"
-      onclick="setMode('BRAND')"
-      id="modeBRAND">
-
-      Create Brand
-
-    </div>
-
-    <div class="mode"
-      onclick="setMode('TYPE')"
-      id="modeTYPE">
-
-      Create Pump / Machine Type
-
-    </div>
-
+    <div class="mode active" onclick="setMode('ITEM')" id="modeITEM">Create Item</div>
+    <div class="mode" onclick="setMode('CATEGORY')" id="modeCATEGORY">Create Category</div>
+    <div class="mode" onclick="setMode('BRAND')" id="modeBRAND">Create Brand</div>
+    <div class="mode" onclick="setMode('TYPE')" id="modeTYPE">Create Pump / Machine Type</div>
   </div>
-
 </div>
 
 <div class="card">
-
   <h2 id="formTitle">Create Item</h2>
 
   <div class="grid">
+    <div class="itemFields"><label>Item Name</label><input id="itemName"></div>
+    <div class="itemFields"><label>Part Number</label><input id="partNo"></div>
+    <div class="itemFields"><label>OEM Number</label><input id="oemNo"></div>
+    <div class="itemFields"><label>Unit</label><input id="unit"></div>
 
-    <div class="itemFields">
-      <label>Item Name</label>
-      <input id="itemName">
-    </div>
+    <div class="itemFields"><label>Category</label><select id="category"></select></div>
+    <div class="itemFields"><label>Brand</label><select id="brand"></select></div>
+    <div class="itemFields"><label>Pump / Machine Type</label><select id="machineType"></select></div>
+    <div class="itemFields"><label>Selling Price</label><input type="number" step="0.001" id="sellingPrice"></div>
 
-    <div class="itemFields">
-      <label>Part Number</label>
-      <input id="partNo">
-    </div>
-
-    <div class="itemFields">
-      <label>OEM Number</label>
-      <input id="oemNo">
-    </div>
-
-    <div class="itemFields">
-      <label>Unit</label>
-      <input id="unit">
-    </div>
-
-    <div class="itemFields">
-      <label>Category</label>
-      <select id="category"></select>
-    </div>
-
-    <div class="itemFields">
-      <label>Brand</label>
-      <select id="brand"></select>
-    </div>
-
-    <div class="itemFields">
-      <label>Pump / Machine Type</label>
-      <select id="machineType"></select>
-    </div>
-
-    <div class="itemFields">
-      <label>Selling Price</label>
-      <input type="number" step="0.001" id="sellingPrice">
-    </div>
-
-    <div class="itemFields">
-      <label>Cost Price</label>
-      <input type="number" step="0.001" id="costPrice">
-    </div>
-
-    <div class="itemFields">
-      <label>Opening Stock</label>
-      <input type="number" step="0.001" id="openingStock">
-    </div>
-
-    <div class="itemFields">
-      <label>Reorder Level</label>
-      <input type="number" step="0.001" id="reorderLevel">
-    </div>
-
+    <div class="itemFields"><label>Cost Price</label><input type="number" step="0.001" id="costPrice"></div>
+    <div class="itemFields"><label>Opening Stock</label><input type="number" step="0.001" id="openingStock"></div>
+    <div class="itemFields"><label>Reorder Level</label><input type="number" step="0.001" id="reorderLevel"></div>
     <div class="itemFields">
       <label>Status</label>
-      <select id="status">
-        <option>Active</option>
-        <option>Inactive</option>
-      </select>
+      <select id="status"><option>Active</option><option>Inactive</option></select>
     </div>
 
-    <div class="full itemFields">
-      <label>Description</label>
-      <textarea id="description"></textarea>
-    </div>
+    <div class="full itemFields"><label>Description</label><textarea id="description"></textarea></div>
 
-    <div class="hidden" id="categoryBox">
-      <label>Category Name</label>
-      <input id="categoryOnly">
-    </div>
-
-    <div class="hidden" id="brandBox">
-      <label>Brand Name</label>
-      <input id="brandOnly">
-    </div>
-
-    <div class="hidden" id="typeBox">
-      <label>Pump / Machine / Vehicle Type</label>
-      <input id="typeOnly">
-    </div>
-
+    <div class="hidden" id="categoryBox"><label>Category Name</label><input id="categoryOnly"></div>
+    <div class="hidden" id="brandBox"><label>Brand Name</label><input id="brandOnly"></div>
+    <div class="hidden" id="typeBox"><label>Pump / Machine / Vehicle Type</label><input id="typeOnly"></div>
   </div>
 
   <div class="btn-row">
-
-    <button class="btn"
-      onclick="saveData()">
-
-      Save
-
-    </button>
-
-    <button class="btn btn-light"
-      onclick="clearForm()">
-
-      Clear
-
-    </button>
-
+    <button class="btn" onclick="saveData()">Save</button>
+    <button class="btn btn-light" onclick="clearForm()">Clear</button>
   </div>
-
 </div>
 
 <div class="card">
+  <div class="viewbar">
+    <div>
+      <label>View Saved Master</label>
+      <select id="viewType" onchange="renderSaved()">
+        <option value="ITEM">Items</option>
+        <option value="CATEGORY">Categories</option>
+        <option value="BRAND">Brands</option>
+        <option value="TYPE">Pump / Machine Types</option>
+      </select>
+    </div>
 
-  <h2>Saved Items</h2>
+    <div>
+      <label>Search</label>
+      <input id="searchBox" placeholder="Search..." oninput="renderSaved()">
+    </div>
+  </div>
+
+  <br>
+
+  <h2 id="savedTitle">Saved Items</h2>
 
   <table>
+    <thead id="savedHead"></thead>
+    <tbody id="savedBody"></tbody>
+  </table>
+</div>
 
-    <thead>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="/firebase-config.js"></script>
 
+<script>
+const COLLECTIONS = {
+  ITEM: "items",
+  CATEGORY: "categories",
+  BRAND: "brands",
+  TYPE: "machineTypes"
+};
+
+let currentMode = "ITEM";
+let EDIT_ID = "";
+let ALL = {
+  ITEM: [],
+  CATEGORY: [],
+  BRAND: [],
+  TYPE: []
+};
+
+function getCurrentCompanyId(){
+  try{
+    const user = JSON.parse(localStorage.getItem("post91CurrentUser") || "{}");
+    return String(user.companyId || user.businessId || user.ownerEmail || user.parentCompanyId || user.email || "default-company").trim().toLowerCase();
+  }catch(e){
+    return "default-company";
+  }
+}
+
+function baseData(){
+  return {
+    companyId:getCurrentCompanyId(),
+    updatedAt:new Date().toISOString()
+  };
+}
+
+function setMode(mode){
+  currentMode = mode;
+  EDIT_ID = "";
+
+  document.querySelectorAll(".mode").forEach(x=>x.classList.remove("active"));
+  document.getElementById("mode"+mode).classList.add("active");
+
+  document.querySelectorAll(".itemFields").forEach(x=>x.classList.add("hidden"));
+  categoryBox.classList.add("hidden");
+  brandBox.classList.add("hidden");
+  typeBox.classList.add("hidden");
+
+  if(mode==="ITEM"){
+    formTitle.textContent="Create Item";
+    document.querySelectorAll(".itemFields").forEach(x=>x.classList.remove("hidden"));
+  }
+
+  if(mode==="CATEGORY"){
+    formTitle.textContent="Create Category";
+    categoryBox.classList.remove("hidden");
+  }
+
+  if(mode==="BRAND"){
+    formTitle.textContent="Create Brand";
+    brandBox.classList.remove("hidden");
+  }
+
+  if(mode==="TYPE"){
+    formTitle.textContent="Create Pump / Machine Type";
+    typeBox.classList.remove("hidden");
+  }
+
+  clearForm(false);
+}
+
+async function loadCollection(mode){
+  const companyId = getCurrentCompanyId();
+
+  try{
+    let snap = await db.collection(COLLECTIONS[mode])
+      .where("companyId","==",companyId)
+      .get();
+
+    let arr = [];
+    snap.forEach(doc=>arr.push({id:doc.id,...doc.data()}));
+    return arr;
+  }catch(err){
+    console.error(err);
+    let snap = await db.collection(COLLECTIONS[mode]).get();
+    let arr = [];
+    snap.forEach(doc=>{
+      let d = doc.data();
+      if(!d.companyId || String(d.companyId).trim().toLowerCase()===companyId){
+        arr.push({id:doc.id,...d});
+      }
+    });
+    return arr;
+  }
+}
+
+async function loadAll(){
+  savedBody.innerHTML = `<tr><td class="loading">Loading...</td></tr>`;
+
+  ALL.ITEM = await loadCollection("ITEM");
+  ALL.CATEGORY = await loadCollection("CATEGORY");
+  ALL.BRAND = await loadCollection("BRAND");
+  ALL.TYPE = await loadCollection("TYPE");
+
+  loadDropdowns();
+  renderSaved();
+}
+
+function loadDropdowns(){
+  category.innerHTML = `<option value="">Select Category</option>`;
+  ALL.CATEGORY.sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(c=>{
+    category.innerHTML += `<option value="${c.name||""}">${c.name||""}</option>`;
+  });
+
+  brand.innerHTML = `<option value="">Select Brand</option>`;
+  ALL.BRAND.sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(b=>{
+    brand.innerHTML += `<option value="${b.name||""}">${b.name||""}</option>`;
+  });
+
+  machineType.innerHTML = `<option value="">Select Type</option>`;
+  ALL.TYPE.sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(t=>{
+    machineType.innerHTML += `<option value="${t.name||""}">${t.name||""}</option>`;
+  });
+}
+
+async function saveData(){
+  try{
+    let collection = COLLECTIONS[currentMode];
+    let rec = {};
+
+    if(currentMode==="CATEGORY"){
+      let val = categoryOnly.value.trim();
+      if(!val)return alert("Enter category name");
+      rec = {name:val, ...baseData()};
+    }
+
+    if(currentMode==="BRAND"){
+      let val = brandOnly.value.trim();
+      if(!val)return alert("Enter brand name");
+      rec = {name:val, ...baseData()};
+    }
+
+    if(currentMode==="TYPE"){
+      let val = typeOnly.value.trim();
+      if(!val)return alert("Enter pump / machine type");
+      rec = {name:val, ...baseData()};
+    }
+
+    if(currentMode==="ITEM"){
+      if(!itemName.value.trim())return alert("Enter item name");
+
+      rec = {
+        itemName:itemName.value.trim(),
+        partNo:partNo.value.trim(),
+        partNumber:partNo.value.trim(),
+        oemNo:oemNo.value.trim(),
+        oemNumber:oemNo.value.trim(),
+        unit:unit.value.trim(),
+        category:category.value,
+        brand:brand.value,
+        brandName:brand.value,
+        machineType:machineType.value,
+        vehicleMachinePumpType:machineType.value,
+        sellingPrice:Number(sellingPrice.value || 0),
+        costPrice:Number(costPrice.value || 0),
+        purchasePrice:Number(costPrice.value || 0),
+        openingStock:Number(openingStock.value || 0),
+        reorderLevel:Number(reorderLevel.value || 0),
+        status:status.value || "Active",
+        description:description.value.trim(),
+        ...baseData()
+      };
+    }
+
+    if(EDIT_ID){
+      await db.collection(collection).doc(EDIT_ID).set(rec,{merge:true});
+      alert("Updated successfully");
+    }else{
+      rec.createdAt = new Date().toISOString();
+      await db.collection(collection).add(rec);
+      alert("Saved successfully");
+    }
+
+    EDIT_ID = "";
+    clearForm(false);
+    await loadAll();
+
+  }catch(err){
+    console.error(err);
+    alert("Firebase save error");
+  }
+}
+
+function clearForm(resetEdit=true){
+  if(resetEdit)EDIT_ID = "";
+
+  [itemName,partNo,oemNo,unit,sellingPrice,costPrice,openingStock,reorderLevel,description,categoryOnly,brandOnly,typeOnly].forEach(x=>x.value="");
+
+  category.value="";
+  brand.value="";
+  machineType.value="";
+  status.value="Active";
+}
+
+function renderSaved(){
+  let type = viewType.value;
+  let q = searchBox.value.toLowerCase().trim();
+
+  savedTitle.textContent =
+    type==="ITEM" ? "Saved Items" :
+    type==="CATEGORY" ? "Saved Categories" :
+    type==="BRAND" ? "Saved Brands" :
+    "Saved Pump / Machine Types";
+
+  if(type==="ITEM"){
+    savedHead.innerHTML = `
       <tr>
-
         <th>Item Name</th>
         <th>Part No</th>
         <th>OEM No</th>
@@ -375,383 +350,93 @@ th{
         <th>Selling Price</th>
         <th>Status</th>
         <th>Action</th>
-
       </tr>
+    `;
 
-    </thead>
+    let data = ALL.ITEM.filter(x=>!q || JSON.stringify(x).toLowerCase().includes(q));
 
-    <tbody id="itemBody"></tbody>
+    savedBody.innerHTML = data.map(i=>`
+      <tr>
+        <td>${i.itemName||"-"}</td>
+        <td>${i.partNo||i.partNumber||"-"}</td>
+        <td>${i.oemNo||i.oemNumber||"-"}</td>
+        <td>${i.category||"-"}</td>
+        <td>${i.brand||i.brandName||"-"}</td>
+        <td>${i.machineType||i.vehicleMachinePumpType||"-"}</td>
+        <td>${Number(i.sellingPrice||0).toFixed(3)}</td>
+        <td>${i.status||"Active"}</td>
+        <td>
+          <button class="btn btn-light" onclick="editRecord('ITEM','${i.id}')">Edit</button>
+          <button class="btn btn-danger" onclick="deleteRecord('ITEM','${i.id}')">Delete</button>
+        </td>
+      </tr>
+    `).join("") || `<tr><td colspan="9">No items found.</td></tr>`;
 
-  </table>
-
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-<script src="/firebase-config.js"></script>
-
-<script>
-
-const ITEM_COLLECTION = "items";
-const CATEGORY_COLLECTION = "categories";
-const BRAND_COLLECTION = "brands";
-const TYPE_COLLECTION = "machineTypes";
-
-let currentMode = "ITEM";
-
-let CURRENT_ITEMS = [];
-
-function getCurrentCompanyId(){
-
-  try{
-
-    const user =
-      JSON.parse(localStorage.getItem("post91CurrentUser") || "{}");
-
-    return user.companyId ||
-           user.businessId ||
-           user.email ||
-           "default-company";
-
-  }catch(e){
-
-    return "default-company";
-  }
-}
-
-function setMode(mode){
-
-  currentMode = mode;
-
-  document.querySelectorAll(".mode")
-    .forEach(x=>x.classList.remove("active"));
-
-  document.getElementById("mode"+mode)
-    .classList.add("active");
-
-  document.querySelectorAll(".itemFields")
-    .forEach(x=>x.classList.add("hidden"));
-
-  categoryBox.classList.add("hidden");
-  brandBox.classList.add("hidden");
-  typeBox.classList.add("hidden");
-
-  if(mode==="ITEM"){
-
-    formTitle.textContent="Create Item";
-
-    document.querySelectorAll(".itemFields")
-      .forEach(x=>x.classList.remove("hidden"));
+    return;
   }
 
-  if(mode==="CATEGORY"){
-
-    formTitle.textContent="Create Category";
-
-    categoryBox.classList.remove("hidden");
-  }
-
-  if(mode==="BRAND"){
-
-    formTitle.textContent="Create Brand";
-
-    brandBox.classList.remove("hidden");
-  }
-
-  if(mode==="TYPE"){
-
-    formTitle.textContent="Create Pump / Machine Type";
-
-    typeBox.classList.remove("hidden");
-  }
-}
-
-async function loadDropdowns(){
-
-  category.innerHTML =
-    '<option value="">Select Category</option>';
-
-  let categorySnap =
-    await db.collection(CATEGORY_COLLECTION).get();
-
-  categorySnap.forEach(doc=>{
-
-    let c = doc.data();
-
-    let o=document.createElement("option");
-
-    o.value=c.name;
-    o.textContent=c.name;
-
-    category.appendChild(o);
-  });
-
-  brand.innerHTML =
-    '<option value="">Select Brand</option>';
-
-  let brandSnap =
-    await db.collection(BRAND_COLLECTION).get();
-
-  brandSnap.forEach(doc=>{
-
-    let b = doc.data();
-
-    let o=document.createElement("option");
-
-    o.value=b.name;
-    o.textContent=b.name;
-
-    brand.appendChild(o);
-  });
-
-  machineType.innerHTML =
-    '<option value="">Select Type</option>';
-
-  let typeSnap =
-    await db.collection(TYPE_COLLECTION).get();
-
-  typeSnap.forEach(doc=>{
-
-    let t = doc.data();
-
-    let o=document.createElement("option");
-
-    o.value=t.name;
-    o.textContent=t.name;
-
-    machineType.appendChild(o);
-  });
-}
-
-async function saveData(){
-
-  try{
-
-    if(currentMode==="CATEGORY"){
-
-      let val = categoryOnly.value.trim();
-
-      if(!val)
-        return alert("Enter category");
-
-      await db.collection(CATEGORY_COLLECTION).add({
-
-        name:val,
-
-        companyId:getCurrentCompanyId(),
-
-        createdAt:new Date().toISOString(),
-        updatedAt:new Date().toISOString()
-      });
-
-      alert("Category saved");
-
-      categoryOnly.value="";
-
-      loadDropdowns();
-
-      return;
-    }
-
-    if(currentMode==="BRAND"){
-
-      let val = brandOnly.value.trim();
-
-      if(!val)
-        return alert("Enter brand");
-
-      await db.collection(BRAND_COLLECTION).add({
-
-        name:val,
-
-        companyId:getCurrentCompanyId(),
-
-        createdAt:new Date().toISOString(),
-        updatedAt:new Date().toISOString()
-      });
-
-      alert("Brand saved");
-
-      brandOnly.value="";
-
-      loadDropdowns();
-
-      return;
-    }
-
-    if(currentMode==="TYPE"){
-
-      let val = typeOnly.value.trim();
-
-      if(!val)
-        return alert("Enter type");
-
-      await db.collection(TYPE_COLLECTION).add({
-
-        name:val,
-
-        companyId:getCurrentCompanyId(),
-
-        createdAt:new Date().toISOString(),
-        updatedAt:new Date().toISOString()
-      });
-
-      alert("Type saved");
-
-      typeOnly.value="";
-
-      loadDropdowns();
-
-      return;
-    }
-
-    let rec = {
-
-      itemName:itemName.value.trim(),
-
-      partNo:partNo.value.trim(),
-
-      oemNo:oemNo.value.trim(),
-
-      unit:unit.value.trim(),
-
-      category:category.value,
-
-      brand:brand.value,
-
-      machineType:machineType.value,
-
-      sellingPrice:Number(sellingPrice.value || 0),
-
-      costPrice:Number(costPrice.value || 0),
-
-      openingStock:Number(openingStock.value || 0),
-
-      reorderLevel:Number(reorderLevel.value || 0),
-
-      status:(status.value || "Active"),
-
-      description:description.value.trim(),
-
-      companyId:getCurrentCompanyId(),
-
-      createdAt:new Date().toISOString(),
-
-      updatedAt:new Date().toISOString()
-    };
-
-    await db.collection(ITEM_COLLECTION).add(rec);
-
-    alert("Item saved successfully");
-
-    clearForm();
-
-    loadItems();
-
-  }catch(err){
-
-    console.error(err);
-
-    alert("Error saving data to Firebase");
-  }
-}
-
-function clearForm(){
-
-  [
-    itemName,
-    partNo,
-    oemNo,
-    unit,
-    sellingPrice,
-    costPrice,
-    openingStock,
-    reorderLevel,
-    description
-  ].forEach(x=>x.value="");
-
-  category.value="";
-  brand.value="";
-  machineType.value="";
-  status.value="Active";
-}
-
-async function loadItems(){
-
-  itemBody.innerHTML = `
+  savedHead.innerHTML = `
     <tr>
-      <td colspan="9" class="loading">
-        Loading items...
-      </td>
+      <th>Name</th>
+      <th>Status</th>
+      <th>Updated At</th>
+      <th>Action</th>
     </tr>
   `;
 
-  let snapshot =
-    await db.collection(ITEM_COLLECTION).get();
+  let data = ALL[type].filter(x=>!q || JSON.stringify(x).toLowerCase().includes(q));
 
-  CURRENT_ITEMS = [];
-
-  snapshot.forEach(doc=>{
-
-    CURRENT_ITEMS.push({
-
-      id:doc.id,
-
-      ...doc.data()
-    });
-  });
-
-  itemBody.innerHTML="";
-
-  CURRENT_ITEMS.forEach((i,index)=>{
-
-    let tr=document.createElement("tr");
-
-    tr.innerHTML=`
-
-      <td>${i.itemName||"-"}</td>
-      <td>${i.partNo||"-"}</td>
-      <td>${i.oemNo||"-"}</td>
-      <td>${i.category||"-"}</td>
-      <td>${i.brand||"-"}</td>
-      <td>${i.machineType||"-"}</td>
-      <td>${Number(i.sellingPrice||0).toFixed(3)}</td>
-      <td>${i.status||"Active"}</td>
-
+  savedBody.innerHTML = data.map(x=>`
+    <tr>
+      <td>${x.name||"-"}</td>
+      <td>${x.status||"Active"}</td>
+      <td>${x.updatedAt||"-"}</td>
       <td>
-
-        <button class="btn btn-danger"
-          onclick="deleteItem('${i.id}')">
-
-          Delete
-
-        </button>
-
+        <button class="btn btn-light" onclick="editRecord('${type}','${x.id}')">Edit</button>
+        <button class="btn btn-danger" onclick="deleteRecord('${type}','${x.id}')">Delete</button>
       </td>
-    `;
-
-    itemBody.appendChild(tr);
-  });
+    </tr>
+  `).join("") || `<tr><td colspan="4">No records found.</td></tr>`;
 }
 
-async function deleteItem(id){
+function editRecord(type,id){
+  let rec = ALL[type].find(x=>x.id===id);
+  if(!rec)return;
 
-  if(!confirm("Delete item?"))
-    return;
+  setMode(type);
+  EDIT_ID = id;
 
-  await db.collection(ITEM_COLLECTION)
-    .doc(id)
-    .delete();
+  if(type==="ITEM"){
+    itemName.value = rec.itemName || "";
+    partNo.value = rec.partNo || rec.partNumber || "";
+    oemNo.value = rec.oemNo || rec.oemNumber || "";
+    unit.value = rec.unit || "";
+    category.value = rec.category || "";
+    brand.value = rec.brand || rec.brandName || "";
+    machineType.value = rec.machineType || rec.vehicleMachinePumpType || "";
+    sellingPrice.value = Number(rec.sellingPrice || 0).toFixed(3);
+    costPrice.value = Number(rec.costPrice || rec.purchasePrice || 0).toFixed(3);
+    openingStock.value = Number(rec.openingStock || 0).toFixed(3);
+    reorderLevel.value = Number(rec.reorderLevel || 0).toFixed(3);
+    status.value = rec.status || "Active";
+    description.value = rec.description || "";
+  }
 
-  loadItems();
+  if(type==="CATEGORY")categoryOnly.value = rec.name || "";
+  if(type==="BRAND")brandOnly.value = rec.name || "";
+  if(type==="TYPE")typeOnly.value = rec.name || "";
+
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
-loadDropdowns();
+async function deleteRecord(type,id){
+  if(!confirm("Delete this record?"))return;
 
-loadItems();
+  await db.collection(COLLECTIONS[type]).doc(id).delete();
+  await loadAll();
+}
 
+loadAll();
 </script>
 
 </body>
