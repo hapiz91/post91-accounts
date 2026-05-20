@@ -11,25 +11,34 @@ body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#06
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .header h1{margin:0;color:#0d6efd}
 .back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
 .card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.box{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:18px;box-shadow:0 14px 34px #0001}
+.box b{display:block;font-size:13px;color:#64748b}
+.box span{font-size:23px;font-weight:900;color:#0d6efd}
 label{display:block;font-weight:800;margin-bottom:6px}
 input,select{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
 .btn{border:0;background:#0d6efd;color:white;padding:11px 15px;border-radius:11px;font-weight:900;cursor:pointer}
 .btn-light{background:#e2e8f0;color:#0f172a}
 .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
-table{width:100%;border-collapse:collapse}
-th,td{border:1px solid #dbe4f0;padding:8px;vertical-align:top}
-th{background:#f8fbff;text-align:left}
-.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
-.box{background:#f8fbff;border:1px solid #dbe4f0;border-radius:15px;padding:16px}
-.box b{display:block;font-size:13px;color:#64748b}
-.box span{font-size:22px;font-weight:900;color:#0d6efd}
-.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
-.inward{color:#166534;font-weight:900}
-.outward{color:#b91c1c;font-weight:900}
-.balance{font-weight:900;color:#0d6efd}
-@media(max-width:900px){.grid,.summary{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #dbe4f0;padding:8px;text-align:left;vertical-align:top}
+th{background:#f8fbff}
+.right{text-align:right}
+.good{color:#166534;font-weight:900}
+.bad{color:#b91c1c;font-weight:900}
+.warn{color:#b45309;font-weight:900}
+.small{font-size:12px;color:#64748b;font-weight:700}
+@media(max-width:1000px){.grid,.summary{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.grid,.summary{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
+@media print{
+  @page{size:A4 landscape;margin:8mm}
+  body{background:#fff;padding:0}
+  .header,.note,.filters,.btn-row{display:none!important}
+  .card{box-shadow:none;border:0;padding:0;margin:0}
+}
 </style>
 </head>
 
@@ -38,350 +47,501 @@ th{background:#f8fbff;text-align:left}
 <div class="header">
   <div>
     <h1>Stock Ledger</h1>
-    <p>Item-wise inward, outward and stock balance report.</p>
+    <p>Stock in, stock out, balance quantity and stock value from cloud transactions.</p>
   </div>
   <a class="back" href="/dashboard.html">Back</a>
 </div>
 
 <div class="note">
-  Stock ledger is automatically generated from Purchase Invoice (Stock In) and Sales Invoice (Stock Out).
+  This report calculates stock from Item Master opening stock, Purchase Invoices as Stock In, and Sales Invoices as Stock Out.
 </div>
 
-<div class="card">
-
+<div class="card filters">
   <h2>Filters</h2>
 
   <div class="grid">
-
-    <div>
-      <label>Item</label>
-      <select id="itemSelect" onchange="generateLedger()">
-        <option value="">All Items</option>
-      </select>
-    </div>
-
-    <div>
-      <label>Category</label>
-      <select id="categorySelect" onchange="generateLedger()">
-        <option value="">All Categories</option>
-      </select>
-    </div>
-
     <div>
       <label>From Date</label>
-      <input type="date" id="fromDate" onchange="generateLedger()">
+      <input type="date" id="fromDate" onchange="generateStockLedger()">
     </div>
 
     <div>
       <label>To Date</label>
-      <input type="date" id="toDate" onchange="generateLedger()">
+      <input type="date" id="toDate" onchange="generateStockLedger()">
     </div>
 
+    <div>
+      <label>Item Search</label>
+      <input id="itemSearch" placeholder="Item / part / brand / category" oninput="generateStockLedger()">
+    </div>
+
+    <div>
+      <label>Report View</label>
+      <select id="viewMode" onchange="generateStockLedger()">
+        <option value="SUMMARY">Summary</option>
+        <option value="MOVEMENT">Movement Ledger</option>
+      </select>
+    </div>
   </div>
 
   <div class="btn-row">
-    <button class="btn" onclick="generateLedger()">Refresh Ledger</button>
+    <button class="btn" onclick="generateStockLedger()">Refresh Report</button>
     <button class="btn btn-light" onclick="clearFilters()">Clear Filter</button>
+    <button class="btn btn-light" onclick="downloadCSV()">Download CSV</button>
+    <button class="btn btn-light" onclick="window.print()">Print</button>
   </div>
-
 </div>
 
 <div class="summary">
-
-  <div class="box">
-    <b>Opening Qty</b>
-    <span id="openingQty">0.000</span>
-  </div>
-
-  <div class="box">
-    <b>Total Inward</b>
-    <span id="totalInward">0.000</span>
-  </div>
-
-  <div class="box">
-    <b>Total Outward</b>
-    <span id="totalOutward">0.000</span>
-  </div>
-
-  <div class="box">
-    <b>Closing Qty</b>
-    <span id="closingQty">0.000</span>
-  </div>
-
-  <div class="box">
-    <b>Total Items</b>
-    <span id="totalItems">0</span>
-  </div>
-
+  <div class="box"><b>Total Items</b><span id="sumItems">0</span></div>
+  <div class="box"><b>Total Stock In</b><span id="sumIn">0.000</span></div>
+  <div class="box"><b>Total Stock Out</b><span id="sumOut">0.000</span></div>
+  <div class="box"><b>Balance Stock</b><span id="sumBalance">0.000</span></div>
 </div>
 
-<br>
+<div class="summary" style="margin-top:14px;">
+  <div class="box"><b>Opening Stock</b><span id="sumOpening">0.000</span></div>
+  <div class="box"><b>Estimated Stock Value</b><span id="sumValue">OMR 0.000</span></div>
+  <div class="box"><b>Low / Negative Stock</b><span id="sumLow">0</span></div>
+  <div class="box"><b>Report Period</b><span id="periodText" style="font-size:15px;">All</span></div>
+</div>
 
-<div class="card">
+<div class="card" id="summaryCard">
+  <h2>Stock Summary</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Part No</th>
+        <th>OEM No</th>
+        <th>Category</th>
+        <th>Brand</th>
+        <th>Machine Type</th>
+        <th class="right">Opening</th>
+        <th class="right">Stock In</th>
+        <th class="right">Stock Out</th>
+        <th class="right">Balance</th>
+        <th class="right">Cost</th>
+        <th class="right">Value</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="summaryBody"></tbody>
+  </table>
+</div>
 
-  <h2>Stock Movement</h2>
-
+<div class="card" id="movementCard">
+  <h2>Stock Movement Ledger</h2>
   <table>
     <thead>
       <tr>
         <th>Date</th>
+        <th>Voucher Type</th>
+        <th>Voucher No</th>
         <th>Item</th>
-        <th>Category</th>
-        <th>Type</th>
-        <th>Document No</th>
-        <th>Reference</th>
-        <th>Inward Qty</th>
-        <th>Outward Qty</th>
-        <th>Balance Qty</th>
+        <th>Customer / Supplier</th>
+        <th class="right">In Qty</th>
+        <th class="right">Out Qty</th>
+        <th class="right">Rate</th>
+        <th class="right">Amount</th>
       </tr>
     </thead>
-
-    <tbody id="ledgerBody"></tbody>
+    <tbody id="movementBody"></tbody>
   </table>
-
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/firebase-db.js"></script>
+
 <script>
-function gd(k){
-  return JSON.parse(localStorage.getItem(k)||"[]");
-}
+let ALL_ITEMS=[];
+let ALL_PURCHASES=[];
+let ALL_SALES=[];
+let EXPORT_ROWS=[];
 
-function mv(n){
-  return Number(n||0).toFixed(3);
-}
+function mv(n){return Number(n||0).toFixed(3)}
+function mt(n){return "OMR "+mv(n)}
 
-function loadFilters(){
-
-  itemSelect.innerHTML='<option value="">All Items</option>';
-  categorySelect.innerHTML='<option value="">All Categories</option>';
-
-  let items=gd("post91Items");
-
-  let categories=[];
-
-  items.forEach(i=>{
-
-    let item=i.itemName||"";
-
-    if(item){
-
-      let o=document.createElement("option");
-      o.value=item;
-      o.textContent=item;
-
-      itemSelect.appendChild(o);
-    }
-
-    let cat=i.category||i.mainCategory||"";
-
-    if(cat && !categories.includes(cat)){
-      categories.push(cat);
-    }
-  });
-
-  categories.sort().forEach(c=>{
-
-    let o=document.createElement("option");
-
-    o.value=c;
-    o.textContent=c;
-
-    categorySelect.appendChild(o);
-  });
+function isCancelled(status){
+  return (status||"").toLowerCase()==="cancelled";
 }
 
 function dateOk(date){
-
   if(!date)return true;
 
-  let d=new Date(date);
+  let d = new Date(date);
+  let f = fromDate.value ? new Date(fromDate.value) : null;
+  let t = toDate.value ? new Date(toDate.value) : null;
 
-  let f=fromDate.value ? new Date(fromDate.value) : null;
-  let t=toDate.value ? new Date(toDate.value) : null;
-
-  if(f && d<f)return false;
-  if(t && d>t)return false;
+  if(f && d < f)return false;
+  if(t && d > t)return false;
 
   return true;
 }
 
-function itemOk(name){
-
-  if(!itemSelect.value)return true;
-
-  return (name||"").toLowerCase()===
-  itemSelect.value.toLowerCase();
+function getPeriodText(){
+  if(fromDate.value && toDate.value)return `${fromDate.value} to ${toDate.value}`;
+  if(fromDate.value)return `From ${fromDate.value}`;
+  if(toDate.value)return `Up to ${toDate.value}`;
+  return "All";
 }
 
-function categoryOk(cat){
-
-  if(!categorySelect.value)return true;
-
-  return (cat||"").toLowerCase()===
-  categorySelect.value.toLowerCase();
+async function smartLoad(collection){
+  try{
+    if(typeof loadFromCloudSmart==="function"){
+      return await loadFromCloudSmart(collection);
+    }
+    if(typeof loadFromCloud==="function"){
+      return await loadFromCloud(collection);
+    }
+    return [];
+  }catch(err){
+    console.error("Stock ledger load error:", collection, err);
+    return [];
+  }
 }
 
-function generateLedger(){
+function itemKey(name){
+  return String(name||"").trim().toLowerCase();
+}
 
-  let rows=[];
+function itemNameFromLine(line){
+  return line.itemName || line.name || line.description || "";
+}
 
-  let itemMaster=gd("post91Items");
+function qtyFromLine(line){
+  return Number(line.qty || line.quantity || 0);
+}
 
-  let itemMap={};
+function rateFromLine(line){
+  return Number(line.rate || line.costPrice || line.purchasePrice || line.sellingPrice || 0);
+}
 
-  itemMaster.forEach(i=>{
+function amountFromLine(line){
+  return Number(line.amount || (qtyFromLine(line) * rateFromLine(line)) || 0);
+}
 
-    itemMap[i.itemName]={
-      category:i.category||i.mainCategory||""
+async function loadStockData(){
+  summaryBody.innerHTML=`<tr><td colspan="13">Loading stock data...</td></tr>`;
+  movementBody.innerHTML=`<tr><td colspan="9">Loading stock data...</td></tr>`;
+
+  ALL_ITEMS = await smartLoad(COLLECTIONS.ITEMS);
+  ALL_PURCHASES = await smartLoad(COLLECTIONS.PURCHASE_INVOICES);
+  ALL_SALES = await smartLoad(COLLECTIONS.SALES_INVOICES);
+
+  generateStockLedger();
+}
+
+function generateStockLedger(){
+  let q = itemSearch.value.toLowerCase().trim();
+
+  let purchases = ALL_PURCHASES
+    .filter(x=>!isCancelled(x.docStatus))
+    .filter(x=>dateOk(x.purchaseDate || x.invoiceDate || x.date));
+
+  let sales = ALL_SALES
+    .filter(x=>!isCancelled(x.docStatus))
+    .filter(x=>dateOk(x.invoiceDate || x.date));
+
+  let itemMap = {};
+  let movements = [];
+
+  ALL_ITEMS.forEach(i=>{
+    let name = i.itemName || i.name || "";
+    if(!name)return;
+
+    let key = itemKey(name);
+
+    itemMap[key] = {
+      itemName:name,
+      partNo:i.partNo || i.partNumber || "",
+      oemNo:i.oemNo || i.oemNumber || "",
+      category:i.category || "",
+      brand:i.brand || i.brandName || "",
+      machineType:i.machineType || i.vehicleMachinePumpType || "",
+      opening:Number(i.openingStock || 0),
+      stockIn:0,
+      stockOut:0,
+      cost:Number(i.costPrice || i.purchasePrice || 0),
+      reorder:Number(i.reorderLevel || 0)
     };
   });
 
-  gd("post91PurchaseInvoices").forEach(inv=>{
+  purchases.forEach(p=>{
+    (p.items||[]).forEach(line=>{
+      let name = itemNameFromLine(line);
+      if(!name)return;
 
-    if((inv.docStatus||"Submitted")==="Cancelled")return;
+      let key = itemKey(name);
 
-    if(!dateOk(inv.purchaseDate))return;
+      if(!itemMap[key]){
+        itemMap[key] = {
+          itemName:name,
+          partNo:"",
+          oemNo:"",
+          category:"",
+          brand:"",
+          machineType:"",
+          opening:0,
+          stockIn:0,
+          stockOut:0,
+          cost:rateFromLine(line),
+          reorder:0
+        };
+      }
 
-    (inv.items||[]).forEach(it=>{
+      let qty = qtyFromLine(line);
+      let rate = rateFromLine(line);
+      let amount = amountFromLine(line);
 
-      let itemName=it.itemName||"";
+      itemMap[key].stockIn += qty;
+      if(rate > 0)itemMap[key].cost = rate;
 
-      let category=itemMap[itemName]?.category||"";
-
-      if(!itemOk(itemName))return;
-      if(!categoryOk(category))return;
-
-      rows.push({
-
-        date:inv.purchaseDate||"",
-        item:itemName,
-        category:category,
-
-        type:"Purchase",
-
-        docNo:inv.purchaseNo||"",
-
-        ref:inv.supplierName||"",
-
-        inward:Number(it.qty||0),
-
-        outward:0
+      movements.push({
+        date:p.purchaseDate || p.invoiceDate || p.date || "",
+        type:"Purchase Invoice",
+        no:p.purchaseNo || p.invoiceNo || "-",
+        item:name,
+        party:p.supplierName || p.supplier || "-",
+        inQty:qty,
+        outQty:0,
+        rate,
+        amount
       });
     });
   });
 
-  gd("post91SalesInvoices").forEach(inv=>{
+  sales.forEach(s=>{
+    (s.items||[]).forEach(line=>{
+      let name = itemNameFromLine(line);
+      if(!name)return;
 
-    if((inv.docStatus||"Submitted")==="Cancelled")return;
+      let key = itemKey(name);
 
-    if(!dateOk(inv.invoiceDate))return;
+      if(!itemMap[key]){
+        itemMap[key] = {
+          itemName:name,
+          partNo:"",
+          oemNo:"",
+          category:"",
+          brand:"",
+          machineType:"",
+          opening:0,
+          stockIn:0,
+          stockOut:0,
+          cost:0,
+          reorder:0
+        };
+      }
 
-    (inv.items||[]).forEach(it=>{
+      let qty = qtyFromLine(line);
+      let rate = rateFromLine(line);
+      let amount = amountFromLine(line);
 
-      let itemName=it.itemName||"";
+      itemMap[key].stockOut += qty;
 
-      let category=itemMap[itemName]?.category||"";
-
-      if(!itemOk(itemName))return;
-      if(!categoryOk(category))return;
-
-      rows.push({
-
-        date:inv.invoiceDate||"",
-        item:itemName,
-        category:category,
-
-        type:"Sales",
-
-        docNo:inv.invoiceNo||"",
-
-        ref:inv.customerName||"",
-
-        inward:0,
-
-        outward:Number(it.qty||0)
+      movements.push({
+        date:s.invoiceDate || s.date || "",
+        type:"Sales Invoice",
+        no:s.invoiceNo || "-",
+        item:name,
+        party:s.customerName || "-",
+        inQty:0,
+        outQty:qty,
+        rate,
+        amount
       });
     });
   });
 
-  rows.sort((a,b)=>{
+  let rows = Object.values(itemMap)
+    .map(x=>{
+      x.balance = Number(x.opening||0) + Number(x.stockIn||0) - Number(x.stockOut||0);
+      x.value = x.balance * Number(x.cost||0);
+      return x;
+    })
+    .filter(x=>{
+      if(!q)return true;
+      return JSON.stringify(x).toLowerCase().includes(q);
+    })
+    .sort((a,b)=>a.itemName.localeCompare(b.itemName));
 
-    let da=new Date(a.date||"1900-01-01");
-    let db=new Date(b.date||"1900-01-01");
+  movements = movements
+    .filter(x=>{
+      if(!q)return true;
+      return JSON.stringify(x).toLowerCase().includes(q);
+    })
+    .sort((a,b)=>new Date(a.date||"1900")-new Date(b.date||"1900"));
 
-    return da-db;
-  });
+  renderSummary(rows);
+  renderMovements(movements);
+  renderTotals(rows);
 
-  let inwardTotal=0;
-  let outwardTotal=0;
-  let running=0;
+  if(viewMode.value==="SUMMARY"){
+    summaryCard.style.display="block";
+    movementCard.style.display="none";
+    EXPORT_ROWS = rows.map(x=>({
+      Item:x.itemName,
+      PartNo:x.partNo,
+      OEMNo:x.oemNo,
+      Category:x.category,
+      Brand:x.brand,
+      MachineType:x.machineType,
+      Opening:mv(x.opening),
+      StockIn:mv(x.stockIn),
+      StockOut:mv(x.stockOut),
+      Balance:mv(x.balance),
+      Cost:mv(x.cost),
+      Value:mv(x.value),
+      Status:getStockStatus(x)
+    }));
+  }else{
+    summaryCard.style.display="none";
+    movementCard.style.display="block";
+    EXPORT_ROWS = movements.map(x=>({
+      Date:x.date,
+      VoucherType:x.type,
+      VoucherNo:x.no,
+      Item:x.item,
+      Party:x.party,
+      InQty:mv(x.inQty),
+      OutQty:mv(x.outQty),
+      Rate:mv(x.rate),
+      Amount:mv(x.amount)
+    }));
+  }
 
-  let uniqueItems=[];
+  console.log("Stock Ledger Loaded:", {
+  items:ALL_ITEMS.length,
+  purchases:ALL_PURCHASES.length,
+  sales:ALL_SALES.length,
+  rows:rows.length,
+  movements:movements.length
+});
+}
 
-  ledgerBody.innerHTML="";
+function getStockStatus(x){
+  if(Number(x.balance) < 0)return "Negative Stock";
+  if(Number(x.reorder||0) > 0 && Number(x.balance) <= Number(x.reorder))return "Low Stock";
+  return "OK";
+}
 
-  rows.forEach(r=>{
+function statusClass(status){
+  if(status==="Negative Stock")return "bad";
+  if(status==="Low Stock")return "warn";
+  return "good";
+}
 
-    inwardTotal+=r.inward;
-    outwardTotal+=r.outward;
+function renderSummary(rows){
+  summaryBody.innerHTML="";
 
-    running+=r.inward-r.outward;
+  if(rows.length===0){
+    summaryBody.innerHTML=`<tr><td colspan="13">No stock records found.</td></tr>`;
+    return;
+  }
 
-    if(!uniqueItems.includes(r.item)){
-      uniqueItems.push(r.item);
-    }
+  rows.forEach(x=>{
+    let status = getStockStatus(x);
 
     let tr=document.createElement("tr");
-
     tr.innerHTML=`
-
-      <td>${r.date||"-"}</td>
-
-      <td>${r.item||"-"}</td>
-
-      <td>${r.category||"-"}</td>
-
-      <td>${r.type}</td>
-
-      <td>${r.docNo||"-"}</td>
-
-      <td>${r.ref||"-"}</td>
-
-      <td class="inward">
-        ${r.inward?mv(r.inward):"-"}
-      </td>
-
-      <td class="outward">
-        ${r.outward?mv(r.outward):"-"}
-      </td>
-
-      <td class="balance">
-        ${mv(running)}
-      </td>
+      <td>${x.itemName||"-"}</td>
+      <td>${x.partNo||"-"}</td>
+      <td>${x.oemNo||"-"}</td>
+      <td>${x.category||"-"}</td>
+      <td>${x.brand||"-"}</td>
+      <td>${x.machineType||"-"}</td>
+      <td class="right">${mv(x.opening)}</td>
+      <td class="right">${mv(x.stockIn)}</td>
+      <td class="right">${mv(x.stockOut)}</td>
+      <td class="right"><b>${mv(x.balance)}</b></td>
+      <td class="right">${mv(x.cost)}</td>
+      <td class="right">${mt(x.value)}</td>
+      <td class="${statusClass(status)}">${status}</td>
     `;
-
-    ledgerBody.appendChild(tr);
+    summaryBody.appendChild(tr);
   });
+}
 
-  openingQty.textContent=mv(0);
-  totalInward.textContent=mv(inwardTotal);
-  totalOutward.textContent=mv(outwardTotal);
-  closingQty.textContent=mv(running);
-  totalItems.textContent=uniqueItems.length;
+function renderMovements(rows){
+  movementBody.innerHTML="";
+
+  if(rows.length===0){
+    movementBody.innerHTML=`<tr><td colspan="9">No stock movement found.</td></tr>`;
+    return;
+  }
+
+  rows.forEach(x=>{
+    let tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${x.date||"-"}</td>
+      <td>${x.type||"-"}</td>
+      <td>${x.no||"-"}</td>
+      <td>${x.item||"-"}</td>
+      <td>${x.party||"-"}</td>
+      <td class="right">${mv(x.inQty)}</td>
+      <td class="right">${mv(x.outQty)}</td>
+      <td class="right">${mv(x.rate)}</td>
+      <td class="right">${mt(x.amount)}</td>
+    `;
+    movementBody.appendChild(tr);
+  });
+}
+
+function renderTotals(rows){
+  let totalOpening = rows.reduce((s,x)=>s+Number(x.opening||0),0);
+  let totalIn = rows.reduce((s,x)=>s+Number(x.stockIn||0),0);
+  let totalOut = rows.reduce((s,x)=>s+Number(x.stockOut||0),0);
+  let totalBalance = rows.reduce((s,x)=>s+Number(x.balance||0),0);
+  let totalValue = rows.reduce((s,x)=>s+Number(x.value||0),0);
+  let lowCount = rows.filter(x=>getStockStatus(x)!=="OK").length;
+
+  sumItems.textContent = rows.length;
+  sumOpening.textContent = mv(totalOpening);
+  sumIn.textContent = mv(totalIn);
+  sumOut.textContent = mv(totalOut);
+  sumBalance.textContent = mv(totalBalance);
+  sumValue.textContent = mt(totalValue);
+  sumLow.textContent = lowCount;
+  periodText.textContent = getPeriodText();
+}
+
+function downloadCSV(){
+  if(!EXPORT_ROWS.length){
+    alert("No data to download");
+    return;
+  }
+
+  let headers = Object.keys(EXPORT_ROWS[0]);
+  let csv = [
+    headers.join(","),
+    ...EXPORT_ROWS.map(row=>
+      headers.map(h=>`"${String(row[h] ?? "").replace(/"/g,'""')}"`).join(",")
+    )
+  ].join("\n");
+
+  let blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  let url = URL.createObjectURL(blob);
+
+  let a=document.createElement("a");
+  a.href=url;
+  a.download=`stock-ledger-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+
+  URL.revokeObjectURL(url);
 }
 
 function clearFilters(){
-
-  itemSelect.value="";
-  categorySelect.value="";
   fromDate.value="";
   toDate.value="";
-
-  generateLedger();
+  itemSearch.value="";
+  viewMode.value="SUMMARY";
+  generateStockLedger();
 }
 
-loadFilters();
-generateLedger();
+loadStockData();
 </script>
 
 </body>

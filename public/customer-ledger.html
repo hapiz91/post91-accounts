@@ -13,6 +13,7 @@ body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#06
 .back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
 .card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 label{display:block;font-weight:800;margin-bottom:6px}
 input,select{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
 .btn{border:0;background:#0d6efd;color:white;padding:11px 15px;border-radius:11px;font-weight:900;cursor:pointer}
@@ -22,7 +23,6 @@ input,select{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px
 table{width:100%;border-collapse:collapse}
 th,td{border:1px solid #dbe4f0;padding:8px;vertical-align:top}
 th{background:#f8fbff;text-align:left}
-.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 .box{background:#f8fbff;border:1px solid #dbe4f0;border-radius:15px;padding:16px}
 .box b{display:block;font-size:13px;color:#64748b}
 .box span{font-size:22px;font-weight:900;color:#0d6efd}
@@ -30,7 +30,14 @@ th{background:#f8fbff;text-align:left}
 .debit{color:#b91c1c;font-weight:900}
 .credit{color:#166534;font-weight:900}
 .balance{font-weight:900;color:#0d6efd}
+.right{text-align:right}
 @media(max-width:900px){.grid,.summary{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
+@media print{
+  @page{size:A4 landscape;margin:8mm}
+  body{background:#fff;padding:0}
+  .header,.note,.filters,.soa-card,.summary,.btn-row{display:none!important}
+  .card{box-shadow:none;border:0;padding:0;margin:0}
+}
 </style>
 </head>
 
@@ -39,16 +46,16 @@ th{background:#f8fbff;text-align:left}
 <div class="header">
   <div>
     <h1>Customer Ledger</h1>
-    <p>Customer-wise invoice, receipt, balance and SOA report.</p>
+    <p>Customer-wise sales invoices, receipts and outstanding balance.</p>
   </div>
   <a class="back" href="/dashboard.html">Back</a>
 </div>
 
 <div class="note">
-  Ledger is generated from Firebase Sales Invoices and Receipt Vouchers. SOA exports only pending invoices up to selected due date.
+  Ledger is generated from Firebase Sales Invoices and Receipt Vouchers.
 </div>
 
-<div class="card">
+<div class="card filters">
   <h2>Filters</h2>
 
   <div class="grid">
@@ -73,11 +80,13 @@ th{background:#f8fbff;text-align:left}
   <div class="btn-row">
     <button class="btn" onclick="generateLedger()">Refresh Ledger</button>
     <button class="btn btn-light" onclick="clearFilters()">Clear Filter</button>
+    <button class="btn btn-light" onclick="downloadCSV()">Download CSV</button>
+    <button class="btn btn-light" onclick="window.print()">Print</button>
   </div>
 </div>
 
-<div class="card">
-  <h2>Customer SOA Export</h2>
+<div class="card soa-card">
+  <h2>Customer SOA</h2>
 
   <div class="grid">
     <div>
@@ -94,7 +103,7 @@ th{background:#f8fbff;text-align:left}
 
     <div>
       <label>&nbsp;</label>
-      <button class="btn btn-green" onclick="exportSOA()">Export / Print SOA</button>
+      <button class="btn btn-green" onclick="exportSOA()">Print / Save SOA</button>
     </div>
   </div>
 </div>
@@ -119,9 +128,9 @@ th{background:#f8fbff;text-align:left}
         <th>Type</th>
         <th>Document No</th>
         <th>Reference</th>
-        <th>Debit</th>
-        <th>Credit</th>
-        <th>Running Balance</th>
+        <th class="right">Debit</th>
+        <th class="right">Credit</th>
+        <th class="right">Running Balance</th>
       </tr>
     </thead>
     <tbody id="ledgerBody"></tbody>
@@ -137,6 +146,7 @@ th{background:#f8fbff;text-align:left}
 let CLOUD_CUSTOMERS=[];
 let CLOUD_INVOICES=[];
 let CLOUD_RECEIPTS=[];
+let EXPORT_ROWS=[];
 
 function mv(n){return Number(n||0).toFixed(3)}
 function mt(n){return "OMR "+mv(n)}
@@ -147,29 +157,36 @@ function esc(v){
   }[m]));
 }
 
-function formatDate(d){
-  if(!d)return "";
-  let x=new Date(d);
-  if(isNaN(x))return d;
-  return String(x.getDate()).padStart(2,"0")+"/"+String(x.getMonth()+1).padStart(2,"0")+"/"+x.getFullYear();
+function isCancelled(status){
+  return String(status||"").toLowerCase()==="cancelled";
 }
 
-function invoiceMonth(d){
-  if(!d)return "";
-  let x=new Date(d);
-  if(isNaN(x))return "";
-  return x.toLocaleString("en-US",{month:"short"});
+async function smartLoad(collection){
+  try{
+    if(typeof loadFromCloudSmart==="function") return await loadFromCloudSmart(collection);
+    if(typeof loadFromCloud==="function") return await loadFromCloud(collection);
+    return [];
+  }catch(err){
+    console.error("Customer ledger load error:", collection, err);
+    return [];
+  }
 }
 
 async function initCloud(){
   ledgerBody.innerHTML=`<tr><td colspan="8">Loading Firebase data...</td></tr>`;
 
-  CLOUD_CUSTOMERS=await loadFromCloud(COLLECTIONS.CUSTOMERS);
-  CLOUD_INVOICES=await loadFromCloud(COLLECTIONS.SALES_INVOICES);
-  CLOUD_RECEIPTS=await loadFromCloud(COLLECTIONS.RECEIPTS);
+  CLOUD_CUSTOMERS = await smartLoad(COLLECTIONS.CUSTOMERS);
+  CLOUD_INVOICES = await smartLoad(COLLECTIONS.SALES_INVOICES);
+  CLOUD_RECEIPTS = await smartLoad(COLLECTIONS.RECEIPTS);
 
   loadCustomers();
   generateLedger();
+
+  console.log("Customer Ledger Loaded:", {
+    customers:CLOUD_CUSTOMERS.length,
+    invoices:CLOUD_INVOICES.length,
+    receipts:CLOUD_RECEIPTS.length
+  });
 }
 
 function loadCustomers(){
@@ -188,16 +205,14 @@ function loadCustomers(){
     if(name && !names.includes(name))names.push(name);
   });
 
-  names.sort().forEach(name=>{
-    let o1=document.createElement("option");
-    o1.value=name;
-    o1.textContent=name;
-    customerSelect.appendChild(o1);
+  CLOUD_RECEIPTS.forEach(rv=>{
+    let name=rv.customerName||"";
+    if(name && !names.includes(name))names.push(name);
+  });
 
-    let o2=document.createElement("option");
-    o2.value=name;
-    o2.textContent=name;
-    soaCustomerSelect.appendChild(o2);
+  names.sort().forEach(name=>{
+    customerSelect.innerHTML+=`<option value="${esc(name)}">${esc(name)}</option>`;
+    soaCustomerSelect.innerHTML+=`<option value="${esc(name)}">${esc(name)}</option>`;
   });
 }
 
@@ -216,14 +231,14 @@ function dateOk(date){
 
 function customerOk(name){
   if(!customerSelect.value)return true;
-  return (name||"").toLowerCase()===customerSelect.value.toLowerCase();
+  return String(name||"").toLowerCase()===String(customerSelect.value||"").toLowerCase();
 }
 
 function generateLedger(){
   let rows=[];
 
   CLOUD_INVOICES.forEach(inv=>{
-    if((inv.docStatus||"Submitted")==="Cancelled")return;
+    if(isCancelled(inv.docStatus))return;
     if(!customerOk(inv.customerName))return;
     if(!dateOk(inv.invoiceDate))return;
 
@@ -232,23 +247,24 @@ function generateLedger(){
       customer:inv.customerName||"",
       type:"Sales Invoice",
       docNo:inv.invoiceNo||"",
-      ref:inv.referenceNo||inv.lpoNo||"",
-      debit:Number(inv.grandTotal||0),
-      credit:0
+      ref:inv.referenceNo||inv.lpoNo||inv.doNo||"",
+      debit:Number(inv.grandTotal||inv.total||0),
+      credit:0,
+      advance:0
     });
   });
 
   CLOUD_RECEIPTS.forEach(rv=>{
-    if((rv.docStatus||"Posted")==="Cancelled")return;
+    if(isCancelled(rv.docStatus||rv.status))return;
     if(!customerOk(rv.customerName))return;
-    if(!dateOk(rv.receiptDate))return;
+    if(!dateOk(rv.receiptDate||rv.date))return;
 
     rows.push({
-      date:rv.receiptDate||"",
+      date:rv.receiptDate||rv.date||"",
       customer:rv.customerName||"",
       type:"Receipt Voucher",
-      docNo:rv.receiptNo||"",
-      ref:(rv.allocations||[]).map(a=>a.invoiceNo).join(", ") || rv.manualAgainst || "",
+      docNo:rv.receiptNo||rv.voucherNo||"",
+      ref:(rv.allocations||[]).map(a=>a.invoiceNo).filter(Boolean).join(", ") || rv.manualAgainst || "",
       debit:0,
       credit:Number(rv.totalReceiptAmount||rv.amountReceived||rv.amount||0),
       advance:Number(rv.unallocatedAmount||0)
@@ -257,7 +273,12 @@ function generateLedger(){
 
   rows.sort((a,b)=>new Date(a.date||"1900-01-01")-new Date(b.date||"1900-01-01"));
 
-  let debitTotal=0, creditTotal=0, advanceTotal=0, running=0;
+  let debitTotal=0;
+  let creditTotal=0;
+  let advanceTotal=0;
+  let running=0;
+
+  EXPORT_ROWS=[];
   ledgerBody.innerHTML="";
 
   rows.forEach(r=>{
@@ -266,6 +287,17 @@ function generateLedger(){
     advanceTotal+=Number(r.advance||0);
     running+=r.debit-r.credit;
 
+    EXPORT_ROWS.push({
+      Date:r.date,
+      Customer:r.customer,
+      Type:r.type,
+      DocumentNo:r.docNo,
+      Reference:r.ref,
+      Debit:mv(r.debit),
+      Credit:mv(r.credit),
+      RunningBalance:mv(running)
+    });
+
     let tr=document.createElement("tr");
     tr.innerHTML=`
       <td>${esc(r.date||"-")}</td>
@@ -273,9 +305,9 @@ function generateLedger(){
       <td>${esc(r.type)}</td>
       <td>${esc(r.docNo||"-")}</td>
       <td>${esc(r.ref||"-")}</td>
-      <td class="debit">${r.debit?mt(r.debit):"-"}</td>
-      <td class="credit">${r.credit?mt(r.credit):"-"}</td>
-      <td class="balance">${mt(running)}</td>
+      <td class="debit right">${r.debit?mt(r.debit):"-"}</td>
+      <td class="credit right">${r.credit?mt(r.credit):"-"}</td>
+      <td class="balance right">${mt(running)}</td>
     `;
     ledgerBody.appendChild(tr);
   });
@@ -297,11 +329,37 @@ function clearFilters(){
   generateLedger();
 }
 
+function downloadCSV(){
+  if(!EXPORT_ROWS.length){
+    alert("No data to download");
+    return;
+  }
+
+  let headers=Object.keys(EXPORT_ROWS[0]);
+
+  let csv=[
+    headers.join(","),
+    ...EXPORT_ROWS.map(row=>
+      headers.map(h=>`"${String(row[h]??"").replace(/"/g,'""')}"`).join(",")
+    )
+  ].join("\n");
+
+  let blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  let url=URL.createObjectURL(blob);
+
+  let a=document.createElement("a");
+  a.href=url;
+  a.download=`customer-ledger-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
 function getInvoicePaidAmount(invoiceNo){
   let paid=0;
 
   CLOUD_RECEIPTS.forEach(rv=>{
-    if((rv.docStatus||"Posted")==="Cancelled")return;
+    if(isCancelled(rv.docStatus||rv.status))return;
 
     (rv.allocations||[]).forEach(a=>{
       if(String(a.invoiceNo||"")===String(invoiceNo||"")){
@@ -313,98 +371,69 @@ function getInvoicePaidAmount(invoiceNo){
   return paid;
 }
 
-function getCustomerDetails(customerName){
-  return CLOUD_CUSTOMERS.find(c=>
-    String(c.customerName||c.name||"").toLowerCase()===String(customerName||"").toLowerCase()
-  ) || {};
-}
-
-function numberToWords(num){
-  num=Number(num||0).toFixed(3);
-  let parts=num.split(".");
-  let rial=parseInt(parts[0],10);
-  let baiza=parseInt(parts[1],10);
-
-  const ones=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
-  const tens=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
-
-  function words(n){
-    n=Number(n);
-    if(n===0)return "Zero";
-    if(n<20)return ones[n];
-    if(n<100)return tens[Math.floor(n/10)] + (n%10 ? " " + ones[n%10] : "");
-    if(n<1000)return ones[Math.floor(n/100)] + " Hundred" + (n%100 ? " " + words(n%100) : "");
-    if(n<1000000)return words(Math.floor(n/1000)) + " Thousand" + (n%1000 ? " " + words(n%1000) : "");
-    return words(Math.floor(n/1000000)) + " Million" + (n%1000000 ? " " + words(n%1000000) : "");
-  }
-
-  let text=words(rial)+" Omani Rial";
-  if(baiza>0)text+=" and "+words(baiza)+" Baiza";
-  return text+" Only";
-}
-
 function getInvoiceDueDate(inv){
   return inv.dueDate ||
     inv.invoiceDueDate ||
     inv.paymentDueDate ||
     inv.creditDueDate ||
-    inv.due_date ||
-    inv.invoice_due_date ||
-    inv.creditPeriodDate ||
-    inv.creditDue ||
     inv.invoiceDate ||
     "";
+}
+
+function formatDate(d){
+  if(!d)return "";
+  let x=new Date(d);
+  if(isNaN(x))return d;
+  return String(x.getDate()).padStart(2,"0")+"/"+String(x.getMonth()+1).padStart(2,"0")+"/"+x.getFullYear();
+}
+
+function invoiceMonth(d){
+  if(!d)return "";
+  let x=new Date(d);
+  if(isNaN(x))return "";
+  return x.toLocaleString("en-US",{month:"short"});
 }
 
 function exportSOA(){
   let customer=soaCustomerSelect.value;
   let dueDate=soaDueDate.value;
 
-  if(!customer){
-    alert("Please select customer for SOA.");
-    return;
-  }
-
-  if(!dueDate){
-    alert("Please select due date up to which pending invoices should be exported.");
-    return;
-  }
+  if(!customer)return alert("Please select customer.");
+  if(!dueDate)return alert("Please select due date.");
 
   let selectedDue=new Date(dueDate);
 
   let invoices=CLOUD_INVOICES
     .filter(inv=>{
-      if((inv.docStatus||"Submitted")==="Cancelled")return false;
+      if(isCancelled(inv.docStatus))return false;
       if(String(inv.customerName||"").toLowerCase()!==String(customer||"").toLowerCase())return false;
 
       let invDue=getInvoiceDueDate(inv);
       if(new Date(invDue)>selectedDue)return false;
 
-      let gross=Number(inv.grandTotal||0);
+      let gross=Number(inv.grandTotal||inv.total||0);
       let paid=getInvoicePaidAmount(inv.invoiceNo);
-      let balance=gross-paid;
-
-      return balance>0.0004;
+      return gross-paid>0.0004;
     })
     .map(inv=>{
-      let gross=Number(inv.grandTotal||0);
+      let gross=Number(inv.grandTotal||inv.total||0);
       let paid=getInvoicePaidAmount(inv.invoiceNo);
       let balance=gross-paid;
 
       return {
         invoiceDate:inv.invoiceDate||"",
         invoiceMonth:invoiceMonth(inv.invoiceDate),
-        doNo:inv.deliveryOrderNo||inv.doNo||inv.deliveryNo||inv.referenceNo||"",
+        doNo:inv.deliveryOrderNo||inv.doNo||inv.referenceNo||"",
         invoiceNo:inv.invoiceNo||"",
         currency:inv.currency||"OMR",
         amount:balance,
-        lpo:inv.lpoNo||inv.lpo||inv.referenceNo||"",
+        lpo:inv.lpoNo||inv.referenceNo||"",
         dueDate:getInvoiceDueDate(inv)
       };
     });
 
   if(invoices.length===0){
-    alert("No pending invoices found for this customer up to selected due date.");
+    alert("No pending invoices found.");
     return;
   }
 
@@ -412,12 +441,12 @@ function exportSOA(){
 
   let rows=invoices.map((r,i)=>`
     <tr>
-      <td style="text-align:right">${i+1}</td>
+      <td>${i+1}</td>
       <td>${esc(customer)}</td>
       <td>${formatDate(r.invoiceDate)}</td>
       <td>${esc(r.invoiceMonth)}</td>
       <td>${esc(r.doNo)}</td>
-      <td style="text-align:right">${esc(r.invoiceNo)}</td>
+      <td>${esc(r.invoiceNo)}</td>
       <td>${esc(r.currency)}</td>
       <td style="text-align:right;font-weight:bold">${mv(r.amount)}</td>
       <td>${esc(r.lpo)}</td>
@@ -431,96 +460,59 @@ function exportSOA(){
 <head>
 <title>SOA - ${esc(customer)}</title>
 <style>
-body{font-family:Arial,sans-serif;margin:0;padding:0;background:white;color:#000}
-.sheet{width:100%;max-width:1120px;margin:0 auto;padding:18px 22px}
-.company-name{font-family:Georgia,serif;font-style:italic;text-align:center;font-size:38px;font-weight:500;margin:4px 0}
-.company-line{text-align:center;font-size:16px;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:6px}
-.title{text-align:center;font-size:18px;font-weight:bold;margin:12px 0}
-.to-section{font-size:16px;line-height:1.55;margin:0 0 18px 4px}
-table{width:100%;border-collapse:collapse;font-size:15px}
-th{background:#2f75b5;color:white;border:1px solid #000;padding:6px 4px;text-align:left}
-td{border:1px solid #000;padding:4px}
-.total-row td{font-weight:bold}
-.words{text-align:center;font-weight:bold}
-.footer{display:flex;justify-content:flex-end;gap:130px;margin-top:34px;font-size:16px}
+body{font-family:Arial,sans-serif;margin:0;background:white;color:#000}
+.sheet{padding:22px}
+h1{text-align:center;margin:0;font-size:26px}
+.title{text-align:center;font-weight:bold;margin:12px 0;font-size:18px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#2f75b5;color:white;border:1px solid #000;padding:6px}
+td{border:1px solid #000;padding:5px}
+.total{font-weight:bold}
+.no-print{text-align:center;margin-top:25px}
 @media print{
   @page{size:A4 landscape;margin:10mm}
-  html,body{width:100%;height:100%}
-  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .sheet{width:100%;max-width:100%;padding:0;margin:0}
-  table{width:100%;font-size:13px}
-  th,td{padding:4px}
-  .company-name{font-size:30px}
-  .company-line{font-size:14px}
-  .title{font-size:20px}
-  .to-section{font-size:14px;line-height:1.4}
-  .footer{margin-top:25px}
   .no-print{display:none}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
 </head>
 <body>
 <div class="sheet">
-  <div class="company-name">Post91 Accounts</div>
-  <div class="company-line">
-    P.O Box : 333, Postal Code : 117, Muscat, Sultanate of Oman
-    &nbsp;&nbsp;&nbsp; Tel: 24831431, GSM : +968 9580 7781
-    &nbsp;&nbsp;&nbsp; C.R. No : 1/83019/8
-  </div>
-
-  <div class="title">SOA for ${esc(customer)}</div>
-
-  <div class="to-section">
-    To,<br>
-    ${esc(customer)}<br>
-    Accounts Department<br>
-    Dear Sir,<br>
-    Here is the accounts statement of the outstanding amount details are as follows
-  </div>
+  <h1>Post91 Accounts</h1>
+  <div class="title">Statement of Account - ${esc(customer)}</div>
 
   <table>
     <thead>
       <tr>
         <th>S No.</th>
-        <th>Company Name</th>
+        <th>Customer</th>
         <th>Invoice Date</th>
-        <th>Invoice Month</th>
-        <th>Delivery Order No</th>
-        <th>Invoice Number</th>
+        <th>Month</th>
+        <th>DO No</th>
+        <th>Invoice No</th>
         <th>Currency</th>
-        <th>Amount</th>
+        <th>Outstanding</th>
         <th>LPO</th>
-        <th>Invoice Due Date</th>
+        <th>Due Date</th>
       </tr>
     </thead>
     <tbody>
       ${rows}
-      <tr class="total-row">
-        <td colspan="6" style="border-left:1px solid #000;border-bottom:1px solid #000"></td>
-        <td style="text-align:right">Total Amount:</td>
-        <td>OMR</td>
-        <td style="text-align:right">${mv(total)}</td>
-        <td></td>
-      </tr>
-      <tr>
-        <td colspan="10" class="words">Amount in Word&nbsp;&nbsp; ${esc(numberToWords(total))}</td>
+      <tr class="total">
+        <td colspan="7" style="text-align:right">Total Outstanding</td>
+        <td style="text-align:right">OMR ${mv(total)}</td>
+        <td colspan="2"></td>
       </tr>
     </tbody>
   </table>
 
-  <div class="footer">
-    <div>Receiver Signature:</div>
-    <div>Date:</div>
-  </div>
-
-  <div class="no-print" style="text-align:center;margin-top:25px">
-    <button onclick="window.print()" style="padding:10px 20px;font-weight:bold">Print / Save PDF</button>
-    <button onclick="window.close()" style="padding:10px 20px;font-weight:bold">Close</button>
+  <div class="no-print">
+    <button onclick="window.print()">Print / Save PDF</button>
+    <button onclick="window.close()">Close</button>
   </div>
 </div>
 </body>
-</html>
-`;
+</html>`;
 
   let w=window.open("","_blank");
   w.document.open();

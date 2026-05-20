@@ -39,10 +39,32 @@ table{width:100%;border-collapse:collapse;margin-top:10px}
 th,td{border:1px solid #dbe4f0;padding:8px;text-align:left}
 th{background:#f8fbff}
 @media(max-width:900px){.grid,.summary{grid-template-columns:1fr}.row{grid-template-columns:1fr 130px}}
+
+.company-print-head{
+  text-align:center;
+  border-bottom:3px double #111;
+  padding-bottom:12px;
+  margin-bottom:12px;
+  color:#000;
+}
+
+.company-print-head h2{
+  margin:0;
+  font-size:24px;
+  text-transform:uppercase;
+}
+
+.company-print-head div{
+  font-size:13px;
+  font-weight:700;
+  line-height:1.5;
+}
+
 @media print{
   @page{size:A4;margin:10mm}
   body{background:#fff;padding:0}
   .header,.note,.filters,.summary,.btn-row{display:none!important}
+.print-company-card{display:block!important}
   .card{box-shadow:none;border:0;padding:0;margin:0}
   .report{border:0;border-radius:0;padding:0}
 }
@@ -98,6 +120,13 @@ th{background:#f8fbff}
 </div>
 
 <br>
+
+<div class="card print-company-card">
+  <div class="company-print-head">
+    <h2 id="printCompanyName">Company Name</h2>
+    <div id="printCompanyDetails"></div>
+  </div>
+</div>
 
 <div class="card">
   <div class="report">
@@ -170,6 +199,8 @@ th{background:#f8fbff}
 <script src="/firebase-db.js"></script>
 
 <script>
+let COMPANY_PROFILE = {};
+
 function mv(n){return Number(n||0).toFixed(3)}
 function mt(n){return "OMR "+mv(n)}
 
@@ -221,6 +252,25 @@ async function smartLoad(collection){
     console.error("Report load error:", collection, err);
     return [];
   }
+}
+
+async function loadCompanyProfile(){
+  let profiles = await smartLoad("companyProfile");
+  COMPANY_PROFILE = profiles[0] || {};
+
+  printCompanyName.textContent =
+    COMPANY_PROFILE.companyName ||
+    COMPANY_PROFILE.name ||
+    "Company Name";
+
+  printCompanyDetails.innerHTML = `
+    ${COMPANY_PROFILE.address || ""}<br>
+    ${COMPANY_PROFILE.phone ? "Tel: " + COMPANY_PROFILE.phone : ""}
+    ${COMPANY_PROFILE.mobile ? " | Mobile: " + COMPANY_PROFILE.mobile : ""}
+    ${COMPANY_PROFILE.email ? " | Email: " + COMPANY_PROFILE.email : ""}<br>
+    ${COMPANY_PROFILE.vatNumber ? "VAT IN: " + COMPANY_PROFILE.vatNumber : ""}
+    ${COMPANY_PROFILE.crNumber ? " | C.R. No: " + COMPANY_PROFILE.crNumber : ""}
+  `;
 }
 
 async function generatePL(){
@@ -364,7 +414,7 @@ function clearFilters(){
   fromDate.value = "";
   toDate.value = "";
   reportName.value = "Profit & Loss Report";
-  generatePL();
+  loadCompanyProfile().then(generatePL);
 }
 
 generatePL();
