@@ -842,7 +842,6 @@ th{background:#f8fbff}
 
 <script>
 
-<script>
 let EDIT = "";
 let CURRENT_DOS = [];
 let CLOUD_CUSTOMERS = [];
@@ -890,23 +889,81 @@ function dl(id,a){
   });
 }
 
-async function initCloudData(){
-  CLOUD_CUSTOMERS = await loadFromCloud(COLLECTIONS.CUSTOMERS);
-  CLOUD_ITEMS = await loadFromCloud(COLLECTIONS.ITEMS);
-  CLOUD_CATEGORIES = await loadFromCloud(COLLECTIONS.CATEGORIES);
-  CLOUD_BRANDS = await loadFromCloud(COLLECTIONS.BRANDS);
-  CLOUD_TYPES = await loadFromCloud(COLLECTIONS.MACHINE_TYPES);
-  CLOUD_QUOTATIONS = await loadFromCloud(COLLECTIONS.QUOTATIONS);
-
-  const profiles = await loadFromCloud("companyProfile");
-  COMPANY_PROFILE = profiles[0] || JSON.parse(localStorage.getItem("post91CompanyProfile") || "{}");
-
-  refreshLists();
-  loadSourceDropdown();
-  setDefaults();
-  await loadSaved();
+async function smartLoad(collection){
+  try{
+    if(typeof loadFromCloudSmart === "function"){
+      return await loadFromCloudSmart(collection);
+    }
+    return await loadFromCloud(collection);
+  }catch(err){
+    console.error("Load error:", collection, err);
+    return [];
+  }
 }
 
+async function initCloudData(){
+
+  savedBody.innerHTML = `
+    <tr>
+      <td colspan="6">Loading...</td>
+    </tr>
+  `;
+
+  try{
+
+    const [
+      customers,
+      items,
+      categories,
+      brands,
+      types,
+      quotations,
+      profiles
+    ] = await Promise.all([
+
+      smartLoad(COLLECTIONS.CUSTOMERS),
+      smartLoad(COLLECTIONS.ITEMS),
+      smartLoad(COLLECTIONS.CATEGORIES),
+      smartLoad(COLLECTIONS.BRANDS),
+      smartLoad(COLLECTIONS.MACHINE_TYPES),
+      smartLoad(COLLECTIONS.QUOTATIONS),
+      smartLoad("companyProfile")
+
+    ]);
+
+    CLOUD_CUSTOMERS = customers || [];
+    CLOUD_ITEMS = items || [];
+    CLOUD_CATEGORIES = categories || [];
+    CLOUD_BRANDS = brands || [];
+    CLOUD_TYPES = types || [];
+    CLOUD_QUOTATIONS = quotations || [];
+
+    COMPANY_PROFILE =
+      profiles[0] ||
+      JSON.parse(localStorage.getItem("post91CompanyProfile") || "{}");
+
+    console.log("Customers:", CLOUD_CUSTOMERS.length);
+    console.log("Items:", CLOUD_ITEMS.length);
+    console.log("DO:", CLOUD_QUOTATIONS.length);
+
+    refreshLists();
+    loadSourceDropdown();
+    setDefaults();
+
+    await loadSaved();
+
+  }catch(err){
+
+    console.error("INIT ERROR:", err);
+
+    savedBody.innerHTML = `
+      <tr>
+        <td colspan="6">Failed loading cloud data</td>
+      </tr>
+    `;
+
+  }
+}
 function refreshLists(){
   dl("typeList",[...CLOUD_TYPES.map(x=>x.name),...CLOUD_ITEMS.map(ity)]);
   dl("brandList",[...CLOUD_BRANDS.map(x=>x.name),...CLOUD_ITEMS.map(ibr)]);
@@ -1433,7 +1490,7 @@ async function loadSaved(){
   let q=(savedSearch.value||"").toLowerCase();
   savedBody.innerHTML="";
 
-  CURRENT_DOS = await loadFromCloud(COLLECTIONS.DELIVERY_ORDERS);
+  CURRENT_DOS = await smartLoad(COLLECTIONS.DELIVERY_ORDERS);
 
   CURRENT_DOS.sort((a,b)=>new Date(b.doDate||"1900-01-01")-new Date(a.doDate||"1900-01-01"));
 
