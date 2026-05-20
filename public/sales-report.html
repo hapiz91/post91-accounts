@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Report | Post91 Accounts</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.header h1{margin:0;color:#0d6efd}
+.back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+label{display:block;font-weight:800;margin-bottom:6px}
+input,select{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
+.btn{border:0;background:#0d6efd;color:white;padding:11px 15px;border-radius:11px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.box{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:18px;box-shadow:0 14px 34px #0001}
+.box b{display:block;font-size:13px;color:#64748b}
+.box span{font-size:23px;font-weight:900;color:#0d6efd}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #dbe4f0;padding:8px;text-align:left;vertical-align:top}
+th{background:#f8fbff}
+.right{text-align:right}
+.good{color:#166534;font-weight:900}
+.bad{color:#b91c1c;font-weight:900}
+.small{font-size:12px;color:#64748b;font-weight:700}
+@media(max-width:1000px){.grid,.summary{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.grid,.summary{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
+@media print{
+  @page{size:A4 landscape;margin:8mm}
+  body{background:#fff;padding:0}
+  .header,.note,.filters,.btn-row{display:none!important}
+  .card{box-shadow:none;border:0;padding:0;margin:0}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>Sales Report</h1>
+    <p>Detailed sales invoice report from Firebase cloud data.</p>
+  </div>
+  <a class="back" href="/dashboard.html">Back</a>
+</div>
+
+<div class="note">
+  This report reads from saved Sales Invoices in Firebase. Draft, Submitted, Paid, Partial and Unpaid invoices can be filtered.
+</div>
+
+<div class="card filters">
+  <h2>Filters</h2>
+
+  <div class="grid">
+    <div>
+      <label>From Date</label>
+      <input type="date" id="fromDate" onchange="generateSalesReport()">
+    </div>
+
+    <div>
+      <label>To Date</label>
+      <input type="date" id="toDate" onchange="generateSalesReport()">
+    </div>
+
+    <div>
+      <label>Status</label>
+      <select id="statusFilter" onchange="generateSalesReport()">
+        <option value="">All</option>
+        <option>Draft</option>
+        <option>Submitted</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Payment Status</label>
+      <select id="paymentFilter" onchange="generateSalesReport()">
+        <option value="">All</option>
+        <option>Unpaid</option>
+        <option>Partial</option>
+        <option>Paid</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Customer Search</label>
+      <input id="customerFilter" placeholder="Customer name" oninput="generateSalesReport()">
+    </div>
+
+    <div>
+      <label>Invoice Search</label>
+      <input id="invoiceFilter" placeholder="Invoice no / reference" oninput="generateSalesReport()">
+    </div>
+
+    <div>
+      <label>VAT Type</label>
+      <select id="vatFilter" onchange="generateSalesReport()">
+        <option value="">All</option>
+        <option>VAT Exclusive</option>
+        <option>VAT Inclusive</option>
+        <option>Non-VAT</option>
+        <option>Zero Rated</option>
+        <option>Exempt</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Report Name</label>
+      <input id="reportName" value="Sales Report" oninput="document.title=this.value||'Sales Report'">
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="generateSalesReport()">Refresh Report</button>
+    <button class="btn btn-light" onclick="clearFilters()">Clear Filter</button>
+    <button class="btn btn-light" onclick="window.print()">Print</button>
+  </div>
+</div>
+
+<div class="summary">
+  <div class="box"><b>Total Invoices</b><span id="sumCount">0</span></div>
+  <div class="box"><b>Total Before VAT</b><span id="sumBefore">OMR 0.000</span></div>
+  <div class="box"><b>Total VAT</b><span id="sumVat">OMR 0.000</span></div>
+  <div class="box"><b>Grand Total</b><span id="sumGrand">OMR 0.000</span></div>
+</div>
+
+<div class="summary" style="margin-top:14px;">
+  <div class="box"><b>Draft Invoices</b><span id="sumDraft">0</span></div>
+  <div class="box"><b>Submitted Invoices</b><span id="sumSubmitted">0</span></div>
+  <div class="box"><b>Paid Amount</b><span id="sumPaid">OMR 0.000</span></div>
+  <div class="box"><b>Outstanding</b><span id="sumOutstanding">OMR 0.000</span></div>
+</div>
+
+<div class="card">
+  <h2>Sales Invoice Details</h2>
+  <div class="small" id="periodText">For all periods</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Invoice No</th>
+        <th>Customer</th>
+        <th>Reference / DO</th>
+        <th>VAT Type</th>
+        <th>Status</th>
+        <th>Payment</th>
+        <th class="right">Before VAT</th>
+        <th class="right">VAT</th>
+        <th class="right">Grand Total</th>
+      </tr>
+    </thead>
+    <tbody id="salesBody"></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Customer Summary</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Customer</th>
+        <th class="right">Invoices</th>
+        <th class="right">Before VAT</th>
+        <th class="right">VAT</th>
+        <th class="right">Grand Total</th>
+      </tr>
+    </thead>
+    <tbody id="customerBody"></tbody>
+  </table>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/firebase-db.js"></script>
+
+<script>
+let ALL_SALES=[];
+
+function mv(n){return Number(n||0).toFixed(3)}
+function mt(n){return "OMR "+mv(n)}
+
+function isCancelled(status){
+  return (status||"").toLowerCase()==="cancelled";
+}
+
+function dateOk(date){
+  if(!date)return true;
+
+  let d = new Date(date);
+  let f = fromDate.value ? new Date(fromDate.value) : null;
+  let t = toDate.value ? new Date(toDate.value) : null;
+
+  if(f && d < f)return false;
+  if(t && d > t)return false;
+
+  return true;
+}
+
+function getPeriodText(){
+  if(fromDate.value && toDate.value){
+    return `From ${fromDate.value} to ${toDate.value}`;
+  }
+
+  if(fromDate.value){
+    return `From ${fromDate.value}`;
+  }
+
+  if(toDate.value){
+    return `Up to ${toDate.value}`;
+  }
+
+  return "For all periods";
+}
+
+async function smartLoad(collection){
+  try{
+    if(typeof loadFromCloudSmart==="function"){
+      return await loadFromCloudSmart(collection);
+    }
+
+    if(typeof loadFromCloud==="function"){
+      return await loadFromCloud(collection);
+    }
+
+    return [];
+  }catch(err){
+    console.error("Sales report load error:", collection, err);
+    return [];
+  }
+}
+
+function applyFilters(data){
+  let status = statusFilter.value;
+  let payment = paymentFilter.value;
+  let customer = customerFilter.value.toLowerCase().trim();
+  let invoice = invoiceFilter.value.toLowerCase().trim();
+  let vat = vatFilter.value;
+
+  return data
+    .filter(x=>!isCancelled(x.docStatus))
+    .filter(x=>dateOk(x.invoiceDate))
+    .filter(x=>!status || (x.docStatus||"")===status)
+    .filter(x=>!payment || (x.paymentStatus||"")===payment)
+    .filter(x=>!vat || (x.vatType||"")===vat)
+    .filter(x=>!customer || (x.customerName||"").toLowerCase().includes(customer))
+    .filter(x=>{
+      if(!invoice)return true;
+      return JSON.stringify({
+        invoiceNo:x.invoiceNo,
+        referenceNo:x.referenceNo,
+        doNo:x.doNo
+      }).toLowerCase().includes(invoice);
+    });
+}
+
+async function loadSales(){
+  salesBody.innerHTML=`<tr><td colspan="10">Loading sales invoices...</td></tr>`;
+  customerBody.innerHTML=`<tr><td colspan="5">Loading customer summary...</td></tr>`;
+
+  ALL_SALES = await smartLoad(COLLECTIONS.SALES_INVOICES);
+
+  generateSalesReport();
+}
+
+function generateSalesReport(){
+  let sales = applyFilters(ALL_SALES);
+
+  sales.sort((a,b)=>new Date(b.invoiceDate||"1900")-new Date(a.invoiceDate||"1900"));
+
+  let totalBefore=0;
+  let totalVat=0;
+  let totalGrand=0;
+  let draftCount=0;
+  let submittedCount=0;
+  let paidAmount=0;
+  let outstanding=0;
+
+  salesBody.innerHTML="";
+  customerBody.innerHTML="";
+
+  let customerMap={};
+
+  sales.forEach(s=>{
+    let before = Number(s.beforeTax || s.taxableAmount || 0);
+    let vat = Number(s.vatAmount || 0);
+    let grand = Number(s.grandTotal || s.total || before + vat || 0);
+
+    totalBefore += before;
+    totalVat += vat;
+    totalGrand += grand;
+
+    if((s.docStatus||"Draft")==="Draft")draftCount++;
+    if((s.docStatus||"")==="Submitted")submittedCount++;
+
+    if((s.paymentStatus||"Unpaid")==="Paid"){
+      paidAmount += grand;
+    }else{
+      outstanding += grand;
+    }
+
+    let customer = s.customerName || "Unknown";
+
+    if(!customerMap[customer]){
+      customerMap[customer] = {
+        count:0,
+        before:0,
+        vat:0,
+        grand:0
+      };
+    }
+
+    customerMap[customer].count++;
+    customerMap[customer].before += before;
+    customerMap[customer].vat += vat;
+    customerMap[customer].grand += grand;
+
+    let tr=document.createElement("tr");
+
+    tr.innerHTML=`
+      <td>${s.invoiceDate || "-"}</td>
+      <td>${s.invoiceNo || "-"}</td>
+      <td>${s.customerName || "-"}</td>
+      <td>${s.referenceNo || s.doNo || "-"}</td>
+      <td>${s.vatType || "-"}</td>
+      <td>${s.docStatus || "Draft"}</td>
+      <td>${s.paymentStatus || "Unpaid"}</td>
+      <td class="right">${mt(before)}</td>
+      <td class="right">${mt(vat)}</td>
+      <td class="right"><b>${mt(grand)}</b></td>
+    `;
+
+    salesBody.appendChild(tr);
+  });
+
+  if(sales.length===0){
+    salesBody.innerHTML=`<tr><td colspan="10">No sales invoices found for selected filters.</td></tr>`;
+  }
+
+  Object.keys(customerMap)
+    .map(name=>({name,...customerMap[name]}))
+    .sort((a,b)=>b.grand-a.grand)
+    .forEach(c=>{
+      let tr=document.createElement("tr");
+
+      tr.innerHTML=`
+        <td>${c.name}</td>
+        <td class="right">${c.count}</td>
+        <td class="right">${mt(c.before)}</td>
+        <td class="right">${mt(c.vat)}</td>
+        <td class="right"><b>${mt(c.grand)}</b></td>
+      `;
+
+      customerBody.appendChild(tr);
+    });
+
+  if(Object.keys(customerMap).length===0){
+    customerBody.innerHTML=`<tr><td colspan="5">No customer summary available.</td></tr>`;
+  }
+
+  sumCount.textContent = sales.length;
+  sumBefore.textContent = mt(totalBefore);
+  sumVat.textContent = mt(totalVat);
+  sumGrand.textContent = mt(totalGrand);
+  sumDraft.textContent = draftCount;
+  sumSubmitted.textContent = submittedCount;
+  sumPaid.textContent = mt(paidAmount);
+  sumOutstanding.textContent = mt(outstanding);
+  periodText.textContent = getPeriodText();
+
+  console.log("Sales Report Loaded:", {
+    totalInvoices:sales.length,
+    totalBefore,
+    totalVat,
+    totalGrand
+  });
+}
+
+function clearFilters(){
+  fromDate.value="";
+  toDate.value="";
+  statusFilter.value="";
+  paymentFilter.value="";
+  customerFilter.value="";
+  invoiceFilter.value="";
+  vatFilter.value="";
+  reportName.value="Sales Report";
+  generateSalesReport();
+}
+
+loadSales();
+</script>
+
+</body>
+</html>
