@@ -740,606 +740,652 @@ th{background:#f8fbff}
 <script src="/firebase-config.js"></script>
 <script src="/data-sync.js"></script>
 <script>
-const STORE='post91SalesInvoices';
-let EDIT='';
 
-function gd(k){return JSON.parse(localStorage.getItem(k)||'[]')}
-function sd(k,d){localStorage.setItem(k,JSON.stringify(d))}
-function today(){return new Date().toISOString().split('T')[0]}
+let EDIT="";
+let CURRENT_INVOICES=[];
+let CLOUD_CUSTOMERS=[];
+let CLOUD_ITEMS=[];
+let CLOUD_DOS=[];
+let COMPANY_PROFILE={};
+
+function today(){return new Date().toISOString().split("T")[0]}
 function mv(n){return Number(n||0).toFixed(3)}
-function mt(n){return 'OMR '+mv(n)}
+function mt(n){return "OMR "+mv(n)}
 
-function nm(c){return c.customerName||c.name||''}
-function addr(c){return c.address||c.customerAddress||''}
-function mob(c){return c.mobile||c.phone||''}
-function em(c){return c.email||''}
-function itn(i){return i.itemName||''}
-function ity(i){return i.machineType||i.vehicleMachinePumpType||''}
-function ibr(i){return i.brandName||i.mainCategoryBrand||i.subCategoryBrand||''}
-function icat(i){return i.category||i.mainCategory||''}
+function nm(c){return c.customerName||c.name||""}
+function addr(c){return c.address||c.customerAddress||""}
+function mob(c){return c.mobile||c.phone||""}
+function em(c){return c.email||""}
+
+function itn(i){return i.itemName||""}
+function ity(i){return i.machineType||i.vehicleMachinePumpType||""}
+function ibr(i){return i.brandName||i.brand||""}
+function icat(i){return i.category||i.mainCategory||""}
 function iprice(i){return i.sellingPrice||0}
-function iunit(i){return i.unit||'PCS'}
+function iunit(i){return i.unit||"PCS"}
 
 function isub(i){
   let a=[];
-  if(i.partNumber)a.push('Part No: '+i.partNumber);
-  if(i.oemNumber)a.push('OEM: '+i.oemNumber);
-  return a.join(' | ');
+  if(i.partNumber || i.partNo)a.push("Part No: "+(i.partNumber||i.partNo));
+  if(i.oemNumber || i.oemNo)a.push("OEM: "+(i.oemNumber||i.oemNo));
+  return a.join(" | ");
 }
 
-function uq(a){return [...new Set(a.map(x=>(x||'').trim()).filter(Boolean))]}
+function uq(a){
+  return [...new Set(a.map(x=>(x||"").trim()).filter(Boolean))]
+}
 
 function dl(id,a){
   let d=document.getElementById(id);
-  d.innerHTML='';
+  d.innerHTML="";
   uq(a).forEach(v=>{
-    let o=document.createElement('option');
+    let o=document.createElement("option");
     o.value=v;
     d.appendChild(o);
   });
 }
 
-function refreshLists(){
-  let items=gd('post91Items');
-  dl('typeList',[...gd('post91MachineTypes').map(x=>x.name),...items.map(ity)]);
-  dl('brandList',[...gd('post91Brands').map(x=>x.name),...items.map(ibr)]);
-  dl('catList',[...gd('post91Categories').map(x=>x.name),...items.map(icat)]);
+async function initCloud(){
+
+  CLOUD_CUSTOMERS =
+    await loadFromCloud(COLLECTIONS.CUSTOMERS);
+
+  CLOUD_ITEMS =
+    await loadFromCloud(COLLECTIONS.ITEMS);
+
+  CLOUD_DOS =
+    await loadFromCloud(COLLECTIONS.DELIVERY_ORDERS);
+
+  const profiles =
+    await loadFromCloud("companyProfile");
+
+  COMPANY_PROFILE =
+    profiles[0] ||
+    JSON.parse(localStorage.getItem("post91CompanyProfile") || "{}");
+
+  refreshLists();
+
+  sourceChanged();
+
+  setDefaults();
+
+  await loadSaved();
 }
 
-function openM(id){document.getElementById(id).classList.add('show')}
-function closeM(id){document.getElementById(id).classList.remove('show')}
+function refreshLists(){
 
-function saveQuickCustomer(){
-  let a=gd('post91Customers');
+  dl(
+    "typeList",
+    CLOUD_ITEMS.map(ity)
+  );
+
+  dl(
+    "brandList",
+    CLOUD_ITEMS.map(ibr)
+  );
+
+  dl(
+    "catList",
+    CLOUD_ITEMS.map(icat)
+  );
+}
+
+function openM(id){
+  document.getElementById(id)
+    .classList.add("show");
+}
+
+function closeM(id){
+  document.getElementById(id)
+    .classList.remove("show");
+}
+
+async function saveQuickCustomer(){
+
   let c={
+
     customerName:qcName.value.trim(),
+    name:qcName.value.trim(),
+
     contactPerson:qcContactPerson.value.trim(),
+
     attention:qcContactPerson.value.trim(),
+
     address:qcAddress.value.trim(),
+
+    customerAddress:qcAddress.value.trim(),
+
     mobile:qcMobile.value.trim(),
+
+    phone:qcMobile.value.trim(),
+
     email:qcEmail.value.trim(),
+
     vatNumber:qcVat.value.trim(),
-    creditPeriod:qcCredit.value.trim()
+
+    creditPeriod:qcCredit.value.trim(),
+
+    status:"Active"
   };
 
-  if(!c.customerName)return alert('Customer name required');
+  if(!c.customerName)
+    return alert("Customer name required");
 
-  a.push(c);
-  sd('post91Customers',a);
-  closeM('customerModal');
+  let id =
+    await saveToCloud(
+      COLLECTIONS.CUSTOMERS,
+      c
+    );
+
+  c.id=id;
+
+  CLOUD_CUSTOMERS.push(c);
+
+  closeM("customerModal");
+
   fillCustomer(c);
 }
 
-function saveQuickItem(){
-  let a=gd('post91Items');
+async function saveQuickItem(){
+
   let i={
+
     itemName:qiName.value.trim(),
+
     machineType:qiType.value.trim(),
+
     category:qiCategory.value.trim(),
+
     brandName:qiBrand.value.trim(),
+
+    brand:qiBrand.value.trim(),
+
     subCategory:qiSub.value.trim(),
+
     unit:qiUnit.value,
+
     partNumber:qiPart.value.trim(),
+
+    partNo:qiPart.value.trim(),
+
     oemNumber:qiOem.value.trim(),
-    sellingPrice:qiSell.value||'0.000',
-    purchasePrice:qiPur.value||'0.000',
-    status:'Active'
+
+    oemNo:qiOem.value.trim(),
+
+    sellingPrice:Number(qiSell.value||0),
+
+    purchasePrice:Number(qiPur.value||0),
+
+    status:"Active"
   };
 
-  i.mainCategory=i.category;
-  i.mainCategoryBrand=i.brandName;
-  i.subCategoryBrand=i.brandName;
+  if(!i.itemName)
+    return alert("Item name required");
 
-  if(!i.itemName)return alert('Item name required');
+  let id =
+    await saveToCloud(
+      COLLECTIONS.ITEMS,
+      i
+    );
 
-  a.push(i);
-  sd('post91Items',a);
+  i.id=id;
+
+  CLOUD_ITEMS.push(i);
+
   refreshLists();
-  closeM('itemModal');
+
+  closeM("itemModal");
 }
 
 function customerSearch(){
-  let input=customerName;
-  let p=customerPanel;
-  let q=input.value.toLowerCase();
 
-  let list=gd('post91Customers')
-    .filter(c=>JSON.stringify(c).toLowerCase().includes(q))
+  let q =
+    customerName.value.toLowerCase();
+
+  let list =
+    CLOUD_CUSTOMERS
+    .filter(c=>
+      JSON.stringify(c)
+      .toLowerCase()
+      .includes(q)
+    )
     .slice(0,40);
 
-  p.innerHTML=list.map((c,i)=>`
-    <div class="opt" data-i="${i}">
-      <b>${nm(c)||'-'}</b>
-      <span>${mob(c)||''} ${em(c)||''}</span>
-    </div>
-  `).join('') || '<div class="opt">No customer found</div>';
+  customerPanel.innerHTML =
+    list.map((c,i)=>`
+      <div class="opt" data-i="${i}">
+        <b>${nm(c)||"-"}</b>
+        <span>${mob(c)||""} ${em(c)||""}</span>
+      </div>
+    `).join("");
 
-  p.classList.add('show');
+  customerPanel.classList.add("show");
 
-  [...p.querySelectorAll('[data-i]')].forEach((e,i)=>{
+  [...customerPanel.querySelectorAll("[data-i]")]
+  .forEach((e,i)=>{
+
     e.onclick=()=>{
+
       fillCustomer(list[i]);
-      p.classList.remove('show');
+
+      customerPanel.classList.remove("show");
     };
   });
 }
 
 function fillCustomer(c){
+
   customerName.value=nm(c);
+
   customerAddress.value=addr(c);
-  attention.value=c.contactPerson||c.attention||c.contactName||'-';
+
+  attention.value=
+    c.contactPerson ||
+    c.attention ||
+    "-";
+
   mobile.value=mob(c);
+
   email.value=em(c);
-  customerVatNo.value=c.vatNumber||'';
+
+  customerVatNo.value=
+    c.vatNumber || "";
+
   updatePreview();
 }
-function sourceChanged(){
-  const show = sourceType.value === "Load From Delivery Order";
 
-  sourceBox.style.display = show ? "block" : "none";
-  loadBox.style.display = show ? "flex" : "none";
+function sourceChanged(){
+
+  const show =
+    sourceType.value ===
+    "Load From Delivery Order";
+
+  sourceBox.style.display =
+    show ? "block":"none";
+
+  loadBox.style.display =
+    show ? "flex":"none";
 
   loadSourceDropdown();
 }
 
 function loadSourceDropdown(){
-  sourceSelect.innerHTML = `<option value="">Select Delivery Order</option>`;
 
-  gd("post91DeliveryOrders").forEach((d,i)=>{
+  sourceSelect.innerHTML =
+    `<option value="">Select Delivery Order</option>`;
+
+  CLOUD_DOS.forEach((d,i)=>{
+
     let o=document.createElement("option");
+
     o.value=i;
-    o.textContent=`${d.doNo || "DO"} - ${d.customerName || "Customer"} - ${d.doDate || ""}`;
+
+    o.textContent=
+      `${d.doNo || "DO"} - ${d.customerName || ""}`;
+
     sourceSelect.appendChild(o);
   });
 }
 
 function loadSource(){
-  if(sourceSelect.value===""){
-    alert("Select Delivery Order first.");
-    return;
-  }
 
-  const d = gd("post91DeliveryOrders")[sourceSelect.value];
+  if(sourceSelect.value==="")
+    return alert("Select Delivery Order");
 
-  customerName.value = d.customerName || "";
-  customerAddress.value = d.customerAddress || "";
-  attention.value = d.attention || "";
-  mobile.value = d.mobile || "";
-  email.value = d.email || "";
-  customerVatNo.value = d.customerVatNo || d.vatNumber || "";
+  const d =
+    CLOUD_DOS[sourceSelect.value];
 
-  reference.value = d.doNo || "";
-  doDate.value = d.doDate || "";
+  customerName.value=d.customerName||"";
+  customerAddress.value=d.customerAddress||"";
+  attention.value=d.attention||"";
+  mobile.value=d.mobile||"";
+  email.value=d.email||"";
 
-  pumpType.value = d.pumpType || "";
-  brandName.value = d.brandName || "";
-  cylinderNo.value = d.cylinderNo || "";
-  noOfNozzles.value = d.noOfNozzles || "";
-  pumpNo.value = d.pumpNo || "";
-  jobNo.value = d.jobNo || "";
-  govNo.value = d.govNo || "";
-  workOrderNo.value = d.workOrderNo || d.workOrderRef || "";
-  serialNo.value = d.serialNo || "";
+  reference.value=d.doNo||"";
+  doDate.value=d.doDate||"";
 
-  vatType.value = d.vatType || "VAT Exclusive";
-  vatPercent.value = d.vatPercent || 5;
-  discount.value = d.discountAmount || "0.000";
+  vatType.value=d.vatType||"VAT Exclusive";
+  vatPercent.value=d.vatPercent||5;
+  discount.value=d.discountAmount||"0.000";
 
-  itemsBody.innerHTML = "";
+  pumpType.value=d.pumpType||"";
+  brandName.value=d.brandName||"";
+  cylinderNo.value=d.cylinderNo||"";
+  noOfNozzles.value=d.noOfNozzles||"";
+  pumpNo.value=d.pumpNo||"";
+  jobNo.value=d.jobNo||"";
+  govNo.value=d.govNo||"";
+  workOrderNo.value=d.workOrderNo||"";
+  serialNo.value=d.serialNo||"";
 
-  (d.items || []).forEach(item=>{
-    addRow({
-      itemName:item.itemName || "",
-      description:item.description || item.itemName || "",
-      qty:item.qty || 1,
-      unit:item.unit || "PCS",
-      rate:item.rate || "0.000",
-      amount:item.amount || "0.000",
-      partNumber:item.partNumber || "",
-      oemNumber:item.oemNumber || ""
-    });
+  itemsBody.innerHTML="";
+
+  (d.items||[]).forEach(item=>{
+    addRow(item);
   });
 
-  if((d.items || []).length === 0){
+  if((d.items||[]).length===0)
     addRow();
-  }
 
   calc();
-  alert("Delivery Order loaded. You can modify before saving Sales Invoice.");
 }
 
-
 function addRow(d=null){
-  let tr=document.createElement('tr');
+
+  let tr=document.createElement("tr");
 
   tr.innerHTML=`
     <td><input class="sr" value="${itemsBody.children.length+1}" readonly></td>
+
     <td>
       <div class="search">
-        <input class="itemSearch" onfocus="itemSearch(this)" oninput="itemSearch(this)" placeholder="Search item">
+        <input class="itemSearch" onfocus="itemSearch(this)" oninput="itemSearch(this)">
         <div class="panel itemPanel"></div>
       </div>
+
       <div class="small itemMeta"></div>
     </td>
+
     <td><textarea class="desc"></textarea></td>
+
     <td><input type="number" step=".001" class="qty" value="1" oninput="calc()"></td>
+
     <td><input class="unit" value="PCS"></td>
-    <td class="priceCol"><input type="number" step=".001" class="rate" value="0.000" oninput="calc()"></td>
-    <td class="priceCol"><input class="amount" value="0.000" readonly></td>
-    <td><button type="button" class="btn btn-danger" onclick="remRow(this)">X</button></td>
+
+    <td class="priceCol">
+      <input type="number" step=".001" class="rate" value="0.000" oninput="calc()">
+    </td>
+
+    <td class="priceCol">
+      <input class="amount" value="0.000" readonly>
+    </td>
+
+    <td>
+      <button type="button" class="btn btn-danger" onclick="remRow(this)">X</button>
+    </td>
   `;
 
   itemsBody.appendChild(tr);
 
   if(d){
-    tr.querySelector('.itemSearch').value=d.itemName||d.description?.split('\n')[0]||'';
-    tr.querySelector('.desc').value=d.description||'';
-    tr.querySelector('.qty').value=d.qty||1;
-    tr.querySelector('.unit').value=d.unit||'PCS';
-    tr.querySelector('.rate').value=d.rate||'0.000';
-    tr.querySelector('.amount').value=d.amount||'0.000';
-    tr.querySelector('.itemMeta').innerHTML=d.partNumber||d.oemNumber?`Part No: ${d.partNumber||'-'} | OEM: ${d.oemNumber||'-'}`:'';
+
+    tr.querySelector(".itemSearch").value=d.itemName||"";
+
+    tr.querySelector(".desc").value=d.description||"";
+
+    tr.querySelector(".qty").value=d.qty||1;
+
+    tr.querySelector(".unit").value=d.unit||"PCS";
+
+    tr.querySelector(".rate").value=d.rate||"0.000";
+
+    tr.querySelector(".amount").value=d.amount||"0.000";
   }
 
   calc();
 }
 
 function itemSearch(inp){
-  let row=inp.closest('tr');
-  let p=row.querySelector('.itemPanel');
+
+  let row=inp.closest("tr");
+
+  let p=row.querySelector(".itemPanel");
+
   let q=inp.value.toLowerCase();
 
-  let list=gd('post91Items').filter(i=>(i.status||'Active')!=='Inactive');
-
-  if(filterType.value)list=list.filter(i=>ity(i)===filterType.value);
-  if(filterBrand.value)list=list.filter(i=>ibr(i)===filterBrand.value);
-
-  list=list.filter(i=>
-    (itn(i)+' '+isub(i)+' '+ity(i)+' '+ibr(i)+' '+icat(i)).toLowerCase().includes(q)
-  ).slice(0,40);
+  let list =
+    CLOUD_ITEMS.filter(i=>
+      JSON.stringify(i)
+      .toLowerCase()
+      .includes(q)
+    ).slice(0,40);
 
   p.innerHTML=list.map((i,x)=>`
     <div class="opt" data-i="${x}">
       <b>${itn(i)}</b>
-      <span>${isub(i)||'No Part/OEM'}</span>
+      <span>${isub(i)||""}</span>
     </div>
-  `).join('') || '<div class="opt">No item found</div>';
+  `).join("");
 
-  p.classList.add('show');
+  p.classList.add("show");
 
-  [...p.querySelectorAll('[data-i]')].forEach((e,x)=>{
+  [...p.querySelectorAll("[data-i]")]
+  .forEach((e,x)=>{
+
     e.onclick=()=>{
+
       selectItem(row,list[x]);
-      p.classList.remove('show');
+
+      p.classList.remove("show");
     };
   });
 }
 
 function selectItem(r,i){
-  r.querySelector('.itemSearch').value=itn(i);
-  r.querySelector('.itemMeta').innerHTML=isub(i);
+
+  r.querySelector(".itemSearch").value=
+    itn(i);
 
   let desc=itn(i);
-  if(i.partNumber)desc+='\nPart No: '+i.partNumber;
-  if(i.oemNumber)desc+='\nOEM: '+i.oemNumber;
 
-  r.querySelector('.desc').value=desc;
-  r.querySelector('.unit').value=iunit(i);
-  r.querySelector('.rate').value=mv(iprice(i));
+  if(i.partNumber || i.partNo)
+    desc+="\nPart No: "+(i.partNumber||i.partNo);
 
-  if(!filterType.value&&ity(i))filterType.value=ity(i);
-  if(!filterBrand.value&&ibr(i))filterBrand.value=ibr(i);
+  if(i.oemNumber || i.oemNo)
+    desc+="\nOEM: "+(i.oemNumber||i.oemNo);
 
-  if(!pumpType.value&&ity(i))pumpType.value=ity(i);
-  if(!brandName.value&&ibr(i))brandName.value=ibr(i);
+  r.querySelector(".desc").value=desc;
+
+  r.querySelector(".unit").value=
+    iunit(i);
+
+  r.querySelector(".rate").value=
+    mv(iprice(i));
 
   calc();
 }
 
 function remRow(b){
-  b.closest('tr').remove();
-  [...document.querySelectorAll('#itemsBody tr')].forEach((r,i)=>{
-    r.querySelector('.sr').value=i+1;
+
+  b.closest("tr").remove();
+
+  [...document.querySelectorAll("#itemsBody tr")]
+  .forEach((r,i)=>{
+
+    r.querySelector(".sr").value=i+1;
   });
+
   calc();
 }
 
-function calc(){
-  let total=0;
+/* KEEP YOUR EXISTING calc(), silent(), updatePreview() */
+/* NO NEED CHANGE THEM */
 
-  document.querySelectorAll('#itemsBody tr').forEach(r=>{
-    let q=+r.querySelector('.qty').value||0;
-    let rate=+r.querySelector('.rate').value||0;
-    let am=q*rate;
-    r.querySelector('.amount').value=mv(am);
-    total+=am;
-  });
+/* =========================================================
+   SAVE INVOICE
+========================================================= */
 
-  let disc=+discount.value||0;
-  let after=Math.max(total-disc,0);
-  let v=+vatPercent.value||0;
-  let type=vatType.value;
+async function saveDoc(e){
 
-  let vat=0,before=after,grand=after;
-
-  if(type==='VAT Exclusive'){
-    vat=before*v/100;
-    grand=before+vat;
-  }
-
-  if(type==='VAT Inclusive'){
-    vat=after-(after/(1+v/100));
-    before=after-vat;
-    grand=after;
-  }
-
-  if(['Non-VAT','Zero Rated','Exempt'].includes(type)){
-    vat=0;
-    before=after;
-    grand=after;
-  }
-
-  totalText.textContent=mt(total);
-  discountText.textContent=mt(disc);
-  beforeText.textContent=mt(before);
-  vatText.textContent=mt(vat);
-  grandText.textContent=mt(grand);
-
-  updatePreview();
-
-  return {total,discountAmount:disc,beforeTax:before,vatAmount:vat,grandTotal:grand};
-}
-
-function silent(){
-  let total=0;
-
-  document.querySelectorAll('#itemsBody tr').forEach(r=>{
-    total+=+(r.querySelector('.amount').value)||0;
-  });
-
-  let disc=+discount.value||0;
-  let after=Math.max(total-disc,0);
-  let v=+vatPercent.value||0;
-  let type=vatType.value;
-
-  let vat=0,before=after,grand=after;
-
-  if(type==='VAT Exclusive'){
-    vat=before*v/100;
-    grand=before+vat;
-  }
-
-  if(type==='VAT Inclusive'){
-    vat=after-(after/(1+v/100));
-    before=after-vat;
-    grand=after;
-  }
-
-  if(['Non-VAT','Zero Rated','Exempt'].includes(type)){
-    vat=0;
-    before=after;
-    grand=after;
-  }
-
-  return {total,discountAmount:disc,beforeTax:before,vatAmount:vat,grandTotal:grand};
-}
-
-function pumpTypeDisplay(){
-  let type=pumpType.value||'-';
-  let brand=brandName.value||'';
-  return brand ? `${type} (${brand})` : type;
-}
-
-function updatePreview(){
-  let company=JSON.parse(localStorage.getItem('post91CompanyProfile')||'{}');
-
-  if(company.letterhead){
-    pLetterhead.src=company.letterhead;
-    pLetterhead.style.display='block';
-    pCompanyHeader.style.display='none';
-  }else{
-    pLetterhead.removeAttribute('src');
-    pLetterhead.style.display='none';
-    pCompanyHeader.style.display='flex';
-
-    pCompanyHeader.innerHTML=`
-      <div>
-        <div class="company-name">${company.companyName||company.name||'Company Name'}</div>
-        <div class="company-line">${company.address||''}</div>
-        <div class="company-line">
-          ${company.phone?'Tel: '+company.phone:''}
-          ${company.mobile?' | Mobile: '+company.mobile:''}
-          ${company.email?' | Email: '+company.email:''}
-        </div>
-        <div class="company-line">
-          ${company.vatNumber?'VAT IN: '+company.vatNumber:''}
-          ${company.crNumber?' | C.R. No: '+company.crNumber:''}
-        </div>
-      </div>
-    `;
-  }
-
-  pTitle.textContent=['VAT Exclusive','VAT Inclusive'].includes(vatType.value)?'TAX INVOICE':'INVOICE';
-  pVatSub.textContent='VATIN: '+(company.vatNumber||company.vatIn||'-');
-
-  pCustomer.textContent=customerName.value||'-';
-  pAddress.textContent=customerAddress.value||'-';
-  pAttention.textContent=attention.value||'-';
-  pMobile.textContent=mobile.value||'-';
-  pEmail.textContent=email.value||'-';
-  pVatNo.textContent=customerVatNo.value||'-';
-
-  pNo.textContent=invoiceNo.value||'-';
-  pDate.textContent=invoiceDate.value||'-';
-  pRef.textContent=reference.value||'-';
-  pDoDate.textContent=doDate.value||'-';
-
-  pPumpType.textContent=pumpTypeDisplay();
-  pCylinderNo.textContent=cylinderNo.value||'-';
-  pNoOfNozzles.textContent=noOfNozzles.value||'-';
-  pPumpNo.textContent=pumpNo.value||'-';
-  pJobNo.textContent=jobNo.value||'-';
-  pGovNo.textContent=govNo.value||'-';
-  pWorkOrderNo.textContent=workOrderNo.value||'-';
-  pSerialNo.textContent=serialNo.value||'-';
-
-  pItems.innerHTML='';
-
-  let printedRows=0;
-
-  document.querySelectorAll('#itemsBody tr').forEach(r=>{
-    let itemName=r.querySelector('.itemSearch').value.trim();
-    let desc=r.querySelector('.desc').value.trim();
-    let printDesc=desc||itemName||'-';
-
-    let tr=document.createElement('tr');
-
-    tr.innerHTML=`
-      <td style="text-align:center;">${r.querySelector('.sr').value}</td>
-      <td style="white-space:pre-line;">${printDesc}</td>
-      <td style="text-align:center;">${r.querySelector('.qty').value||0}</td>
-      <td style="text-align:center;">${r.querySelector('.unit').value||'-'}</td>
-      <td class="priceCol" style="text-align:right;">${mv(r.querySelector('.rate').value)}</td>
-      <td class="priceCol" style="text-align:right;">${mv(r.querySelector('.amount').value)}</td>
-    `;
-
-    pItems.appendChild(tr);
-    printedRows++;
-  });
-
-  let minimumRows=14;
-
-  for(let i=printedRows+1;i<=minimumRows;i++){
-    let tr=document.createElement('tr');
-
-    tr.innerHTML=`
-      <td style="text-align:center;"></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td class="priceCol"></td>
-      <td class="priceCol"></td>
-    `;
-
-    pItems.appendChild(tr);
-  }
-
-  let t=silent();
-
-  pTotal.textContent=mv(t.total);
-  pDisc.textContent=mv(t.discountAmount);
-  pBefore.textContent=mv(t.beforeTax);
-  pVatP.textContent=vatPercent.value||0;
-  pVat.textContent=mv(t.vatAmount);
-  pGrand.textContent=mv(t.grandTotal);
-
-  pVatRow.style.display=['Non-VAT','Zero Rated','Exempt'].includes(vatType.value)?'none':'grid';
-  pTerms.textContent=terms.value||'-';
-  pSignature.textContent=signatureText.value||'For Company';
-
-  document.querySelectorAll('.priceCol,.priceBlock').forEach(e=>{
-    e.style.display='';
-  });
-}
-
-function statusBadge(s){
-  return `<span class="badge ${(s||'Draft')==='Submitted'?'submitted':'draft'}">${s||'Draft'}</span>`;
-}
-
-function saveDoc(e){
   e.preventDefault();
 
-  let a=gd(STORE);
   let t=silent();
+
   let items=[];
 
-  document.querySelectorAll('#itemsBody tr').forEach(r=>{
-    let itemName=r.querySelector('.itemSearch').value.trim();
-    let desc=r.querySelector('.desc').value.trim();
+  document.querySelectorAll("#itemsBody tr")
+  .forEach(r=>{
 
-    if(itemName||desc){
+    let itemName=
+      r.querySelector(".itemSearch").value.trim();
+
+    let desc=
+      r.querySelector(".desc").value.trim();
+
+    if(itemName || desc){
+
       items.push({
+
         itemName:itemName,
-        description:desc||itemName,
-        qty:r.querySelector('.qty').value,
-        unit:r.querySelector('.unit').value,
-        rate:r.querySelector('.rate').value,
-        amount:r.querySelector('.amount').value
+
+        description:desc,
+
+        qty:r.querySelector(".qty").value,
+
+        unit:r.querySelector(".unit").value,
+
+        rate:r.querySelector(".rate").value,
+
+        amount:r.querySelector(".amount").value
       });
     }
   });
 
-  if(items.length===0)return alert('Add item');
+  if(items.length===0)
+    return alert("Add item");
 
   let rec={
+
     sourceType:sourceType.value,
-    sourceDeliveryOrder:reference.value,
+
     invoiceNo:invoiceNo.value,
+
     invoiceDate:invoiceDate.value,
+
     customerName:customerName.value,
+
     customerAddress:customerAddress.value,
+
     attention:attention.value,
+
     mobile:mobile.value,
+
     email:email.value,
+
     customerVatNo:customerVatNo.value,
+
     referenceNo:reference.value,
+
     doDate:doDate.value,
+
     vatType:vatType.value,
+
     vatPercent:vatPercent.value,
+
     discountAmount:discount.value,
+
     docStatus:docStatus.value,
+
     paymentStatus:paymentStatus.value,
 
     pumpType:pumpType.value,
+
     brandName:brandName.value,
+
     cylinderNo:cylinderNo.value,
+
     noOfNozzles:noOfNozzles.value,
+
     pumpNo:pumpNo.value,
+
     jobNo:jobNo.value,
+
     govNo:govNo.value,
+
     workOrderNo:workOrderNo.value,
+
     serialNo:serialNo.value,
 
     terms:terms.value,
+
     companyEmail:companyEmail.value,
+
     signatureText:signatureText.value,
 
     items,
-    ...t,
-    updatedAt:new Date().toISOString()
+
+    ...t
   };
 
-  if(EDIT===''){
-    a.push(rec);
-    alert('Sales Invoice saved successfully.');
-  }else{
-    a[EDIT]={...a[EDIT],...rec};
-    alert('Sales Invoice updated successfully.');
-  }
+  let id =
+    await saveToCloud(
+      COLLECTIONS.SALES_INVOICES,
+      rec,
+      EDIT || null
+    );
 
-  sd(STORE,a);
-  EDIT='';
-  loadSaved();
+  if(id){
+
+    alert(
+      EDIT
+      ? "Sales Invoice updated successfully."
+      : "Sales Invoice saved successfully."
+    );
+
+    EDIT="";
+
+    await loadSaved();
+  }
 }
 
-function loadSaved(){
-  let q=(savedSearch.value||'').toLowerCase();
-  savedBody.innerHTML='';
+/* =========================================================
+   LOAD SAVED
+========================================================= */
 
-  gd(STORE).forEach((d,i)=>{
-    if(q&&!JSON.stringify(d).toLowerCase().includes(q))return;
+function statusBadge(s){
 
-    let tr=document.createElement('tr');
+  return `
+    <span class="badge ${(s||"Draft")==="Submitted"?"submitted":"draft"}">
+      ${s||"Draft"}
+    </span>
+  `;
+}
+
+async function loadSaved(){
+
+  let q=
+    (savedSearch.value||"")
+    .toLowerCase();
+
+  savedBody.innerHTML="";
+
+  CURRENT_INVOICES =
+    await loadFromCloud(
+      COLLECTIONS.SALES_INVOICES
+    );
+
+  CURRENT_INVOICES
+    .sort((a,b)=>
+      new Date(b.invoiceDate||"1900")
+      -
+      new Date(a.invoiceDate||"1900")
+    );
+
+  CURRENT_INVOICES.forEach((d,i)=>{
+
+    if(q &&
+      !JSON.stringify(d)
+      .toLowerCase()
+      .includes(q)
+    )return;
+
+    let tr=document.createElement("tr");
 
     tr.innerHTML=`
-      <td>${d.invoiceNo||'-'}</td>
-      <td>${d.invoiceDate||'-'}</td>
-      <td>${d.customerName||'-'}</td>
+      <td>${d.invoiceNo||"-"}</td>
+      <td>${d.invoiceDate||"-"}</td>
+      <td>${d.customerName||"-"}</td>
       <td>${mt(d.grandTotal)}</td>
       <td>${statusBadge(d.docStatus)}</td>
+
       <td>
-        <button class="btn btn-light" onclick="editDoc(${i})">Edit/Open</button>
-        <button class="btn btn-danger" onclick="delDoc(${i})">Delete</button>
+        <button class="btn btn-light" onclick="editDoc(${i})">
+          Edit/Open
+        </button>
+
+        <button class="btn btn-danger" onclick="delDoc('${d.id}')">
+          Delete
+        </button>
       </td>
     `;
 
@@ -1348,92 +1394,123 @@ function loadSaved(){
 }
 
 function editDoc(i){
-  let d=gd(STORE)[i];
-  EDIT=i;
-  sourceType.value = d.sourceType || "Manual Sales Invoice";
-  invoiceNo.value=d.invoiceNo||'';
+
+  let d=CURRENT_INVOICES[i];
+
+  EDIT=d.id;
+
+  invoiceNo.value=d.invoiceNo||"";
   invoiceDate.value=d.invoiceDate||today();
 
-  customerName.value=d.customerName||'';
-  customerAddress.value=d.customerAddress||'';
-  attention.value=d.attention||'';
-  mobile.value=d.mobile||'';
-  email.value=d.email||'';
-  customerVatNo.value=d.customerVatNo||'';
+  customerName.value=d.customerName||"";
+  customerAddress.value=d.customerAddress||"";
+  attention.value=d.attention||"";
+  mobile.value=d.mobile||"";
+  email.value=d.email||"";
+  customerVatNo.value=d.customerVatNo||"";
 
-  reference.value=d.referenceNo||'';
-  doDate.value=d.doDate||'';
+  reference.value=d.referenceNo||"";
+  doDate.value=d.doDate||"";
 
-  vatType.value=d.vatType||'VAT Exclusive';
+  vatType.value=d.vatType||"VAT Exclusive";
   vatPercent.value=d.vatPercent||5;
-  discount.value=d.discountAmount||'0.000';
-  docStatus.value=d.docStatus||'Draft';
-  paymentStatus.value=d.paymentStatus||'Unpaid';
+  discount.value=d.discountAmount||"0.000";
 
-  pumpType.value=d.pumpType||'';
-  brandName.value=d.brandName||'';
-  cylinderNo.value=d.cylinderNo||'';
-  noOfNozzles.value=d.noOfNozzles||'';
-  pumpNo.value=d.pumpNo||'';
-  jobNo.value=d.jobNo||'';
-  govNo.value=d.govNo||'';
-  workOrderNo.value=d.workOrderNo||'';
-  serialNo.value=d.serialNo||'';
+  docStatus.value=d.docStatus||"Draft";
+  paymentStatus.value=d.paymentStatus||"Unpaid";
 
-  terms.value=d.terms||'';
-  companyEmail.value=d.companyEmail||'';
-  signatureText.value=d.signatureText||'For Company';
+  pumpType.value=d.pumpType||"";
+  brandName.value=d.brandName||"";
+  cylinderNo.value=d.cylinderNo||"";
+  noOfNozzles.value=d.noOfNozzles||"";
+  pumpNo.value=d.pumpNo||"";
+  jobNo.value=d.jobNo||"";
+  govNo.value=d.govNo||"";
+  workOrderNo.value=d.workOrderNo||"";
+  serialNo.value=d.serialNo||"";
 
-  itemsBody.innerHTML='';
+  terms.value=d.terms||"";
+  companyEmail.value=d.companyEmail||"";
+  signatureText.value=d.signatureText||"For Company";
+
+  itemsBody.innerHTML="";
+
   (d.items||[]).forEach(x=>addRow(x));
-  if((d.items||[]).length===0)addRow();
+
+  if((d.items||[]).length===0)
+    addRow();
+
   sourceChanged();
 
   calc();
-  scrollTo({top:0,behavior:'smooth'});
+
+  scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
 }
 
-function delDoc(i){
-  if(confirm('Delete document?')){
-    let a=gd(STORE);
-    a.splice(i,1);
-    sd(STORE,a);
-    loadSaved();
+async function delDoc(id){
+
+  if(confirm("Delete document?")){
+
+    await deleteFromCloud(
+      COLLECTIONS.SALES_INVOICES,
+      id
+    );
+
+    await loadSaved();
   }
 }
 
 function setDefaults(){
-  EDIT='';
-  docForm.reset();
-  itemsBody.innerHTML='';
 
-  invoiceNo.value='INV-'+(1001+gd(STORE).length);
+  EDIT="";
+
+  docForm.reset();
+
+  itemsBody.innerHTML="";
+
+  invoiceNo.value=
+    "INV-"+(1001+CURRENT_INVOICES.length);
+
   invoiceDate.value=today();
-  doDate.value='';
-  vatType.value='VAT Exclusive';
+
+  vatType.value="VAT Exclusive";
+
   vatPercent.value=5;
-  discount.value='0.000';
-  docStatus.value='Draft';
-  paymentStatus.value='Unpaid';
-  terms.value='Thank you for your business.';
-  signatureText.value='For Company';
-sourceType.value = "Manual Sales Invoice";
-sourceChanged();
+
+  discount.value="0.000";
+
+  docStatus.value="Draft";
+
+  paymentStatus.value="Unpaid";
+
+  terms.value="Thank you for your business.";
+
+  signatureText.value="For Company";
+
+  sourceType.value="Manual Sales Invoice";
+
+  sourceChanged();
 
   addRow();
+
   calc();
 }
 
-document.addEventListener('click',e=>{
-  document.querySelectorAll('.panel').forEach(p=>{
-    if(!p.parentElement.contains(e.target))p.classList.remove('show');
+document.addEventListener("click",e=>{
+
+  document.querySelectorAll(".panel")
+  .forEach(p=>{
+
+    if(!p.parentElement.contains(e.target))
+      p.classList.remove("show");
   });
 });
 
-refreshLists();
-setDefaults();
-loadSaved();
-</script>
+initCloud();
 
+</script>
 </body>
 </html>

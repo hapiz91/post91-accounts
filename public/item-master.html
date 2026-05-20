@@ -6,7 +6,9 @@
 <title>Item Master | Post91 Accounts</title>
 
 <style>
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
 body{
   margin:0;
@@ -153,13 +155,21 @@ th{
   display:none;
 }
 
+.loading{
+  color:#0d6efd;
+  font-weight:900;
+  padding:15px;
+}
+
 @media(max-width:1000px){
+
   .grid,.mode-box{
     grid-template-columns:repeat(2,1fr);
   }
 }
 
 @media(max-width:700px){
+
   .grid,.mode-box{
     grid-template-columns:1fr;
   }
@@ -176,16 +186,21 @@ th{
 <body>
 
 <div class="header">
+
   <div>
     <h1>Item Master</h1>
     <p>Create items, categories, brands and machine/pump types.</p>
   </div>
 
-  <a class="back" href="/dashboard.html">Back</a>
+  <a class="back" href="/dashboard.html">
+    Back
+  </a>
+
 </div>
 
 <div class="note">
-  You can create standalone categories, brands and machine/pump types without creating full items.
+  Item Master is now connected to Firebase Firestore.
+  Data will sync between laptop, mobile and cloud automatically.
 </div>
 
 <div class="card">
@@ -194,20 +209,36 @@ th{
 
   <div class="mode-box">
 
-    <div class="mode active" onclick="setMode('ITEM')" id="modeITEM">
+    <div class="mode active"
+      onclick="setMode('ITEM')"
+      id="modeITEM">
+
       Create Item
+
     </div>
 
-    <div class="mode" onclick="setMode('CATEGORY')" id="modeCATEGORY">
+    <div class="mode"
+      onclick="setMode('CATEGORY')"
+      id="modeCATEGORY">
+
       Create Category
+
     </div>
 
-    <div class="mode" onclick="setMode('BRAND')" id="modeBRAND">
+    <div class="mode"
+      onclick="setMode('BRAND')"
+      id="modeBRAND">
+
       Create Brand
+
     </div>
 
-    <div class="mode" onclick="setMode('TYPE')" id="modeTYPE">
+    <div class="mode"
+      onclick="setMode('TYPE')"
+      id="modeTYPE">
+
       Create Pump / Machine Type
+
     </div>
 
   </div>
@@ -306,8 +337,21 @@ th{
   </div>
 
   <div class="btn-row">
-    <button class="btn" onclick="saveData()">Save</button>
-    <button class="btn btn-light" onclick="clearForm()">Clear</button>
+
+    <button class="btn"
+      onclick="saveData()">
+
+      Save
+
+    </button>
+
+    <button class="btn btn-light"
+      onclick="clearForm()">
+
+      Clear
+
+    </button>
+
   </div>
 
 </div>
@@ -317,8 +361,11 @@ th{
   <h2>Saved Items</h2>
 
   <table>
+
     <thead>
+
       <tr>
+
         <th>Item Name</th>
         <th>Part No</th>
         <th>OEM No</th>
@@ -328,28 +375,50 @@ th{
         <th>Selling Price</th>
         <th>Status</th>
         <th>Action</th>
+
       </tr>
+
     </thead>
 
     <tbody id="itemBody"></tbody>
+
   </table>
 
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="/firebase-config.js"></script>
+
 <script>
-const ITEM_KEY = "post91Items";
-const CATEGORY_KEY = "post91Categories";
-const BRAND_KEY = "post91Brands";
-const TYPE_KEY = "post91MachineTypes";
+
+const ITEM_COLLECTION = "items";
+const CATEGORY_COLLECTION = "categories";
+const BRAND_COLLECTION = "brands";
+const TYPE_COLLECTION = "machineTypes";
 
 let currentMode = "ITEM";
 
-function gd(k){
-  return JSON.parse(localStorage.getItem(k)||"[]");
-}
+let CURRENT_ITEMS = [];
 
-function sd(k,v){
-  localStorage.setItem(k,JSON.stringify(v));
+function getCurrentCompanyId(){
+
+  try{
+
+    const user =
+      JSON.parse(localStorage.getItem("post91CurrentUser") || "{}");
+
+    return user.companyId ||
+           user.businessId ||
+           user.email ||
+           "default-company";
+
+  }catch(e){
+
+    return "default-company";
+  }
 }
 
 function setMode(mode){
@@ -399,11 +468,17 @@ function setMode(mode){
   }
 }
 
-function loadDropdowns(){
+async function loadDropdowns(){
 
-  category.innerHTML='<option value="">Select Category</option>';
+  category.innerHTML =
+    '<option value="">Select Category</option>';
 
-  gd(CATEGORY_KEY).forEach(c=>{
+  let categorySnap =
+    await db.collection(CATEGORY_COLLECTION).get();
+
+  categorySnap.forEach(doc=>{
+
+    let c = doc.data();
 
     let o=document.createElement("option");
 
@@ -413,9 +488,15 @@ function loadDropdowns(){
     category.appendChild(o);
   });
 
-  brand.innerHTML='<option value="">Select Brand</option>';
+  brand.innerHTML =
+    '<option value="">Select Brand</option>';
 
-  gd(BRAND_KEY).forEach(b=>{
+  let brandSnap =
+    await db.collection(BRAND_COLLECTION).get();
+
+  brandSnap.forEach(doc=>{
+
+    let b = doc.data();
 
     let o=document.createElement("option");
 
@@ -425,9 +506,15 @@ function loadDropdowns(){
     brand.appendChild(o);
   });
 
-  machineType.innerHTML='<option value="">Select Type</option>';
+  machineType.innerHTML =
+    '<option value="">Select Type</option>';
 
-  gd(TYPE_KEY).forEach(t=>{
+  let typeSnap =
+    await db.collection(TYPE_COLLECTION).get();
+
+  typeSnap.forEach(doc=>{
+
+    let t = doc.data();
 
     let o=document.createElement("option");
 
@@ -438,113 +525,137 @@ function loadDropdowns(){
   });
 }
 
-function saveData(){
+async function saveData(){
 
-  if(currentMode==="CATEGORY"){
+  try{
 
-    let val=categoryOnly.value.trim();
+    if(currentMode==="CATEGORY"){
 
-    if(!val)return alert("Enter category");
+      let val = categoryOnly.value.trim();
 
-    let arr=gd(CATEGORY_KEY);
+      if(!val)
+        return alert("Enter category");
 
-    arr.push({
-      name:val,
-      createdAt:new Date().toISOString()
-    });
+      await db.collection(CATEGORY_COLLECTION).add({
 
-    sd(CATEGORY_KEY,arr);
+        name:val,
 
-    alert("Category saved");
+        companyId:getCurrentCompanyId(),
 
-    categoryOnly.value="";
+        createdAt:new Date().toISOString(),
+        updatedAt:new Date().toISOString()
+      });
 
-    loadDropdowns();
+      alert("Category saved");
 
-    return;
+      categoryOnly.value="";
+
+      loadDropdowns();
+
+      return;
+    }
+
+    if(currentMode==="BRAND"){
+
+      let val = brandOnly.value.trim();
+
+      if(!val)
+        return alert("Enter brand");
+
+      await db.collection(BRAND_COLLECTION).add({
+
+        name:val,
+
+        companyId:getCurrentCompanyId(),
+
+        createdAt:new Date().toISOString(),
+        updatedAt:new Date().toISOString()
+      });
+
+      alert("Brand saved");
+
+      brandOnly.value="";
+
+      loadDropdowns();
+
+      return;
+    }
+
+    if(currentMode==="TYPE"){
+
+      let val = typeOnly.value.trim();
+
+      if(!val)
+        return alert("Enter type");
+
+      await db.collection(TYPE_COLLECTION).add({
+
+        name:val,
+
+        companyId:getCurrentCompanyId(),
+
+        createdAt:new Date().toISOString(),
+        updatedAt:new Date().toISOString()
+      });
+
+      alert("Type saved");
+
+      typeOnly.value="";
+
+      loadDropdowns();
+
+      return;
+    }
+
+    let rec = {
+
+      itemName:itemName.value.trim(),
+
+      partNo:partNo.value.trim(),
+
+      oemNo:oemNo.value.trim(),
+
+      unit:unit.value.trim(),
+
+      category:category.value,
+
+      brand:brand.value,
+
+      machineType:machineType.value,
+
+      sellingPrice:Number(sellingPrice.value || 0),
+
+      costPrice:Number(costPrice.value || 0),
+
+      openingStock:Number(openingStock.value || 0),
+
+      reorderLevel:Number(reorderLevel.value || 0),
+
+      status:(status.value || "Active"),
+
+      description:description.value.trim(),
+
+      companyId:getCurrentCompanyId(),
+
+      createdAt:new Date().toISOString(),
+
+      updatedAt:new Date().toISOString()
+    };
+
+    await db.collection(ITEM_COLLECTION).add(rec);
+
+    alert("Item saved successfully");
+
+    clearForm();
+
+    loadItems();
+
+  }catch(err){
+
+    console.error(err);
+
+    alert("Error saving data to Firebase");
   }
-
-  if(currentMode==="BRAND"){
-
-    let val=brandOnly.value.trim();
-
-    if(!val)return alert("Enter brand");
-
-    let arr=gd(BRAND_KEY);
-
-    arr.push({
-      name:val,
-      createdAt:new Date().toISOString()
-    });
-
-    sd(BRAND_KEY,arr);
-
-    alert("Brand saved");
-
-    brandOnly.value="";
-
-    loadDropdowns();
-
-    return;
-  }
-
-  if(currentMode==="TYPE"){
-
-    let val=typeOnly.value.trim();
-
-    if(!val)return alert("Enter type");
-
-    let arr=gd(TYPE_KEY);
-
-    arr.push({
-      name:val,
-      createdAt:new Date().toISOString()
-    });
-
-    sd(TYPE_KEY,arr);
-
-    alert("Type saved");
-
-    typeOnly.value="";
-
-    loadDropdowns();
-
-    return;
-  }
-
-  let items=gd(ITEM_KEY);
-
-  items.push({
-
-    itemName:itemName.value.trim(),
-    partNo:partNo.value.trim(),
-    oemNo:oemNo.value.trim(),
-    unit:unit.value.trim(),
-
-    category:category.value,
-    brand:brand.value,
-    machineType:machineType.value,
-
-    sellingPrice:Number(sellingPrice.value||0),
-    costPrice:Number(costPrice.value||0),
-
-    openingStock:Number(openingStock.value||0),
-    reorderLevel:Number(reorderLevel.value||0),
-
-    status:status.value,
-
-    description:description.value.trim(),
-
-    createdAt:new Date().toISOString()
-  });
-
-  sd(ITEM_KEY,items);
-
-  alert("Item saved successfully");
-
-  clearForm();
-
-  loadItems();
 }
 
 function clearForm(){
@@ -567,13 +678,34 @@ function clearForm(){
   status.value="Active";
 }
 
-function loadItems(){
+async function loadItems(){
 
-  let items=gd(ITEM_KEY);
+  itemBody.innerHTML = `
+    <tr>
+      <td colspan="9" class="loading">
+        Loading items...
+      </td>
+    </tr>
+  `;
+
+  let snapshot =
+    await db.collection(ITEM_COLLECTION).get();
+
+  CURRENT_ITEMS = [];
+
+  snapshot.forEach(doc=>{
+
+    CURRENT_ITEMS.push({
+
+      id:doc.id,
+
+      ...doc.data()
+    });
+  });
 
   itemBody.innerHTML="";
 
-  items.forEach((i,index)=>{
+  CURRENT_ITEMS.forEach((i,index)=>{
 
     let tr=document.createElement("tr");
 
@@ -589,10 +721,14 @@ function loadItems(){
       <td>${i.status||"Active"}</td>
 
       <td>
+
         <button class="btn btn-danger"
-          onclick="deleteItem(${index})">
+          onclick="deleteItem('${i.id}')">
+
           Delete
+
         </button>
+
       </td>
     `;
 
@@ -600,21 +736,22 @@ function loadItems(){
   });
 }
 
-function deleteItem(index){
+async function deleteItem(id){
 
-  if(!confirm("Delete item?")) return;
+  if(!confirm("Delete item?"))
+    return;
 
-  let items=gd(ITEM_KEY);
-
-  items.splice(index,1);
-
-  sd(ITEM_KEY,items);
+  await db.collection(ITEM_COLLECTION)
+    .doc(id)
+    .delete();
 
   loadItems();
 }
 
 loadDropdowns();
+
 loadItems();
+
 </script>
 
 </body>

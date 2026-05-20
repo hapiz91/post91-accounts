@@ -200,95 +200,280 @@ button:hover{
 
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/firebase-db.js"></script>
+<script src="/permission-guard.js"></script>
+
 <script>
-function getUsers(){
-  return JSON.parse(localStorage.getItem("post91Users") || "[]");
-}
 
 function showError(msg){
-  const box = document.getElementById("errorBox");
+
+  const box =
+    document.getElementById("errorBox");
+
   box.style.display = "block";
+
   box.innerHTML = msg;
 
-  document.getElementById("successBox").style.display = "none";
+  document.getElementById("successBox")
+    .style.display = "none";
 }
 
 function showSuccess(msg){
-  const box = document.getElementById("successBox");
+
+  const box =
+    document.getElementById("successBox");
+
   box.style.display = "block";
+
   box.innerHTML = msg;
 
-  document.getElementById("errorBox").style.display = "none";
+  document.getElementById("errorBox")
+    .style.display = "none";
 }
 
-document.getElementById("loginForm")
-.addEventListener("submit", async function(e){
+function showPlan(user){
 
-  e.preventDefault();
+  const planBox =
+    document.getElementById("planBox");
 
-  const email =
-    document.getElementById("email")
-    .value
-    .trim()
-    .toLowerCase();
+  planBox.style.display = "block";
 
-  const password =
-    document.getElementById("password")
-    .value;
+  planBox.innerHTML = `
 
-  try {
+    <strong>Business:</strong>
+    ${user.businessName || "-"}
 
-    const response = await fetch("/api/post91/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        email,
-        password
-      })
-    });
+    <br>
 
-    const data = await response.json();
+    <strong>Selected Plan:</strong>
+    ${user.selectedPlan || "-"}
 
-    const planBox = document.getElementById("planBox");
+    <br>
 
-    if(data.user){
-      planBox.style.display = "block";
-      planBox.innerHTML = `
-        <strong>Business:</strong> ${data.user.businessName || "-"}<br>
-        <strong>Selected Plan:</strong> ${data.user.selectedPlan || "-"}<br>
-        <strong>Registration Status:</strong> ${data.user.registrationStatus || "-"}<br>
-        <strong>Account Status:</strong>
-        ${data.user.accountActive ? "Active" : "Inactive"}
-      `;
+    <strong>Registration Status:</strong>
+    ${user.registrationStatus || "-"}
+
+    <br>
+
+    <strong>Account Status:</strong>
+
+    ${
+      user.accountActive !== false
+      ? "Active"
+      : "Inactive"
     }
 
-    if(!response.ok){
-      showError(data.message || "Login failed.");
-      return;
-    }
+    <br>
 
-    localStorage.setItem(
-      "post91CurrentUser",
-      JSON.stringify(data.user)
+    <strong>Role:</strong>
+    ${user.role || "User"}
+
+  `;
+}
+
+async function loginUser(email,password){
+
+  /* =====================================================
+     1. CHECK POST91 USERS
+  ===================================================== */
+
+  const users =
+    await loadFromCloud("post91Users");
+
+  let user =
+    users.find(u=>
+
+      String(u.email || "")
+      .toLowerCase()
+
+      ===
+
+      String(email || "")
+      .toLowerCase()
+
     );
 
-    showSuccess("Login successful. Redirecting...");
+  /* =====================================================
+     2. CHECK COMPANY REGISTRATION USERS
+  ===================================================== */
 
-    setTimeout(()=>{
-      window.location.href = "/dashboard.html";
-    },1200);
+  if(!user){
 
-  } catch(error){
+    const regs =
+      await loadFromCloud("post91Registrations");
 
-    console.error(error);
-    showError("Unable to login. Please try again.");
+    user =
+      regs.find(u=>
 
+        String(u.email || "")
+        .toLowerCase()
+
+        ===
+
+        String(email || "")
+        .toLowerCase()
+
+      );
   }
 
-});
-</script>
+  /* =====================================================
+     3. VALIDATE USER
+  ===================================================== */
 
+  if(!user){
+
+    showError("User not found.");
+
+    return;
+  }
+
+  if(
+    String(user.password || "")
+    !==
+    String(password || "")
+  ){
+
+    showError("Incorrect password.");
+
+    return;
+  }
+
+  if(
+    user.accountActive === false ||
+    user.status === "Inactive"
+  ){
+
+    showError(
+      "Your account is inactive. Please contact admin."
+    );
+
+    return;
+  }
+
+  /* =====================================================
+     4. DEFAULT PERMISSIONS FOR MAIN OWNER
+  ===================================================== */
+
+  if(
+    !user.permissions &&
+    (
+      user.role === "Admin" ||
+      user.registrationStatus === "Approved"
+    )
+  ){
+
+    user.permissions = [
+      "dashboard",
+      "companyProfile",
+      "userManagement",
+      "customerMaster",
+      "supplierMaster",
+      "itemMaster",
+      "cashBankMaster",
+      "quotation",
+      "deliveryOrder",
+      "salesInvoice",
+      "receiptVoucher",
+      "purchaseInvoice",
+      "paymentVoucher",
+      "expenseEntry",
+      "customerLedger",
+      "supplierLedger",
+      "stockLedger",
+      "cashBankLedger",
+      "profitLoss",
+      "vatReport",
+      "backupRestore"
+    ];
+  }
+
+  /* =====================================================
+     5. SAVE SESSION
+  ===================================================== */
+
+  localStorage.setItem(
+    "post91CurrentUser",
+    JSON.stringify(user)
+  );
+
+  sessionStorage.setItem(
+    "post91LoggedIn",
+    "true"
+  );
+
+  showPlan(user);
+
+  showSuccess(
+    "Login successful. Redirecting..."
+  );
+
+  setTimeout(()=>{
+
+    window.location.href =
+      "/dashboard.html";
+
+  },1200);
+}
+
+document
+  .getElementById("loginForm")
+  .addEventListener(
+    "submit",
+    async function(e){
+
+      e.preventDefault();
+
+      const email =
+        document
+        .getElementById("email")
+        .value
+        .trim()
+        .toLowerCase();
+
+      const password =
+        document
+        .getElementById("password")
+        .value;
+
+      if(!email){
+
+        showError(
+          "Please enter email address."
+        );
+
+        return;
+      }
+
+      if(!password){
+
+        showError(
+          "Please enter password."
+        );
+
+        return;
+      }
+
+      try{
+
+        await loginUser(
+          email,
+          password
+        );
+
+      }catch(err){
+
+        console.error(err);
+
+        showError(
+          "Unable to login. Please try again."
+        );
+      }
+    }
+  );
+
+</script>
 </body>
 </html>

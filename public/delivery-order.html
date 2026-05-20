@@ -835,11 +835,22 @@ th{background:#f8fbff}
 <datalist id="catList"></datalist>
 
 <script>
-const STORE = "post91DeliveryOrders";
-let EDIT = "";
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/firebase-db.js"></script>
 
-function gd(k){return JSON.parse(localStorage.getItem(k)||"[]")}
-function sd(k,d){localStorage.setItem(k,JSON.stringify(d))}
+<script>
+let EDIT = "";
+let CURRENT_DOS = [];
+let CLOUD_CUSTOMERS = [];
+let CLOUD_ITEMS = [];
+let CLOUD_CATEGORIES = [];
+let CLOUD_BRANDS = [];
+let CLOUD_TYPES = [];
+let CLOUD_QUOTATIONS = [];
+let COMPANY_PROFILE = {};
+
 function today(){return new Date().toISOString().split("T")[0]}
 function mv(n){return Number(n||0).toFixed(3)}
 function mt(n){return "OMR "+mv(n)}
@@ -851,15 +862,15 @@ function em(c){return c.email||""}
 
 function itn(i){return i.itemName||""}
 function ity(i){return i.machineType||i.vehicleMachinePumpType||""}
-function ibr(i){return i.brandName||i.mainCategoryBrand||i.subCategoryBrand||""}
+function ibr(i){return i.brandName||i.brand||i.mainCategoryBrand||i.subCategoryBrand||""}
 function icat(i){return i.category||i.mainCategory||""}
 function iprice(i){return i.sellingPrice||0}
 function iunit(i){return i.unit||"PCS"}
 
 function isub(i){
   let a=[];
-  if(i.partNumber)a.push("Part No: "+i.partNumber);
-  if(i.oemNumber)a.push("OEM: "+i.oemNumber);
+  if(i.partNumber || i.partNo)a.push("Part No: "+(i.partNumber||i.partNo));
+  if(i.oemNumber || i.oemNo)a.push("OEM: "+(i.oemNumber||i.oemNo));
   return a.join(" | ");
 }
 
@@ -877,52 +888,73 @@ function dl(id,a){
   });
 }
 
+async function initCloudData(){
+  CLOUD_CUSTOMERS = await loadFromCloud(COLLECTIONS.CUSTOMERS);
+  CLOUD_ITEMS = await loadFromCloud(COLLECTIONS.ITEMS);
+  CLOUD_CATEGORIES = await loadFromCloud(COLLECTIONS.CATEGORIES);
+  CLOUD_BRANDS = await loadFromCloud(COLLECTIONS.BRANDS);
+  CLOUD_TYPES = await loadFromCloud(COLLECTIONS.MACHINE_TYPES);
+  CLOUD_QUOTATIONS = await loadFromCloud(COLLECTIONS.QUOTATIONS);
+
+  const profiles = await loadFromCloud("companyProfile");
+  COMPANY_PROFILE = profiles[0] || JSON.parse(localStorage.getItem("post91CompanyProfile") || "{}");
+
+  refreshLists();
+  loadSourceDropdown();
+  setDefaults();
+  await loadSaved();
+}
+
 function refreshLists(){
-  let items=gd("post91Items");
-  dl("typeList",[...gd("post91MachineTypes").map(x=>x.name),...items.map(ity)]);
-  dl("brandList",[...gd("post91Brands").map(x=>x.name),...items.map(ibr)]);
-  dl("catList",[...gd("post91Categories").map(x=>x.name),...items.map(icat)]);
+  dl("typeList",[...CLOUD_TYPES.map(x=>x.name),...CLOUD_ITEMS.map(ity)]);
+  dl("brandList",[...CLOUD_BRANDS.map(x=>x.name),...CLOUD_ITEMS.map(ibr)]);
+  dl("catList",[...CLOUD_CATEGORIES.map(x=>x.name),...CLOUD_ITEMS.map(icat)]);
 }
 
 function openM(id){document.getElementById(id).classList.add("show")}
 function closeM(id){document.getElementById(id).classList.remove("show")}
 
-function saveQuickCustomer(){
-  let a=gd("post91Customers");
-
+async function saveQuickCustomer(){
   let c={
     customerName:qcName.value.trim(),
+    name:qcName.value.trim(),
     contactPerson:qcContactPerson.value.trim(),
     attention:qcContactPerson.value.trim(),
     address:qcAddress.value.trim(),
+    customerAddress:qcAddress.value.trim(),
     mobile:qcMobile.value.trim(),
+    phone:qcMobile.value.trim(),
     email:qcEmail.value.trim(),
     vatNumber:qcVat.value.trim(),
-    creditPeriod:qcCredit.value.trim()
+    creditPeriod:qcCredit.value.trim(),
+    status:"Active"
   };
 
   if(!c.customerName)return alert("Customer name required");
 
-  a.push(c);
-  sd("post91Customers",a);
+  const id = await saveToCloud(COLLECTIONS.CUSTOMERS,c);
+  c.id = id;
+  CLOUD_CUSTOMERS.push(c);
+
   closeM("customerModal");
   fillCustomer(c);
 }
 
-function saveQuickItem(){
-  let a=gd("post91Items");
-
+async function saveQuickItem(){
   let i={
     itemName:qiName.value.trim(),
     machineType:qiType.value.trim(),
     category:qiCategory.value.trim(),
     brandName:qiBrand.value.trim(),
+    brand:qiBrand.value.trim(),
     subCategory:qiSub.value.trim(),
     unit:qiUnit.value,
     partNumber:qiPart.value.trim(),
+    partNo:qiPart.value.trim(),
     oemNumber:qiOem.value.trim(),
-    sellingPrice:qiSell.value||"0.000",
-    purchasePrice:qiPur.value||"0.000",
+    oemNo:qiOem.value.trim(),
+    sellingPrice:Number(qiSell.value||0),
+    purchasePrice:Number(qiPur.value||0),
     status:"Active"
   };
 
@@ -932,8 +964,10 @@ function saveQuickItem(){
 
   if(!i.itemName)return alert("Item name required");
 
-  a.push(i);
-  sd("post91Items",a);
+  const id = await saveToCloud(COLLECTIONS.ITEMS,i);
+  i.id = id;
+  CLOUD_ITEMS.push(i);
+
   refreshLists();
   closeM("itemModal");
 }
@@ -943,7 +977,7 @@ function customerSearch(){
   let p=customerPanel;
   let q=input.value.toLowerCase();
 
-  let list=gd("post91Customers")
+  let list=CLOUD_CUSTOMERS
     .filter(c=>JSON.stringify(c).toLowerCase().includes(q))
     .slice(0,40);
 
@@ -983,7 +1017,7 @@ function sourceChanged(){
 function loadSourceDropdown(){
   sourceSelect.innerHTML = `<option value="">Select Quotation</option>`;
 
-  gd("post91Quotations").forEach((q,i)=>{
+  CLOUD_QUOTATIONS.forEach((q,i)=>{
     let o=document.createElement("option");
     o.value=i;
     o.textContent=`${q.quotationNo || "QT"} - ${q.customerName || "Customer"}`;
@@ -994,7 +1028,7 @@ function loadSourceDropdown(){
 function loadSource(){
   if(sourceSelect.value==="")return alert("Select quotation first.");
 
-  const q = gd("post91Quotations")[sourceSelect.value];
+  const q = CLOUD_QUOTATIONS[sourceSelect.value];
 
   customerName.value=q.customerName||"";
   customerAddress.value=q.customerAddress||"";
@@ -1032,7 +1066,6 @@ function addRow(d=null){
 
   tr.innerHTML=`
     <td><input class="sr" value="${itemsBody.children.length+1}" readonly></td>
-
     <td>
       <div class="search">
         <input class="itemSearch" onfocus="itemSearch(this)" oninput="itemSearch(this)" placeholder="Search item or type manually">
@@ -1040,7 +1073,6 @@ function addRow(d=null){
       </div>
       <div class="small itemMeta"></div>
     </td>
-
     <td><textarea class="desc"></textarea></td>
     <td><input type="number" step=".001" class="qty" value="1" oninput="calc()"></td>
     <td><input class="unit" value="PCS"></td>
@@ -1069,7 +1101,7 @@ function itemSearch(inp){
   let p=row.querySelector(".itemPanel");
   let q=inp.value.toLowerCase();
 
-  let list=gd("post91Items").filter(i=>(i.status||"Active")!=="Inactive");
+  let list=CLOUD_ITEMS.filter(i=>(i.status||"Active")!=="Inactive");
 
   if(filterType.value) list=list.filter(i=>ity(i)===filterType.value);
   if(filterBrand.value) list=list.filter(i=>ibr(i)===filterBrand.value);
@@ -1100,8 +1132,8 @@ function selectItem(r,i){
   r.querySelector(".itemMeta").innerHTML=isub(i);
 
   let desc=itn(i);
-  if(i.partNumber)desc+="\\nPart No: "+i.partNumber;
-  if(i.oemNumber)desc+="\\nOEM: "+i.oemNumber;
+  if(i.partNumber || i.partNo)desc+="\\nPart No: "+(i.partNumber||i.partNo);
+  if(i.oemNumber || i.oemNo)desc+="\\nOEM: "+(i.oemNumber||i.oemNo);
 
   r.querySelector(".desc").value=desc;
   r.querySelector(".unit").value=iunit(i);
@@ -1214,7 +1246,7 @@ function pumpTypeDisplay(){
 }
 
 function updatePreview(){
-  let company = JSON.parse(localStorage.getItem("post91CompanyProfile") || "{}");
+  let company = COMPANY_PROFILE || {};
 
   if(company.letterhead){
     pLetterhead.src = company.letterhead;
@@ -1286,22 +1318,18 @@ function updatePreview(){
     printedRows++;
   });
 
-  let minimumRows = 14;
-
-for(let i = printedRows + 1; i <= minimumRows; i++){
-  let tr=document.createElement("tr");
-
-  tr.innerHTML=`
-    <td style="text-align:center;"></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td class="priceCol"></td>
-    <td class="priceCol"></td>
-  `;
-
-  pItems.appendChild(tr);
-}
+  for(let i = printedRows + 1; i <= 14; i++){
+    let tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td style="text-align:center;"></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td class="priceCol"></td>
+      <td class="priceCol"></td>
+    `;
+    pItems.appendChild(tr);
+  }
 
   let t=silent();
 
@@ -1324,10 +1352,9 @@ for(let i = printedRows + 1; i <= minimumRows; i++){
   });
 }
 
-function saveDoc(e){
+async function saveDoc(e){
   e.preventDefault();
 
-  let a=gd(STORE);
   let t=silent();
   let items=[];
 
@@ -1384,32 +1411,31 @@ function saveDoc(e){
     companyEmail:companyEmail.value,
 
     items,
-    ...t,
-    updatedAt:new Date().toISOString()
+    ...t
   };
 
-  if(EDIT===""){
-    a.push(rec);
-    alert("Delivery Order saved successfully.");
-  }else{
-    a[EDIT]={...a[EDIT],...rec};
-    alert("Delivery Order updated successfully.");
-  }
+  let id = await saveToCloud(COLLECTIONS.DELIVERY_ORDERS,rec,EDIT || null);
 
-  sd(STORE,a);
-  EDIT="";
-  loadSaved();
+  if(id){
+    alert(EDIT ? "Delivery Order updated successfully." : "Delivery Order saved successfully.");
+    EDIT="";
+    await loadSaved();
+  }
 }
 
 function statusBadge(s){
   return `<span class="badge ${(s||"Draft")==="Submitted"?"submitted":"draft"}">${s||"Draft"}</span>`;
 }
 
-function loadSaved(){
+async function loadSaved(){
   let q=(savedSearch.value||"").toLowerCase();
   savedBody.innerHTML="";
 
-  gd(STORE).forEach((d,i)=>{
+  CURRENT_DOS = await loadFromCloud(COLLECTIONS.DELIVERY_ORDERS);
+
+  CURRENT_DOS.sort((a,b)=>new Date(b.doDate||"1900-01-01")-new Date(a.doDate||"1900-01-01"));
+
+  CURRENT_DOS.forEach((d,i)=>{
     if(q && !JSON.stringify(d).toLowerCase().includes(q))return;
 
     let tr=document.createElement("tr");
@@ -1422,7 +1448,7 @@ function loadSaved(){
       <td>${statusBadge(d.docStatus)}</td>
       <td>
         <button class="btn btn-light" onclick="editDoc(${i})">Edit/Open</button>
-        <button class="btn btn-danger" onclick="delDoc(${i})">Delete</button>
+        <button class="btn btn-danger" onclick="delDoc('${d.id}')">Delete</button>
       </td>
     `;
 
@@ -1431,8 +1457,8 @@ function loadSaved(){
 }
 
 function editDoc(i){
-  let d=gd(STORE)[i];
-  EDIT=i;
+  let d=CURRENT_DOS[i];
+  EDIT=d.id;
 
   doNo.value=d.doNo||"";
   doDate.value=d.doDate||today();
@@ -1468,7 +1494,6 @@ function editDoc(i){
 
   itemsBody.innerHTML="";
   (d.items||[]).forEach(item=>addRow(item));
-
   if((d.items||[]).length===0)addRow();
 
   sourceChanged();
@@ -1476,12 +1501,10 @@ function editDoc(i){
   scrollTo({top:0,behavior:"smooth"});
 }
 
-function delDoc(i){
+async function delDoc(id){
   if(confirm("Delete this delivery order?")){
-    let a=gd(STORE);
-    a.splice(i,1);
-    sd(STORE,a);
-    loadSaved();
+    await deleteFromCloud(COLLECTIONS.DELIVERY_ORDERS,id);
+    await loadSaved();
   }
 }
 
@@ -1490,7 +1513,7 @@ function setDefaults(){
   docForm.reset();
   itemsBody.innerHTML="";
 
-  doNo.value="DO-"+(1001+gd(STORE).length);
+  doNo.value="DO-"+(1001+CURRENT_DOS.length);
   doDate.value=today();
   sourceType.value="Manual Delivery Order";
   printMode.value="Without Price";
@@ -1512,11 +1535,7 @@ document.addEventListener("click",e=>{
   });
 });
 
-refreshLists();
-loadSourceDropdown();
-setDefaults();
-loadSaved();
+initCloudData();
 </script>
-
 </body>
 </html>

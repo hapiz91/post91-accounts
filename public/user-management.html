@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Management | Post91 Accounts</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.header h1{margin:0;color:#0d6efd}
+.back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+label{display:block;font-weight:800;margin-bottom:6px}
+input,select{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
+.btn{border:0;background:#0d6efd;color:white;padding:11px 15px;border-radius:11px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-danger{background:#dc2626}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #dbe4f0;padding:8px;vertical-align:top}
+th{background:#f8fbff;text-align:left}
+.permissions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.perm{background:#f8fbff;border:1px solid #dbe4f0;border-radius:12px;padding:10px;font-weight:800}
+.badge{padding:5px 10px;border-radius:99px;font-size:12px;font-weight:900}
+.active{background:#dcfce7;color:#166534}
+.inactive{background:#fee2e2;color:#991b1b}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+@media(max-width:900px){.grid,.permissions{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <h1>User Management</h1>
+    <p>Create users and control module access limitations.</p>
+  </div>
+  <a class="back" href="/dashboard.html">Back</a>
+</div>
+
+<div class="note">
+  This page stores users in Firebase. Login restriction logic can be connected next so each user sees only allowed modules.
+</div>
+
+<div class="card">
+  <h2 id="formTitle">Create User</h2>
+
+  <div class="grid">
+    <div>
+      <label>Full Name *</label>
+      <input id="fullName">
+    </div>
+
+    <div>
+      <label>Email / Login ID *</label>
+      <input id="email">
+    </div>
+
+    <div>
+      <label>Mobile</label>
+      <input id="mobile">
+    </div>
+
+    <div>
+      <label>Role</label>
+      <select id="role">
+        <option>Admin</option>
+        <option>Accountant</option>
+        <option>Sales User</option>
+        <option>Viewer</option>
+        <option>Custom</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Password / Temporary Password</label>
+      <input id="password" placeholder="For MVP record only">
+    </div>
+
+    <div>
+      <label>Status</label>
+      <select id="status">
+        <option>Active</option>
+        <option>Inactive</option>
+      </select>
+    </div>
+  </div>
+
+  <h3>Module Permissions</h3>
+
+  <div class="permissions" id="permissionBox"></div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="saveUser()">Save User</button>
+    <button class="btn btn-light" onclick="clearForm()">Clear</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Saved Users</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email/Login</th>
+        <th>Role</th>
+        <th>Allowed Modules</th>
+        <th>Status</th>
+        <th style="width:190px;">Action</th>
+      </tr>
+    </thead>
+    <tbody id="userBody"></tbody>
+  </table>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/firebase-db.js"></script>
+
+<script>
+let EDIT_ID="";
+let CURRENT_USERS=[];
+
+const MODULES=[
+  "dashboard",
+  "companyProfile",
+  "userManagement",
+  "customerMaster",
+  "supplierMaster",
+  "itemMaster",
+  "cashBankMaster",
+  "quotation",
+  "deliveryOrder",
+  "salesInvoice",
+  "receiptVoucher",
+  "purchaseInvoice",
+  "paymentVoucher",
+  "expenseEntry",
+  "customerLedger",
+  "supplierLedger",
+  "stockLedger",
+  "cashBankLedger",
+  "profitLoss",
+  "vatReport",
+  "backupRestore"
+];
+
+const MODULE_LABELS={
+  dashboard:"Dashboard",
+  companyProfile:"Company Profile",
+  userManagement:"User Management",
+  customerMaster:"Customer Master",
+  supplierMaster:"Supplier Master",
+  itemMaster:"Item Master",
+  cashBankMaster:"Cash / Bank Master",
+  quotation:"Quotation",
+  deliveryOrder:"Delivery Order",
+  salesInvoice:"Sales Invoice",
+  receiptVoucher:"Receipt Voucher",
+  purchaseInvoice:"Purchase Invoice",
+  paymentVoucher:"Payment Voucher",
+  expenseEntry:"Expense Entry",
+  customerLedger:"Customer Ledger",
+  supplierLedger:"Supplier Ledger",
+  stockLedger:"Stock Ledger",
+  cashBankLedger:"Cash / Bank Ledger",
+  profitLoss:"Profit & Loss",
+  vatReport:"VAT Report",
+  backupRestore:"Backup & Restore"
+};
+
+function renderPermissions(selected=[]){
+  permissionBox.innerHTML="";
+
+  MODULES.forEach(m=>{
+    let div=document.createElement("label");
+    div.className="perm";
+    div.innerHTML=`
+      <input type="checkbox" class="permCheck" value="${m}" ${selected.includes(m) ? "checked" : ""}>
+      ${MODULE_LABELS[m]}
+    `;
+    permissionBox.appendChild(div);
+  });
+}
+
+function getSelectedPermissions(){
+  return [...document.querySelectorAll(".permCheck:checked")].map(x=>x.value);
+}
+
+function badge(s){
+  return `<span class="badge ${(s||"Active")==="Active" ? "active" : "inactive"}">${s||"Active"}</span>`;
+}
+
+async function loadUsers(){
+  userBody.innerHTML=`<tr><td colspan="6">Loading users...</td></tr>`;
+
+  CURRENT_USERS=await loadFromCloud("post91Users");
+
+  userBody.innerHTML="";
+
+  CURRENT_USERS.forEach((u,i)=>{
+    let tr=document.createElement("tr");
+
+    let allowed=(u.permissions||[]).map(x=>MODULE_LABELS[x]||x).join(", ");
+
+    tr.innerHTML=`
+      <td><b>${u.fullName||"-"}</b><br><small>${u.mobile||""}</small></td>
+      <td>${u.email||"-"}</td>
+      <td>${u.role||"-"}</td>
+      <td>${allowed || "-"}</td>
+      <td>${badge(u.status)}</td>
+      <td>
+        <button class="btn btn-light" onclick="editUser(${i})">Edit</button>
+        <button class="btn btn-danger" onclick="deleteUser('${u.id}')">Delete</button>
+      </td>
+    `;
+
+    userBody.appendChild(tr);
+  });
+
+  if(CURRENT_USERS.length===0){
+    userBody.innerHTML=`<tr><td colspan="6">No users created yet.</td></tr>`;
+  }
+}
+
+async function saveUser(){
+  let name=fullName.value.trim();
+  let mail=email.value.trim();
+
+  if(!name){
+    alert("Full name is required.");
+    return;
+  }
+
+  if(!mail){
+    alert("Email/Login ID is required.");
+    return;
+  }
+
+  let rec={
+    fullName:name,
+    email:mail,
+    mobile:mobile.value.trim(),
+    role:role.value,
+    password:password.value.trim(),
+    status:status.value,
+    permissions:getSelectedPermissions()
+  };
+
+  if(rec.role==="Admin" && rec.permissions.length===0){
+    rec.permissions=[...MODULES];
+  }
+
+  let id=await saveToCloud("post91Users",rec,EDIT_ID || null);
+
+  if(id){
+    alert(EDIT_ID ? "User updated successfully." : "User created successfully.");
+    clearForm();
+    await loadUsers();
+  }
+}
+
+function editUser(i){
+  let u=CURRENT_USERS[i];
+
+  EDIT_ID=u.id;
+  formTitle.textContent="Edit User";
+
+  fullName.value=u.fullName||"";
+  email.value=u.email||"";
+  mobile.value=u.mobile||"";
+  role.value=u.role||"Custom";
+  password.value=u.password||"";
+  status.value=u.status||"Active";
+
+  renderPermissions(u.permissions||[]);
+
+  scrollTo({top:0,behavior:"smooth"});
+}
+
+async function deleteUser(id){
+  if(!confirm("Delete this user?"))return;
+
+  await deleteFromCloud("post91Users",id);
+  await loadUsers();
+}
+
+function clearForm(){
+  EDIT_ID="";
+  formTitle.textContent="Create User";
+
+  fullName.value="";
+  email.value="";
+  mobile.value="";
+  role.value="Custom";
+  password.value="";
+  status.value="Active";
+
+  renderPermissions([]);
+}
+
+renderPermissions([]);
+loadUsers();
+</script>
+
+</body>
+</html>

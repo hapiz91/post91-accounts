@@ -380,6 +380,7 @@ if(currentUser && !currentUser.accountActive){
 
       <div class="nav-title">Masters</div>
       <a href="/company-profile.html">Company Profile</a>
+      <a href="/user-management.html">User Management</a>
       <a href="/customer-master.html">Customer Master</a>
       <a href="/supplier-master.html">Supplier Master</a>
       <a href="/item-master.html">Item Master</a>
@@ -457,6 +458,8 @@ if(currentUser && !currentUser.accountActive){
       <h2>Masters</h2>
       <div class="module-grid">
         <a class="module" href="/company-profile.html"><h3>Company Profile</h3><p>Company details, VAT, CR, contacts and letterhead.</p></a>
+       <a class="module" href="/user-management.html"><h3>User Management</h3><p>Create users and control module access limitations.</p>
+</a>
         <a class="module" href="/customer-master.html"><h3>Customer Master</h3><p>Create, edit and manage customer records.</p></a>
         <a class="module" href="/supplier-master.html"><h3>Supplier Master</h3><p>Create, edit and manage supplier records.</p></a>
         <a class="module" href="/item-master.html"><h3>Item Master</h3><p>Items, parts, OEM, brands, categories and pricing.</p></a>
@@ -513,9 +516,6 @@ if(currentUser && !currentUser.accountActive){
 </div>
 
 <script>
-function gd(k){
-  return JSON.parse(localStorage.getItem(k)||"[]");
-}
 
 function mv(n){
   return Number(n||0).toFixed(3);
@@ -534,95 +534,270 @@ function isCancelled(s){
 }
 
 function moneyFromAny(obj, keys){
+
   for(let k of keys){
-    if(obj[k] !== undefined && obj[k] !== null && obj[k] !== ""){
+
+    if(
+      obj[k] !== undefined &&
+      obj[k] !== null &&
+      obj[k] !== ""
+    ){
       return Number(obj[k] || 0);
     }
   }
+
   return 0;
 }
 
-function loadDashboard(){
-  let sales=gd("post91SalesInvoices").filter(x=>!isCancelled(x.docStatus));
-  let receipts=gd("post91ReceiptVouchers").filter(x=>!isCancelled(x.docStatus));
-  let purchases=gd("post91PurchaseInvoices").filter(x=>!isCancelled(x.docStatus));
-  let expenses=gd("post91ExpenseEntries").filter(x=>!isCancelled(x.status));
+async function loadDashboard(){
 
-  let salesAmount=sales.reduce((s,x)=>s+moneyFromAny(x,["grandTotal","totalAmount","netTotal","amount"]),0);
-  let receiptAmount=receipts.reduce((s,x)=>s+moneyFromAny(x,["totalReceiptAmount","amountReceived","amount"]),0);
-  let purchaseAmount=purchases.reduce((s,x)=>s+moneyFromAny(x,["grandTotal","totalAmount","netTotal","amount"]),0);
-  let expenseAmount=expenses.reduce((s,x)=>s+moneyFromAny(x,["totalAmount","amount","baseAmount"]),0);
+  recentSalesBody.innerHTML=`
+    <tr>
+      <td colspan="5">Loading dashboard...</td>
+    </tr>
+  `;
 
-  totalSales.textContent=mt(salesAmount);
-  totalReceipts.textContent=mt(receiptAmount);
-  totalPurchases.textContent=mt(purchaseAmount);
-  totalExpenses.textContent=mt(expenseAmount);
+  const sales =
+    (await loadFromCloud(COLLECTIONS.SALES_INVOICES))
+    .filter(x=>!isCancelled(x.docStatus));
+
+  const receipts =
+    (await loadFromCloud(COLLECTIONS.RECEIPTS))
+    .filter(x=>!isCancelled(x.docStatus));
+
+  const purchases =
+    (await loadFromCloud(COLLECTIONS.PURCHASE_INVOICES))
+    .filter(x=>!isCancelled(x.docStatus));
+
+  const expenses =
+    (await loadFromCloud(COLLECTIONS.EXPENSES))
+    .filter(x=>!isCancelled(x.status));
+
+  let salesAmount =
+    sales.reduce((s,x)=>
+      s+moneyFromAny(
+        x,
+        ["grandTotal","totalAmount","netTotal","amount"]
+      )
+    ,0);
+
+  let receiptAmount =
+    receipts.reduce((s,x)=>
+      s+moneyFromAny(
+        x,
+        ["totalReceiptAmount","amountReceived","amount"]
+      )
+    ,0);
+
+  let purchaseAmount =
+    purchases.reduce((s,x)=>
+      s+moneyFromAny(
+        x,
+        ["grandTotal","totalAmount","netTotal","amount"]
+      )
+    ,0);
+
+  let expenseAmount =
+    expenses.reduce((s,x)=>
+      s+moneyFromAny(
+        x,
+        ["totalAmount","amount","baseAmount"]
+      )
+    ,0);
+
+  totalSales.textContent =
+    mt(salesAmount);
+
+  totalReceipts.textContent =
+    mt(receiptAmount);
+
+  totalPurchases.textContent =
+    mt(purchaseAmount);
+
+  totalExpenses.textContent =
+    mt(expenseAmount);
 
   recentSalesBody.innerHTML="";
 
   sales
     .slice()
-    .sort((a,b)=>new Date(b.invoiceDate||b.date||"1900-01-01")-new Date(a.invoiceDate||a.date||"1900-01-01"))
+    .sort((a,b)=>
+      new Date(
+        b.invoiceDate ||
+        b.date ||
+        "1900-01-01"
+      )
+      -
+      new Date(
+        a.invoiceDate ||
+        a.date ||
+        "1900-01-01"
+      )
+    )
     .slice(0,8)
     .forEach(s=>{
+
       let tr=document.createElement("tr");
 
       tr.innerHTML=`
-        <td>${s.invoiceNo||s.salesInvoiceNo||"-"}</td>
-        <td>${s.invoiceDate||s.date||"-"}</td>
-        <td>${s.customerName||"-"}</td>
-        <td>${mt(moneyFromAny(s,["grandTotal","totalAmount","netTotal","amount"]))}</td>
-        <td>${s.paymentStatus||"Unpaid"}</td>
+
+        <td>
+          ${s.invoiceNo || s.salesInvoiceNo || "-"}
+        </td>
+
+        <td>
+          ${s.invoiceDate || s.date || "-"}
+        </td>
+
+        <td>
+          ${s.customerName || "-"}
+        </td>
+
+        <td>
+          ${mt(
+            moneyFromAny(
+              s,
+              ["grandTotal","totalAmount","netTotal","amount"]
+            )
+          )}
+        </td>
+
+        <td>
+          ${s.paymentStatus || "Unpaid"}
+        </td>
       `;
 
       recentSalesBody.appendChild(tr);
     });
+
+  if(sales.length===0){
+
+    recentSalesBody.innerHTML=`
+      <tr>
+        <td colspan="5">
+          No sales invoices found.
+        </td>
+      </tr>
+    `;
+  }
 }
 
-function applyBranding(){
-  let b=JSON.parse(localStorage.getItem("post91ThemeBranding")||"{}");
-  let company=JSON.parse(localStorage.getItem("post91CompanyProfile")||"{}");
+async function applyBranding(){
 
-  const primary=b.primaryColor||"#0d6efd";
-  const sidebarColor=b.sidebarColor||"#061833";
-  const bg=b.backgroundColor||"#eef3f8";
-  const card=b.cardColor||"#ffffff";
+  let companyList =
+    await loadFromCloud("companyProfile");
 
-  document.documentElement.style.setProperty("--primary",primary);
-  document.documentElement.style.setProperty("--sidebar",sidebarColor);
-  document.documentElement.style.setProperty("--bg",bg);
-  document.documentElement.style.setProperty("--card",card);
+  let company =
+    companyList[0] ||
+    JSON.parse(
+      localStorage.getItem("post91CompanyProfile") || "{}"
+    );
 
-  headerBrandName.textContent=b.brandName||"Post91 Accounts";
-  mobileBrand.textContent=b.brandName||"Post91 Accounts";
-  headerTagline.textContent=b.tagline||"Simple Accounting for Smart Businesses";
+  let b =
+    JSON.parse(
+      localStorage.getItem("post91ThemeBranding") || "{}"
+    );
 
-  companyNameTop.textContent=company.companyName||company.name||"Company Name";
-  companyAddressTop.textContent=company.address||"Muscat, Sultanate of Oman";
+  const primary =
+    b.primaryColor || "#0d6efd";
 
-  companyVatTop.textContent=
-    "VAT IN: " + (company.vatNumber||company.vatIn||"-") +
-    " | C.R No: " + (company.crNumber||"-");
+  const sidebarColor =
+    b.sidebarColor || "#061833";
+
+  const bg =
+    b.backgroundColor || "#eef3f8";
+
+  const card =
+    b.cardColor || "#ffffff";
+
+  document.documentElement
+    .style
+    .setProperty("--primary",primary);
+
+  document.documentElement
+    .style
+    .setProperty("--sidebar",sidebarColor);
+
+  document.documentElement
+    .style
+    .setProperty("--bg",bg);
+
+  document.documentElement
+    .style
+    .setProperty("--card",card);
+
+  headerBrandName.textContent =
+    b.brandName || "Post91 Accounts";
+
+  mobileBrand.textContent =
+    b.brandName || "Post91 Accounts";
+
+  headerTagline.textContent =
+    b.tagline ||
+    "Simple Accounting for Smart Businesses";
+
+  companyNameTop.textContent =
+    company.companyName ||
+    company.name ||
+    "Company Name";
+
+  companyAddressTop.textContent =
+    company.address ||
+    "Muscat, Sultanate of Oman";
+
+  companyVatTop.textContent =
+
+    "VAT IN: " +
+
+    (
+      company.vatNumber ||
+      company.vatIn ||
+      "-"
+    )
+
+    +
+
+    " | C.R No: " +
+
+    (
+      company.crNumber ||
+      "-"
+    );
 
   if(b.logo){
+
     topLogo.src=b.logo;
+
     topLogo.style.display="inline-block";
+
     topLogoText.style.display="none";
+
   }else{
+
     topLogo.style.display="none";
+
     topLogoText.style.display="block";
   }
 
   if(b.themeMode==="Dark"){
+
     document.body.style.background="#0f172a";
-    document.querySelectorAll(".card,.section,.module").forEach(el=>{
-      el.style.background="#1e293b";
-      el.style.color="#fff";
-      el.style.borderColor="#334155";
-    });
-    document.querySelectorAll(".module p,.card b").forEach(el=>{
-      el.style.color="#cbd5e1";
-    });
+
+    document
+      .querySelectorAll(".card,.section,.module")
+      .forEach(el=>{
+
+        el.style.background="#1e293b";
+        el.style.color="#fff";
+        el.style.borderColor="#334155";
+      });
+
+    document
+      .querySelectorAll(".module p,.card b")
+      .forEach(el=>{
+
+        el.style.color="#cbd5e1";
+      });
   }
 }
 
@@ -638,7 +813,12 @@ function logout(){
 
 applyBranding();
 loadDashboard();
-</script>
 
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/firebase-db.js"></script>
+<script src="/permission-guard.js"></script>
 </body>
 </html>

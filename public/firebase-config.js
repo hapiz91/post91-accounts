@@ -1,15 +1,14 @@
 /* =========================================================
    POST91 ACCOUNTS - FIREBASE CONFIG
-   Replace firebaseConfig values from your Firebase project.
 ========================================================= */
 
 const firebaseConfig = {
-  apiKey: "PASTE_YOUR_API_KEY",
-  authDomain: "PASTE_YOUR_PROJECT.firebaseapp.com",
-  projectId: "PASTE_YOUR_PROJECT_ID",
-  storageBucket: "PASTE_YOUR_PROJECT.appspot.com",
-  messagingSenderId: "PASTE_SENDER_ID",
-  appId: "PASTE_APP_ID"
+  apiKey: "AIzaSyBJJcKRT6-XyqFKcWJ1_2qKKjtxj_yM-zI",
+  authDomain: "post91-accounts.firebaseapp.com",
+  projectId: "post91-accounts",
+  storageBucket: "post91-accounts.firebasestorage.app",
+  messagingSenderId: "776119906958",
+  appId: "1:776119906958:web:a50f24c06ad5413a628fdf"
 };
 
 firebase.initializeApp(firebaseConfig);

@@ -244,96 +244,203 @@ th{background:#f8fbff;text-align:left}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script src="/firebase-config.js"></script>
-<script src="/data-sync.js"></script>
+<script src="/firebase-db.js"></script>
 <script>
-const STORE="post91ReceiptVouchers";
-let EDIT="";
 
-function gd(k){return JSON.parse(localStorage.getItem(k)||"[]")}
-function sd(k,d){localStorage.setItem(k,JSON.stringify(d))}
-function today(){return new Date().toISOString().split("T")[0]}
-function mv(n){return Number(n||0).toFixed(3)}
-function mt(n){return "OMR "+mv(n)}
+const STORE="receiptVouchers";
+
+let EDIT="";
+let CURRENT_RECEIPTS=[];
+
+let CLOUD_CUSTOMERS=[];
+let CLOUD_INVOICES=[];
+let CLOUD_ACCOUNTS=[];
+
+function today(){
+  return new Date().toISOString().split("T")[0];
+}
+
+function mv(n){
+  return Number(n||0).toFixed(3);
+}
+
+function mt(n){
+  return "OMR "+mv(n);
+}
+
+async function initCloud(){
+
+  CLOUD_CUSTOMERS =
+    await loadFromCloud(
+      COLLECTIONS.CUSTOMERS
+    );
+
+  CLOUD_INVOICES =
+    await loadFromCloud(
+      COLLECTIONS.SALES_INVOICES
+    );
+
+  CLOUD_ACCOUNTS =
+    await loadFromCloud(
+      "cashBankAccounts"
+    );
+
+  loadCashBankAccounts();
+
+  setDefaults();
+
+  await loadSaved();
+}
 
 function loadCashBankAccounts(){
-  cashBankAccount.innerHTML = `<option value="">Select Cash / Bank Account</option>`;
 
-  gd("post91CashBankAccounts")
-    .filter(a => (a.status || "Active") === "Active")
+  cashBankAccount.innerHTML =
+    `<option value="">Select Cash / Bank Account</option>`;
+
+  CLOUD_ACCOUNTS
+    .filter(a=>
+      (a.status||"Active")
+      ==="Active"
+    )
     .forEach((a,i)=>{
-      let o = document.createElement("option");
-      o.value = i;
-      o.textContent = `${a.accountName || a.name || "-"} (${a.accountType || "Bank"})`;
+
+      let o=document.createElement("option");
+
+      o.value=i;
+
+      o.textContent=
+        `${a.accountName || a.name || "-"} (${a.accountType || "Bank"})`;
+
       cashBankAccount.appendChild(o);
     });
 }
 
 function selectedCashBank(){
-  let accounts = gd("post91CashBankAccounts");
-  let idx = cashBankAccount.value;
 
-  if(idx === "") return {};
+  let idx=cashBankAccount.value;
 
-  return accounts[idx] || {};
+  if(idx==="")
+    return {};
+
+  return CLOUD_ACCOUNTS[idx] || {};
 }
 
 function customerSearch(){
-  let q=customerName.value.toLowerCase();
 
-  let list=gd("post91Customers")
-    .filter(c=>JSON.stringify(c).toLowerCase().includes(q))
+  let q=
+    customerName.value.toLowerCase();
+
+  let list=
+    CLOUD_CUSTOMERS
+    .filter(c=>
+      JSON.stringify(c)
+      .toLowerCase()
+      .includes(q)
+    )
     .slice(0,40);
 
-  customerPanel.innerHTML=list.map((c,i)=>`
-    <div class="opt" data-i="${i}">
-      <b>${c.customerName||c.name||"-"}</b>
-      <span>${c.mobile||c.phone||""} ${c.email||""}</span>
-    </div>
-  `).join("") || `<div class="opt">No customer found</div>`;
+  customerPanel.innerHTML=
+    list.map((c,i)=>`
+      <div class="opt" data-i="${i}">
+        <b>${c.customerName||c.name||"-"}</b>
+        <span>${c.mobile||c.phone||""} ${c.email||""}</span>
+      </div>
+    `).join("")
+    ||
+    `<div class="opt">No customer found</div>`;
 
   customerPanel.classList.add("show");
 
-  [...customerPanel.querySelectorAll("[data-i]")].forEach((e,i)=>{
+  [...customerPanel.querySelectorAll("[data-i]")]
+  .forEach((e,i)=>{
+
     e.onclick=()=>{
+
       let c=list[i];
 
-      customerName.value=c.customerName||c.name||"";
-      customerAddress.value=c.address||c.customerAddress||"";
-      attention.value=c.contactPerson||c.attention||c.contactName||"";
-      mobile.value=c.mobile||c.phone||"";
-      email.value=c.email||"";
-      customerVatNo.value=c.vatNumber||"";
+      customerName.value=
+        c.customerName ||
+        c.name ||
+        "";
+
+      customerAddress.value=
+        c.address ||
+        c.customerAddress ||
+        "";
+
+      attention.value=
+        c.contactPerson ||
+        c.attention ||
+        c.contactName ||
+        "";
+
+      mobile.value=
+        c.mobile ||
+        c.phone ||
+        "";
+
+      email.value=
+        c.email || "";
+
+      customerVatNo.value=
+        c.vatNumber || "";
 
       customerPanel.classList.remove("show");
+
       loadOpenInvoices();
     };
   });
 }
 
 function receiptTypeChanged(){
-  if(receiptType.value==="Against Sales Invoice"){
-    invoiceAllocationCard.style.display="block";
+
+  if(
+    receiptType.value===
+    "Against Sales Invoice"
+  ){
+
+    invoiceAllocationCard.style.display=
+      "block";
+
     loadOpenInvoices();
+
   }else{
-    invoiceAllocationCard.style.display="none";
+
+    invoiceAllocationCard.style.display=
+      "none";
+
     allocationBody.innerHTML="";
+
     recalculateAllocation();
   }
 }
 
-function getInvoiceReceived(invoiceNo, excludeReceiptIndex=""){
+function getInvoiceReceived(invoiceNo,excludeId=""){
+
   if(!invoiceNo)return 0;
 
-  let receipts=gd(STORE);
   let total=0;
 
-  receipts.forEach((r,i)=>{
-    if(String(i)===String(excludeReceiptIndex))return;
-    if((r.docStatus||"Posted")==="Cancelled")return;
+  CURRENT_RECEIPTS.forEach(r=>{
 
-    (r.allocations||[]).forEach(a=>{
+    if(
+      excludeId &&
+      r.id===excludeId
+    )return;
+
+    if(
+      (r.docStatus||"Posted")
+      ==="Cancelled"
+    )return;
+
+    (r.allocations||[])
+    .forEach(a=>{
+
       if(a.invoiceNo===invoiceNo){
-        total+=Number(a.amountReceived||0);
+
+        total+=Number(
+          a.amountReceived||0
+        );
       }
     });
   });
@@ -342,43 +449,89 @@ function getInvoiceReceived(invoiceNo, excludeReceiptIndex=""){
 }
 
 function getInvoiceBalance(inv){
-  let total=Number(inv.grandTotal||0);
-  let received=getInvoiceReceived(inv.invoiceNo, EDIT);
+
+  let total=
+    Number(inv.grandTotal||0);
+
+  let received=
+    getInvoiceReceived(
+      inv.invoiceNo,
+      EDIT
+    );
+
   return Math.max(total-received,0);
 }
 
 function loadOpenInvoices(){
+
   allocationBody.innerHTML="";
 
-  if(receiptType.value!=="Against Sales Invoice")return;
+  if(
+    receiptType.value!==
+    "Against Sales Invoice"
+  )return;
 
-  let customer=(customerName.value||"").toLowerCase();
-  let invoices=gd("post91SalesInvoices");
+  let customer=
+    (customerName.value||"")
+    .toLowerCase();
 
-  invoices.forEach(inv=>{
-    if(customer && (inv.customerName||"").toLowerCase()!==customer)return;
+  CLOUD_INVOICES.forEach(inv=>{
 
-    let prev=getInvoiceReceived(inv.invoiceNo, EDIT);
-    let total=Number(inv.grandTotal||0);
-    let bal=Math.max(total-prev,0);
+    if(
+      customer &&
+      (inv.customerName||"")
+      .toLowerCase()!==customer
+    )return;
+
+    let prev=
+      getInvoiceReceived(
+        inv.invoiceNo,
+        EDIT
+      );
+
+    let total=
+      Number(inv.grandTotal||0);
+
+    let bal=
+      Math.max(total-prev,0);
 
     if(bal<=0)return;
 
     let tr=document.createElement("tr");
 
     tr.innerHTML=`
+
       <td style="text-align:center;">
         <input type="checkbox" class="useInv" onchange="rowUseChanged(this)">
       </td>
-      <td class="invNo">${inv.invoiceNo||""}</td>
-      <td class="invDate">${inv.invoiceDate||""}</td>
-      <td class="invTotal">${mv(total)}</td>
-      <td class="prevReceived">${mv(prev)}</td>
-      <td class="balanceBefore">${mv(bal)}</td>
+
+      <td class="invNo">
+        ${inv.invoiceNo||""}
+      </td>
+
+      <td class="invDate">
+        ${inv.invoiceDate||""}
+      </td>
+
+      <td class="invTotal">
+        ${mv(total)}
+      </td>
+
+      <td class="prevReceived">
+        ${mv(prev)}
+      </td>
+
+      <td class="balanceBefore">
+        ${mv(bal)}
+      </td>
+
       <td>
         <input type="number" step=".001" class="allocAmount" value="0.000" oninput="manualAllocateChanged(this)">
       </td>
-      <td class="balanceAfter">${mv(bal)}</td>
+
+      <td class="balanceAfter">
+        ${mv(bal)}
+      </td>
     `;
 
     allocationBody.appendChild(tr);
@@ -388,10 +541,14 @@ function loadOpenInvoices(){
 }
 
 function rowUseChanged(chk){
+
   let row=chk.closest("tr");
-  let amount=row.querySelector(".allocAmount");
+
+  let amount=
+    row.querySelector(".allocAmount");
 
   if(!chk.checked){
+
     amount.value="0.000";
   }
 
@@ -399,14 +556,26 @@ function rowUseChanged(chk){
 }
 
 function manualAllocateChanged(inp){
-  let row=inp.closest("tr");
-  let chk=row.querySelector(".useInv");
-  let bal=Number(row.querySelector(".balanceBefore").textContent||0);
-  let val=Number(inp.value||0);
 
-  if(val>0)chk.checked=true;
+  let row=inp.closest("tr");
+
+  let chk=
+    row.querySelector(".useInv");
+
+  let bal=
+    Number(
+      row.querySelector(".balanceBefore")
+      .textContent || 0
+    );
+
+  let val=
+    Number(inp.value||0);
+
+  if(val>0)
+    chk.checked=true;
 
   if(val>bal){
+
     inp.value=mv(bal);
   }
 
@@ -414,20 +583,40 @@ function manualAllocateChanged(inp){
 }
 
 function autoAllocate(){
-  let remaining=Number(totalReceiptAmount.value||0);
 
-  document.querySelectorAll("#allocationBody tr").forEach(row=>{
-    let chk=row.querySelector(".useInv");
-    let amount=row.querySelector(".allocAmount");
-    let bal=Number(row.querySelector(".balanceBefore").textContent||0);
+  let remaining=
+    Number(totalReceiptAmount.value||0);
+
+  document.querySelectorAll("#allocationBody tr")
+  .forEach(row=>{
+
+    let chk=
+      row.querySelector(".useInv");
+
+    let amount=
+      row.querySelector(".allocAmount");
+
+    let bal=
+      Number(
+        row.querySelector(".balanceBefore")
+        .textContent || 0
+      );
 
     if(remaining>0){
-      let alloc=Math.min(remaining,bal);
+
+      let alloc=
+        Math.min(remaining,bal);
+
       amount.value=mv(alloc);
+
       chk.checked=alloc>0;
+
       remaining-=alloc;
+
     }else{
+
       amount.value="0.000";
+
       chk.checked=false;
     }
   });
@@ -436,69 +625,134 @@ function autoAllocate(){
 }
 
 function clearAllocations(){
-  document.querySelectorAll("#allocationBody tr").forEach(row=>{
+
+  document.querySelectorAll("#allocationBody tr")
+  .forEach(row=>{
+
     row.querySelector(".useInv").checked=false;
+
     row.querySelector(".allocAmount").value="0.000";
-    row.querySelector(".balanceAfter").textContent=row.querySelector(".balanceBefore").textContent;
+
+    row.querySelector(".balanceAfter").textContent=
+      row.querySelector(".balanceBefore")
+      .textContent;
   });
 
   recalculateAllocation();
 }
 
 function recalculateAllocation(){
-  let receiptAmount=Number(totalReceiptAmount.value||0);
+
+  let receiptAmount=
+    Number(totalReceiptAmount.value||0);
+
   let allocated=0;
 
-  document.querySelectorAll("#allocationBody tr").forEach(row=>{
-    let bal=Number(row.querySelector(".balanceBefore").textContent||0);
-    let amount=Number(row.querySelector(".allocAmount").value||0);
+  document.querySelectorAll("#allocationBody tr")
+  .forEach(row=>{
+
+    let bal=
+      Number(
+        row.querySelector(".balanceBefore")
+        .textContent || 0
+      );
+
+    let amount=
+      Number(
+        row.querySelector(".allocAmount")
+        .value || 0
+      );
 
     if(amount>bal){
+
       amount=bal;
-      row.querySelector(".allocAmount").value=mv(amount);
+
+      row.querySelector(".allocAmount").value=
+        mv(amount);
     }
 
     if(amount<0){
+
       amount=0;
-      row.querySelector(".allocAmount").value="0.000";
+
+      row.querySelector(".allocAmount").value=
+        "0.000";
     }
 
-    row.querySelector(".balanceAfter").textContent=mv(Math.max(bal-amount,0));
+    row.querySelector(".balanceAfter").textContent=
+      mv(
+        Math.max(bal-amount,0)
+      );
 
     if(amount>0){
+
       row.querySelector(".useInv").checked=true;
+
       allocated+=amount;
     }
   });
 
-  let unallocated=Math.max(receiptAmount-allocated,0);
+  let unallocated=
+    Math.max(receiptAmount-allocated,0);
 
-  receiptAmountText.textContent=mt(receiptAmount);
-  allocatedText.textContent=mt(allocated);
-  unallocatedText.textContent=mt(unallocated);
+  receiptAmountText.textContent=
+    mt(receiptAmount);
 
-  if(unallocated>0){
-    unallocatedText.className="warning";
-  }else{
-    unallocatedText.className="good";
-  }
+  allocatedText.textContent=
+    mt(allocated);
+
+  unallocatedText.textContent=
+    mt(unallocated);
+
+  unallocatedText.className=
+    unallocated>0
+    ? "warning"
+    : "good";
 }
 
 function collectAllocations(){
+
   let allocations=[];
 
-  document.querySelectorAll("#allocationBody tr").forEach(row=>{
-    let amount=Number(row.querySelector(".allocAmount").value||0);
+  document.querySelectorAll("#allocationBody tr")
+  .forEach(row=>{
+
+    let amount=
+      Number(
+        row.querySelector(".allocAmount")
+        .value || 0
+      );
 
     if(amount>0){
+
       allocations.push({
-        invoiceNo:row.querySelector(".invNo").textContent,
-        invoiceDate:row.querySelector(".invDate").textContent,
-        invoiceTotal:row.querySelector(".invTotal").textContent,
-        previousReceived:row.querySelector(".prevReceived").textContent,
-        balanceBefore:row.querySelector(".balanceBefore").textContent,
-        amountReceived:mv(amount),
-        balanceAfter:row.querySelector(".balanceAfter").textContent
+
+        invoiceNo:
+          row.querySelector(".invNo")
+          .textContent,
+
+        invoiceDate:
+          row.querySelector(".invDate")
+          .textContent,
+
+        invoiceTotal:
+          row.querySelector(".invTotal")
+          .textContent,
+
+        previousReceived:
+          row.querySelector(".prevReceived")
+          .textContent,
+
+        balanceBefore:
+          row.querySelector(".balanceBefore")
+          .textContent,
+
+        amountReceived:
+          mv(amount),
+
+        balanceAfter:
+          row.querySelector(".balanceAfter")
+          .textContent
       });
     }
   });
@@ -506,147 +760,204 @@ function collectAllocations(){
   return allocations;
 }
 
-function saveDoc(e){
+async function saveDoc(e){
+
   e.preventDefault();
 
   if(!customerName.value.trim()){
+
     alert("Customer name is required.");
+
     return;
   }
 
-  let receiptAmount=Number(totalReceiptAmount.value||0);
+  let receiptAmount=
+    Number(totalReceiptAmount.value||0);
 
   if(receiptAmount<=0){
+
     alert("Receipt amount should be greater than zero.");
+
     return;
   }
 
   let allocations=[];
 
-  if(receiptType.value==="Against Sales Invoice"){
-    allocations=collectAllocations();
+  if(
+    receiptType.value===
+    "Against Sales Invoice"
+  ){
+
+    allocations=
+      collectAllocations();
 
     if(allocations.length===0){
+
       alert("Please allocate amount to at least one invoice.");
+
       return;
     }
   }
 
-  let allocatedAmount=allocations.reduce((s,a)=>s+Number(a.amountReceived||0),0);
-  let unallocatedAmount=Math.max(receiptAmount-allocatedAmount,0);
+  let allocatedAmount=
+    allocations.reduce((s,a)=>
+      s+Number(a.amountReceived||0)
+    ,0);
 
-  let list=gd(STORE);
+  let unallocatedAmount=
+    Math.max(receiptAmount-allocatedAmount,0);
 
-let acc = selectedCashBank();  
-let rec={
+  let acc=
+    selectedCashBank();
+
+  let rec={
+
     receiptNo:receiptNo.value,
+
     receiptDate:receiptDate.value,
 
     customerName:customerName.value,
+
     customerAddress:customerAddress.value,
+
     attention:attention.value,
+
     mobile:mobile.value,
+
     email:email.value,
+
     customerVatNo:customerVatNo.value,
 
     receiptType:receiptType.value,
+
     paymentMode:paymentMode.value,
-    cashBankAccountIndex:cashBankAccount.value,
-    cashBankAccountName:acc.accountName || acc.name || "",
-    cashBankAccountType:acc.accountType || "",
-    paymentReference:paymentReference.value,
+
+    cashBankAccountIndex:
+      cashBankAccount.value,
+
+    cashBankAccountName:
+      acc.accountName ||
+      acc.name ||
+      "",
+
+    cashBankAccountType:
+      acc.accountType ||
+      "",
+
+    paymentReference:
+      paymentReference.value,
+
     docStatus:docStatus.value,
 
-    totalReceiptAmount:mv(receiptAmount),
-    allocatedAmount:mv(allocatedAmount),
-    unallocatedAmount:mv(unallocatedAmount),
+    totalReceiptAmount:
+      mv(receiptAmount),
 
-    manualAgainst:manualAgainst.value,
+    allocatedAmount:
+      mv(allocatedAmount),
+
+    unallocatedAmount:
+      mv(unallocatedAmount),
+
+    manualAgainst:
+      manualAgainst.value,
+
     allocations:allocations,
-    remarks:remarks.value,
 
-    updatedAt:new Date().toISOString()
+    remarks:remarks.value
   };
 
-  let oldInvoices=[];
+  let id=
+    await saveToCloud(
+      COLLECTIONS.RECEIPTS,
+      rec,
+      EDIT || null
+    );
 
-  if(EDIT!==""){
-    oldInvoices=(list[EDIT].allocations||[]).map(a=>a.invoiceNo);
+  if(id){
+
+    alert(
+      EDIT
+      ? "Receipt Voucher updated."
+      : "Receipt Voucher saved."
+    );
+
+    EDIT="";
+
+    setDefaults();
+
+    await loadSaved();
   }
-
-  if(EDIT===""){
-    rec.createdAt=new Date().toISOString();
-    list.push(rec);
-    alert("Receipt Voucher saved.");
-  }else{
-    rec.createdAt=list[EDIT].createdAt||new Date().toISOString();
-    list[EDIT]={...list[EDIT],...rec};
-    alert("Receipt Voucher updated.");
-  }
-
-  sd(STORE,list);
-
-  let affected=[...new Set([...oldInvoices,...allocations.map(a=>a.invoiceNo)])];
-  affected.forEach(invNo=>updateInvoicePaymentStatus(invNo));
-
-  EDIT="";
-  setDefaults();
-  loadSaved();
-}
-
-function updateInvoicePaymentStatus(invoiceNo){
-  if(!invoiceNo)return;
-
-  let invoices=gd("post91SalesInvoices");
-  let idx=invoices.findIndex(x=>x.invoiceNo===invoiceNo);
-
-  if(idx<0)return;
-
-  let total=Number(invoices[idx].grandTotal||0);
-  let received=getInvoiceReceived(invoiceNo);
-
-  if(received<=0){
-    invoices[idx].paymentStatus="Unpaid";
-  }else if(received>=total){
-    invoices[idx].paymentStatus="Paid";
-  }else{
-    invoices[idx].paymentStatus="Partial";
-  }
-
-  invoices[idx].amountReceived=mv(received);
-  invoices[idx].balanceAmount=mv(Math.max(total-received,0));
-
-  sd("post91SalesInvoices",invoices);
 }
 
 function badge(s){
+
   let cls="draft";
-  if(s==="Posted")cls="posted";
-  if(s==="Cancelled")cls="cancelled";
-  return `<span class="badge ${cls}">${s||"Draft"}</span>`;
+
+  if(s==="Posted")
+    cls="posted";
+
+  if(s==="Cancelled")
+    cls="cancelled";
+
+  return `
+    <span class="badge ${cls}">
+      ${s||"Draft"}
+    </span>
+  `;
 }
 
-function loadSaved(){
-  let q=(savedSearch.value||"").toLowerCase();
+async function loadSaved(){
+
+  let q=
+    (savedSearch.value||"")
+    .toLowerCase();
+
   savedBody.innerHTML="";
 
-  gd(STORE).forEach((r,i)=>{
-    if(q && !JSON.stringify(r).toLowerCase().includes(q))return;
+  CURRENT_RECEIPTS =
+    await loadFromCloud(
+      COLLECTIONS.RECEIPTS
+    );
+
+  CURRENT_RECEIPTS.forEach((r,i)=>{
+
+    if(
+      q &&
+      !JSON.stringify(r)
+      .toLowerCase()
+      .includes(q)
+    )return;
 
     let tr=document.createElement("tr");
 
     tr.innerHTML=`
+
       <td>${r.receiptNo||"-"}</td>
+
       <td>${r.receiptDate||"-"}</td>
+
       <td>${r.customerName||"-"}</td>
+
       <td>${r.receiptType||"-"}</td>
+
       <td>${mt(r.totalReceiptAmount)}</td>
+
       <td>${mt(r.allocatedAmount)}</td>
+
       <td>${mt(r.unallocatedAmount)}</td>
+
       <td>${badge(r.docStatus)}</td>
+
       <td>
-        <button class="btn btn-light" onclick="editDoc(${i})">Edit</button>
-        <button class="btn btn-danger" onclick="delDoc(${i})">Delete</button>
+
+        <button class="btn btn-light" onclick="editDoc(${i})">
+          Edit
+        </button>
+
+        <button class="btn btn-danger" onclick="delDoc('${r.id}')">
+          Delete
+        </button>
+
       </td>
     `;
 
@@ -655,89 +966,162 @@ function loadSaved(){
 }
 
 function editDoc(i){
-  let r=gd(STORE)[i];
-  EDIT=i;
 
-  receiptNo.value=r.receiptNo||"";
-  receiptDate.value=r.receiptDate||today();
+  let r=
+    CURRENT_RECEIPTS[i];
 
-  customerName.value=r.customerName||"";
-  customerAddress.value=r.customerAddress||"";
-  attention.value=r.attention||"";
-  mobile.value=r.mobile||"";
-  email.value=r.email||"";
-  customerVatNo.value=r.customerVatNo||"";
+  EDIT=r.id;
 
-  receiptType.value=r.receiptType||"Against Sales Invoice";
-  paymentMode.value=r.paymentMode||"Cash";
-  cashBankAccount.value = r.cashBankAccountIndex || "";
-  paymentReference.value=r.paymentReference||"";
-  docStatus.value=r.docStatus||"Posted";
-  totalReceiptAmount.value=r.totalReceiptAmount||"0.000";
-  manualAgainst.value=r.manualAgainst||"";
-  remarks.value=r.remarks||"";
+  receiptNo.value=
+    r.receiptNo || "";
+
+  receiptDate.value=
+    r.receiptDate || today();
+
+  customerName.value=
+    r.customerName || "";
+
+  customerAddress.value=
+    r.customerAddress || "";
+
+  attention.value=
+    r.attention || "";
+
+  mobile.value=
+    r.mobile || "";
+
+  email.value=
+    r.email || "";
+
+  customerVatNo.value=
+    r.customerVatNo || "";
+
+  receiptType.value=
+    r.receiptType ||
+    "Against Sales Invoice";
+
+  paymentMode.value=
+    r.paymentMode ||
+    "Cash";
+
+  cashBankAccount.value =
+    r.cashBankAccountIndex || "";
+
+  paymentReference.value=
+    r.paymentReference || "";
+
+  docStatus.value=
+    r.docStatus || "Posted";
+
+  totalReceiptAmount.value=
+    r.totalReceiptAmount || "0.000";
+
+  manualAgainst.value=
+    r.manualAgainst || "";
+
+  remarks.value=
+    r.remarks || "";
 
   receiptTypeChanged();
 
-  if(receiptType.value==="Against Sales Invoice"){
+  if(
+    receiptType.value===
+    "Against Sales Invoice"
+  ){
+
     loadOpenInvoices();
 
-    (r.allocations||[]).forEach(a=>{
-      [...document.querySelectorAll("#allocationBody tr")].forEach(row=>{
-        if(row.querySelector(".invNo").textContent===a.invoiceNo){
+    (r.allocations||[])
+    .forEach(a=>{
+
+      [...document.querySelectorAll("#allocationBody tr")]
+      .forEach(row=>{
+
+        if(
+          row.querySelector(".invNo")
+          .textContent===a.invoiceNo
+        ){
+
           row.querySelector(".useInv").checked=true;
-          row.querySelector(".allocAmount").value=mv(a.amountReceived);
+
+          row.querySelector(".allocAmount").value=
+            mv(a.amountReceived);
         }
       });
     });
   }
 
   recalculateAllocation();
-  scrollTo({top:0,behavior:"smooth"});
+
+  scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
 }
 
-function delDoc(i){
-  if(!confirm("Delete this receipt voucher?"))return;
+async function delDoc(id){
 
-  let list=gd(STORE);
-  let affected=(list[i].allocations||[]).map(a=>a.invoiceNo);
+  if(
+    !confirm(
+      "Delete this receipt voucher?"
+    )
+  )return;
 
-  list.splice(i,1);
-  sd(STORE,list);
+  await deleteFromCloud(
+    COLLECTIONS.RECEIPTS,
+    id
+  );
 
-  affected.forEach(invNo=>updateInvoicePaymentStatus(invNo));
-  loadSaved();
+  await loadSaved();
 }
 
 function setDefaults(){
+
   EDIT="";
+
   docForm.reset();
 
-  receiptNo.value="RV-"+(1001+gd(STORE).length);
-  receiptDate.value=today();
-  receiptType.value="Against Sales Invoice";
-  paymentMode.value="Cash";
+  receiptNo.value=
+    "RV-"+(1001+CURRENT_RECEIPTS.length);
+
+  receiptDate.value=
+    today();
+
+  receiptType.value=
+    "Against Sales Invoice";
+
+  paymentMode.value=
+    "Cash";
+
   cashBankAccount.value="";
-  docStatus.value="Posted";
-  totalReceiptAmount.value="0.000";
+
+  docStatus.value=
+    "Posted";
+
+  totalReceiptAmount.value=
+    "0.000";
 
   allocationBody.innerHTML="";
+
   receiptTypeChanged();
+
   recalculateAllocation();
 }
 
 document.addEventListener("click",e=>{
-  document.querySelectorAll(".panel").forEach(p=>{
+
+  document.querySelectorAll(".panel")
+  .forEach(p=>{
+
     if(!p.parentElement.contains(e.target)){
+
       p.classList.remove("show");
     }
   });
 });
 
-loadCashBankAccounts();
-setDefaults();
-loadSaved();
-</script>
+initCloud();
 
+</script>
 </body>
 </html>

@@ -30,11 +30,7 @@ th{background:#f8fbff;text-align:left}
 .debit{color:#b91c1c;font-weight:900}
 .credit{color:#166534;font-weight:900}
 .balance{font-weight:900;color:#0d6efd}
-
-@media(max-width:900px){
-  .grid,.summary{grid-template-columns:1fr}
-  table{display:block;overflow-x:auto;white-space:nowrap}
-}
+@media(max-width:900px){.grid,.summary{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
 </style>
 </head>
 
@@ -49,7 +45,7 @@ th{background:#f8fbff;text-align:left}
 </div>
 
 <div class="note">
-  Ledger is generated automatically from Sales Invoices and Receipt Vouchers. SOA exports only pending invoices up to selected due date.
+  Ledger is generated from Firebase Sales Invoices and Receipt Vouchers. SOA exports only pending invoices up to selected due date.
 </div>
 
 <div class="card">
@@ -104,25 +100,10 @@ th{background:#f8fbff;text-align:left}
 </div>
 
 <div class="summary">
-  <div class="box">
-    <b>Total Invoices</b>
-    <span id="totalInvoices">OMR 0.000</span>
-  </div>
-
-  <div class="box">
-    <b>Total Receipts</b>
-    <span id="totalReceipts">OMR 0.000</span>
-  </div>
-
-  <div class="box">
-    <b>Advance / Unallocated</b>
-    <span id="totalAdvance">OMR 0.000</span>
-  </div>
-
-  <div class="box">
-    <b>Net Balance</b>
-    <span id="netBalance">OMR 0.000</span>
-  </div>
+  <div class="box"><b>Total Invoices</b><span id="totalInvoices">OMR 0.000</span></div>
+  <div class="box"><b>Total Receipts</b><span id="totalReceipts">OMR 0.000</span></div>
+  <div class="box"><b>Advance / Unallocated</b><span id="totalAdvance">OMR 0.000</span></div>
+  <div class="box"><b>Net Balance</b><span id="netBalance">OMR 0.000</span></div>
 </div>
 
 <br>
@@ -147,14 +128,22 @@ th{background:#f8fbff;text-align:left}
   </table>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/firebase-db.js"></script>
+
 <script>
-function gd(k){return JSON.parse(localStorage.getItem(k)||"[]")}
+let CLOUD_CUSTOMERS=[];
+let CLOUD_INVOICES=[];
+let CLOUD_RECEIPTS=[];
+
 function mv(n){return Number(n||0).toFixed(3)}
 function mt(n){return "OMR "+mv(n)}
 
 function esc(v){
-  return String(v||"").replace(/[&<>"']/g, m=>({
-    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"
+  return String(v||"").replace(/[&<>"']/g,m=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
   }[m]));
 }
 
@@ -172,18 +161,29 @@ function invoiceMonth(d){
   return x.toLocaleString("en-US",{month:"short"});
 }
 
+async function initCloud(){
+  ledgerBody.innerHTML=`<tr><td colspan="8">Loading Firebase data...</td></tr>`;
+
+  CLOUD_CUSTOMERS=await loadFromCloud(COLLECTIONS.CUSTOMERS);
+  CLOUD_INVOICES=await loadFromCloud(COLLECTIONS.SALES_INVOICES);
+  CLOUD_RECEIPTS=await loadFromCloud(COLLECTIONS.RECEIPTS);
+
+  loadCustomers();
+  generateLedger();
+}
+
 function loadCustomers(){
   customerSelect.innerHTML='<option value="">All Customers</option>';
   soaCustomerSelect.innerHTML='<option value="">Select Customer</option>';
 
   let names=[];
 
-  gd("post91Customers").forEach(c=>{
+  CLOUD_CUSTOMERS.forEach(c=>{
     let name=c.customerName||c.name||"";
     if(name && !names.includes(name))names.push(name);
   });
 
-  gd("post91SalesInvoices").forEach(inv=>{
+  CLOUD_INVOICES.forEach(inv=>{
     let name=inv.customerName||"";
     if(name && !names.includes(name))names.push(name);
   });
@@ -222,7 +222,7 @@ function customerOk(name){
 function generateLedger(){
   let rows=[];
 
-  gd("post91SalesInvoices").forEach(inv=>{
+  CLOUD_INVOICES.forEach(inv=>{
     if((inv.docStatus||"Submitted")==="Cancelled")return;
     if(!customerOk(inv.customerName))return;
     if(!dateOk(inv.invoiceDate))return;
@@ -238,7 +238,7 @@ function generateLedger(){
     });
   });
 
-  gd("post91ReceiptVouchers").forEach(rv=>{
+  CLOUD_RECEIPTS.forEach(rv=>{
     if((rv.docStatus||"Posted")==="Cancelled")return;
     if(!customerOk(rv.customerName))return;
     if(!dateOk(rv.receiptDate))return;
@@ -250,7 +250,7 @@ function generateLedger(){
       docNo:rv.receiptNo||"",
       ref:(rv.allocations||[]).map(a=>a.invoiceNo).join(", ") || rv.manualAgainst || "",
       debit:0,
-      credit:Number(rv.totalReceiptAmount||0),
+      credit:Number(rv.totalReceiptAmount||rv.amountReceived||rv.amount||0),
       advance:Number(rv.unallocatedAmount||0)
     });
   });
@@ -280,6 +280,10 @@ function generateLedger(){
     ledgerBody.appendChild(tr);
   });
 
+  if(rows.length===0){
+    ledgerBody.innerHTML=`<tr><td colspan="8">No ledger records found.</td></tr>`;
+  }
+
   totalInvoices.textContent=mt(debitTotal);
   totalReceipts.textContent=mt(creditTotal);
   totalAdvance.textContent=mt(advanceTotal);
@@ -296,7 +300,7 @@ function clearFilters(){
 function getInvoicePaidAmount(invoiceNo){
   let paid=0;
 
-  gd("post91ReceiptVouchers").forEach(rv=>{
+  CLOUD_RECEIPTS.forEach(rv=>{
     if((rv.docStatus||"Posted")==="Cancelled")return;
 
     (rv.allocations||[]).forEach(a=>{
@@ -310,7 +314,7 @@ function getInvoicePaidAmount(invoiceNo){
 }
 
 function getCustomerDetails(customerName){
-  return gd("post91Customers").find(c=>
+  return CLOUD_CUSTOMERS.find(c=>
     String(c.customerName||c.name||"").toLowerCase()===String(customerName||"").toLowerCase()
   ) || {};
 }
@@ -339,6 +343,19 @@ function numberToWords(num){
   return text+" Only";
 }
 
+function getInvoiceDueDate(inv){
+  return inv.dueDate ||
+    inv.invoiceDueDate ||
+    inv.paymentDueDate ||
+    inv.creditDueDate ||
+    inv.due_date ||
+    inv.invoice_due_date ||
+    inv.creditPeriodDate ||
+    inv.creditDue ||
+    inv.invoiceDate ||
+    "";
+}
+
 function exportSOA(){
   let customer=soaCustomerSelect.value;
   let dueDate=soaDueDate.value;
@@ -354,27 +371,13 @@ function exportSOA(){
   }
 
   let selectedDue=new Date(dueDate);
-  let cust=getCustomerDetails(customer);
 
-  let invoices=gd("post91SalesInvoices")
+  let invoices=CLOUD_INVOICES
     .filter(inv=>{
       if((inv.docStatus||"Submitted")==="Cancelled")return false;
       if(String(inv.customerName||"").toLowerCase()!==String(customer||"").toLowerCase())return false;
 
-      let invDue =
-  inv.dueDate ||
-  inv.invoiceDueDate ||
-  inv.paymentDueDate ||
-  inv.creditDueDate ||
-  inv.due_date ||
-  inv.invoice_due_date ||
-  inv.creditPeriodDate ||
-  inv.creditDue ||
-  "";
-      if(!invDue){
-  invDue = inv.invoiceDate || "";
-}
-
+      let invDue=getInvoiceDueDate(inv);
       if(new Date(invDue)>selectedDue)return false;
 
       let gross=Number(inv.grandTotal||0);
@@ -391,21 +394,12 @@ function exportSOA(){
       return {
         invoiceDate:inv.invoiceDate||"",
         invoiceMonth:invoiceMonth(inv.invoiceDate),
-        doNo:inv.deliveryOrderNo||inv.doNo||inv.deliveryNo||"",
+        doNo:inv.deliveryOrderNo||inv.doNo||inv.deliveryNo||inv.referenceNo||"",
         invoiceNo:inv.invoiceNo||"",
         currency:inv.currency||"OMR",
         amount:balance,
         lpo:inv.lpoNo||inv.lpo||inv.referenceNo||"",
-        dueDate:
-  inv.dueDate ||
-  inv.invoiceDueDate ||
-  inv.paymentDueDate ||
-  inv.creditDueDate ||
-  inv.due_date ||
-  inv.invoice_due_date ||
-  inv.creditPeriodDate ||
-  inv.creditDue ||
-  ""
+        dueDate:getInvoiceDueDate(inv)
       };
     });
 
@@ -437,19 +431,8 @@ function exportSOA(){
 <head>
 <title>SOA - ${esc(customer)}</title>
 <style>
-body{
-  font-family:Arial,sans-serif;
-  margin:0;
-  padding:0;
-  background:white;
-  color:#000;
-}
-.sheet{
-  width:100%;
-  max-width:1120px;
-  margin:0 auto;
-  padding:18px 22px;
-}
+body{font-family:Arial,sans-serif;margin:0;padding:0;background:white;color:#000}
+.sheet{width:100%;max-width:1120px;margin:0 auto;padding:18px 22px}
 .company-name{font-family:Georgia,serif;font-style:italic;text-align:center;font-size:38px;font-weight:500;margin:4px 0}
 .company-line{text-align:center;font-size:16px;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:6px}
 .title{text-align:center;font-size:18px;font-weight:bold;margin:12px 0}
@@ -461,62 +444,18 @@ td{border:1px solid #000;padding:4px}
 .words{text-align:center;font-weight:bold}
 .footer{display:flex;justify-content:flex-end;gap:130px;margin-top:34px;font-size:16px}
 @media print{
-
-  @page{
-    size:A4 landscape;
-    margin:10mm;
-  }
-
-  html,body{
-    width:100%;
-    height:100%;
-  }
-
-  body{
-    -webkit-print-color-adjust:exact;
-    print-color-adjust:exact;
-  }
-
-  .sheet{
-    width:100%;
-    max-width:100%;
-    padding:0;
-    margin:0;
-  }
-
-  table{
-    width:100%;
-    font-size:13px;
-  }
-
-  th,td{
-    padding:4px;
-  }
-
-  .company-name{
-    font-size:30px;
-  }
-
-  .company-line{
-    font-size:14px;
-  }
-
-  .title{
-    font-size:20px;
-  }
-
-  .to-section{
-    font-size:14px;
-    line-height:1.4;
-  }
-
-  .footer{
-    margin-top:25px;
-  }
-
-  .no-print{
-    display:none;
-  }
+  @page{size:A4 landscape;margin:10mm}
+  html,body{width:100%;height:100%}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet{width:100%;max-width:100%;padding:0;margin:0}
+  table{width:100%;font-size:13px}
+  th,td{padding:4px}
+  .company-name{font-size:30px}
+  .company-line{font-size:14px}
+  .title{font-size:20px}
+  .to-section{font-size:14px;line-height:1.4}
+  .footer{margin-top:25px}
+  .no-print{display:none}
 }
 </style>
 </head>
@@ -589,8 +528,7 @@ td{border:1px solid #000;padding:4px}
   w.document.close();
 }
 
-loadCustomers();
-generateLedger();
+initCloud();
 </script>
 
 </body>
