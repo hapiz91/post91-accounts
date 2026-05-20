@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Post91 Accounts Admin Dashboard</title>
+  <link rel="stylesheet" href="/post91-admin.css" />
+</head>
+<body>
+
+<div class="admin-layout">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="/images/post91-logo.png" alt="Post91 Logo" />
+      <h2>Post91 Admin</h2>
+      <p>Simple Accounting for Smart Businesses</p>
+    </div>
+
+    <button class="nav-btn active">Dashboard</button>
+    <button class="nav-btn">Pending Approvals</button>
+    <button class="nav-btn">Companies</button>
+    <button class="nav-btn">Packages</button>
+    <button class="nav-btn">VAT Reports</button>
+    <button class="nav-btn">Settings</button>
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar">
+      <div>
+        <h1>Post91 Accounts Admin Dashboard</h1>
+        <p>Manage registrations, approvals, packages and customer accounts.</p>
+      </div>
+      <button onclick="logoutAdmin()" class="logout-btn">Logout</button>
+    </header>
+
+    <section class="stats-grid">
+      <div class="stat-card">
+        <span>Total Companies</span>
+        <h2 id="totalCompanies">0</h2>
+      </div>
+
+      <div class="stat-card pending">
+        <span>Pending Approvals</span>
+        <h2 id="pendingApprovals">0</h2>
+      </div>
+
+      <div class="stat-card active">
+        <span>Active Companies</span>
+        <h2 id="activeCompanies">0</h2>
+      </div>
+
+      <div class="stat-card rejected">
+        <span>Rejected</span>
+        <h2 id="rejectedCompanies">0</h2>
+      </div>
+    </section>
+
+    <section class="content-card">
+      <div class="section-title">
+        <div>
+          <h2>Registration Requests</h2>
+          <p>Approve or reject Post91 customer registrations.</p>
+        </div>
+        <button onclick="loadRegistrations()" class="refresh-btn">Refresh</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Owner</th>
+              <th>Email</th>
+              <th>Mobile</th>
+              <th>Package</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="registrationTable">
+            <tr>
+              <td colspan="7">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+<script src="/post91-admin.js"></script>
+</body>
+</html>

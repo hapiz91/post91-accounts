@@ -336,6 +336,126 @@ app.post("/api/post91/reject", async (req, res) => {
   }
 });
 
+app.post("/api/post91/admin/update-package", async (req, res) => {
+  try {
+    if (!db) {
+      return res.status(500).json({
+        success: false,
+        message: "Database not connected",
+      });
+    }
+
+    const {
+      email,
+      selectedPlan,
+      monthlyPrice,
+      vatAmount,
+      totalAmount,
+      validityDays,
+    } = req.body;
+
+    const cleanEmail = (email || "").toLowerCase().trim();
+
+    if (!cleanEmail || !selectedPlan) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and package are required",
+      });
+    }
+
+    const now = new Date();
+    const validUntil = new Date();
+    validUntil.setDate(now.getDate() + Number(validityDays || 30));
+
+    const updateData = {
+      selectedPlan,
+      monthlyPrice: Number(monthlyPrice || 0),
+      vatAmount: Number(vatAmount || 0),
+      totalAmount: Number(totalAmount || 0),
+      packageValidUntil: validUntil.toISOString().split("T")[0],
+      validUntil: validUntil.toISOString().split("T")[0],
+      packageUpdatedAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+    };
+
+    await db.collection("post91Users").doc(cleanEmail).update(updateData);
+    await db.collection("post91RegistrationRequests").doc(cleanEmail).update(updateData);
+
+    res.json({
+      success: true,
+      message: "Package updated successfully",
+      validUntil: updateData.validUntil,
+    });
+
+  } catch (error) {
+    console.error("Post91 package update error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Package update failed",
+    });
+  }
+});
+
+app.post("/api/post91/admin/extend-validity", async (req, res) => {
+  try {
+    if (!db) {
+      return res.status(500).json({
+        success: false,
+        message: "Database not connected",
+      });
+    }
+
+    const { email, days, reason } = req.body;
+    const cleanEmail = (email || "").toLowerCase().trim();
+
+    if (!cleanEmail || !days) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and days are required",
+      });
+    }
+
+    const userRef = db.collection("post91Users").doc(cleanEmail);
+    const userDoc = await userRef.get();
+
+    let baseDate = new Date();
+
+    if (userDoc.exists) {
+      const user = userDoc.data();
+      if (user.validUntil || user.packageValidUntil) {
+        const oldDate = new Date(user.validUntil || user.packageValidUntil);
+        if (oldDate > baseDate) baseDate = oldDate;
+      }
+    }
+
+    baseDate.setDate(baseDate.getDate() + Number(days));
+
+    const updateData = {
+      validUntil: baseDate.toISOString().split("T")[0],
+      packageValidUntil: baseDate.toISOString().split("T")[0],
+      validityExtendedAt: new Date().toISOString(),
+      validityExtensionReason: reason || "Manual validity extension",
+      updatedAt: new Date().toISOString(),
+    };
+
+    await db.collection("post91Users").doc(cleanEmail).update(updateData);
+    await db.collection("post91RegistrationRequests").doc(cleanEmail).update(updateData);
+
+    res.json({
+      success: true,
+      message: "Validity extended successfully",
+      validUntil: updateData.validUntil,
+    });
+
+  } catch (error) {
+    console.error("Post91 validity extension error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Validity extension failed",
+    });
+  }
+});
+
 /* =========================
    SERVER START
 ========================= */
