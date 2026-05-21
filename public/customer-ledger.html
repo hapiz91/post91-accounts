@@ -146,6 +146,7 @@ th{background:#f8fbff;text-align:left}
 let CLOUD_CUSTOMERS=[];
 let CLOUD_INVOICES=[];
 let CLOUD_RECEIPTS=[];
+let COMPANY_PROFILE={};
 let EXPORT_ROWS=[];
 
 function mv(n){return Number(n||0).toFixed(3)}
@@ -179,13 +180,30 @@ async function initCloud(){
   CLOUD_INVOICES = await smartLoad(COLLECTIONS.SALES_INVOICES);
   CLOUD_RECEIPTS = await smartLoad(COLLECTIONS.RECEIPTS);
 
+  let profiles = await smartLoad("companyProfile");
+
+  if(!profiles || profiles.length===0){
+    profiles = await smartLoad("companyProfiles");
+  }
+
+  if(!profiles || profiles.length===0){
+    profiles = await smartLoad("companies");
+  }
+
+  if(!profiles || profiles.length===0){
+    profiles = [JSON.parse(localStorage.getItem("post91CompanyProfile") || "{}")];
+  }
+
+  COMPANY_PROFILE = profiles[0] || {};
+
   loadCustomers();
   generateLedger();
 
   console.log("Customer Ledger Loaded:", {
     customers:CLOUD_CUSTOMERS.length,
     invoices:CLOUD_INVOICES.length,
-    receipts:CLOUD_RECEIPTS.length
+    receipts:CLOUD_RECEIPTS.length,
+    company:COMPANY_PROFILE
   });
 }
 
@@ -371,15 +389,6 @@ function getInvoicePaidAmount(invoiceNo){
   return paid;
 }
 
-function getInvoiceDueDate(inv){
-  return inv.dueDate ||
-    inv.invoiceDueDate ||
-    inv.paymentDueDate ||
-    inv.creditDueDate ||
-    inv.invoiceDate ||
-    "";
-}
-
 function formatDate(d){
   if(!d)return "";
   let x=new Date(d);
@@ -394,40 +403,140 @@ function invoiceMonth(d){
   return x.toLocaleString("en-US",{month:"short"});
 }
 
+function getCustomerDetails(name){
+  return CLOUD_CUSTOMERS.find(c=>
+    String(c.customerName||c.name||"").toLowerCase() ===
+    String(name||"").toLowerCase()
+  ) || {};
+}
+
+function getCustomerCreditDays(customerName){
+  let c = getCustomerDetails(customerName);
+
+  let days = Number(
+    c.creditPeriod ||
+    c.creditDays ||
+    c.paymentTermsDays ||
+    c.paymentTerms ||
+    0
+  );
+
+  return isNaN(days) ? 0 : days;
+}
+
+function addDays(date,days){
+  if(!date)return "";
+
+  let d=new Date(date);
+
+  if(isNaN(d))return "";
+
+  d.setDate(d.getDate()+Number(days||0));
+
+  return d.toISOString().split("T")[0];
+}
+
+function getInvoiceDueDate(inv){
+  if(
+    inv.dueDate ||
+    inv.invoiceDueDate ||
+    inv.paymentDueDate ||
+    inv.creditDueDate
+  ){
+    return (
+      inv.dueDate ||
+      inv.invoiceDueDate ||
+      inv.paymentDueDate ||
+      inv.creditDueDate
+    );
+  }
+
+  let creditDays=getCustomerCreditDays(inv.customerName);
+
+  if(creditDays>0){
+    return addDays(inv.invoiceDate,creditDays);
+  }
+
+  return inv.invoiceDate || "";
+}
+
+function numberToWords(num){
+  num=Number(num||0).toFixed(3);
+
+  let parts=num.split(".");
+  let rial=parseInt(parts[0],10);
+  let baiza=parseInt(parts[1],10);
+
+  const ones=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+  const tens=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+
+  function words(n){
+    n=Number(n);
+
+    if(n===0)return "Zero";
+    if(n<20)return ones[n];
+    if(n<100)return tens[Math.floor(n/10)] + (n%10 ? " " + ones[n%10] : "");
+    if(n<1000)return ones[Math.floor(n/100)] + " Hundred" + (n%100 ? " " + words(n%100) : "");
+    if(n<1000000)return words(Math.floor(n/1000)) + " Thousand" + (n%1000 ? " " + words(n%1000) : "");
+
+    return words(Math.floor(n/1000000)) + " Million" + (n%1000000 ? " " + words(n%1000000) : "");
+  }
+
+  let text=words(rial)+" Omani Rial";
+
+  if(baiza>0){
+    text+=" and "+words(baiza)+" Baiza";
+  }
+
+  return text+" Only";
+}
+
 function exportSOA(){
   let customer=soaCustomerSelect.value;
   let dueDate=soaDueDate.value;
 
-  if(!customer)return alert("Please select customer.");
-  if(!dueDate)return alert("Please select due date.");
+  if(!customer){
+    alert("Please select customer.");
+    return;
+  }
+
+  if(!dueDate){
+    alert("Please select due date.");
+    return;
+  }
 
   let selectedDue=new Date(dueDate);
 
   let invoices=CLOUD_INVOICES
     .filter(inv=>{
-      if(isCancelled(inv.docStatus))return false;
-      if(String(inv.customerName||"").toLowerCase()!==String(customer||"").toLowerCase())return false;
+      if(isCancelled(inv.docStatus)) return false;
+
+      if(
+        String(inv.customerName||"").toLowerCase() !==
+        String(customer||"").toLowerCase()
+      ) return false;
 
       let invDue=getInvoiceDueDate(inv);
-      if(new Date(invDue)>selectedDue)return false;
+
+      if(new Date(invDue) > selectedDue) return false;
 
       let gross=Number(inv.grandTotal||inv.total||0);
       let paid=getInvoicePaidAmount(inv.invoiceNo);
-      return gross-paid>0.0004;
+
+      return gross-paid > 0.0004;
     })
     .map(inv=>{
       let gross=Number(inv.grandTotal||inv.total||0);
       let paid=getInvoicePaidAmount(inv.invoiceNo);
-      let balance=gross-paid;
 
       return {
-        invoiceDate:inv.invoiceDate||"",
+        invoiceDate:inv.invoiceDate || "",
         invoiceMonth:invoiceMonth(inv.invoiceDate),
-        doNo:inv.deliveryOrderNo||inv.doNo||inv.referenceNo||"",
-        invoiceNo:inv.invoiceNo||"",
-        currency:inv.currency||"OMR",
-        amount:balance,
-        lpo:inv.lpoNo||inv.referenceNo||"",
+        doNo:inv.deliveryOrderNo || inv.doNo || inv.referenceNo || "",
+        invoiceNo:inv.invoiceNo || "",
+        currency:inv.currency || "OMR",
+        amount:gross-paid,
+        lpo:inv.lpoNo || inv.referenceNo || "",
         dueDate:getInvoiceDueDate(inv)
       };
     });
@@ -441,12 +550,12 @@ function exportSOA(){
 
   let rows=invoices.map((r,i)=>`
     <tr>
-      <td>${i+1}</td>
+      <td style="text-align:right">${i+1}</td>
       <td>${esc(customer)}</td>
       <td>${formatDate(r.invoiceDate)}</td>
       <td>${esc(r.invoiceMonth)}</td>
       <td>${esc(r.doNo)}</td>
-      <td>${esc(r.invoiceNo)}</td>
+      <td style="text-align:right">${esc(r.invoiceNo)}</td>
       <td>${esc(r.currency)}</td>
       <td style="text-align:right;font-weight:bold">${mv(r.amount)}</td>
       <td>${esc(r.lpo)}</td>
@@ -454,65 +563,117 @@ function exportSOA(){
     </tr>
   `).join("");
 
+  let companyName =
+    COMPANY_PROFILE.companyName ||
+    COMPANY_PROFILE.businessName ||
+    COMPANY_PROFILE.name ||
+    "Company Name";
+
+  let companyDetails = `
+    ${COMPANY_PROFILE.address || COMPANY_PROFILE.companyAddress || ""}
+    ${COMPANY_PROFILE.phone ? "&nbsp;&nbsp;&nbsp; Tel: " + esc(COMPANY_PROFILE.phone) : ""}
+    ${COMPANY_PROFILE.mobile ? "&nbsp;&nbsp;&nbsp; GSM: " + esc(COMPANY_PROFILE.mobile) : ""}
+    ${COMPANY_PROFILE.vatNumber || COMPANY_PROFILE.vatIn ? "&nbsp;&nbsp;&nbsp; VAT IN: " + esc(COMPANY_PROFILE.vatNumber || COMPANY_PROFILE.vatIn) : ""}
+    ${COMPANY_PROFILE.crNumber || COMPANY_PROFILE.crNo ? "&nbsp;&nbsp;&nbsp; C.R. No: " + esc(COMPANY_PROFILE.crNumber || COMPANY_PROFILE.crNo) : ""}
+  `;
+
   let html=`
 <!DOCTYPE html>
 <html>
 <head>
 <title>SOA - ${esc(customer)}</title>
+
 <style>
-body{font-family:Arial,sans-serif;margin:0;background:white;color:#000}
-.sheet{padding:22px}
-h1{text-align:center;margin:0;font-size:26px}
-.title{text-align:center;font-weight:bold;margin:12px 0;font-size:18px}
+body{font-family:Calibri,Arial,sans-serif;margin:0;background:white;color:#000}
+.sheet{width:100%;padding:10px}
+.company{text-align:center;margin-bottom:12px}
+.company h1{margin:0;font-family:Georgia,serif;font-style:italic;font-size:34px;font-weight:500}
+.company div{font-size:14px;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:6px}
+.soa-title{text-align:center;font-size:18px;font-weight:bold;margin:12px 0}
+.to-section{font-size:15px;line-height:1.35;margin-bottom:15px}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{background:#2f75b5;color:white;border:1px solid #000;padding:6px}
-td{border:1px solid #000;padding:5px}
-.total{font-weight:bold}
+th{background:#2f75b5;color:white;border:1px solid #000;padding:6px 4px;text-align:left}
+td{border:1px solid #000;padding:4px}
+.total-row td{font-weight:bold}
+.words{text-align:center;font-weight:bold}
+.footer{display:flex;justify-content:space-between;margin-top:35px;font-size:15px}
 .no-print{text-align:center;margin-top:25px}
 @media print{
-  @page{size:A4 landscape;margin:10mm}
+  @page{size:A4 landscape;margin:8mm}
   .no-print{display:none}
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet{padding:0}
 }
 </style>
 </head>
+
 <body>
 <div class="sheet">
-  <h1>Post91 Accounts</h1>
-  <div class="title">Statement of Account - ${esc(customer)}</div>
+
+  <div class="company">
+    <h1>${esc(companyName)}</h1>
+    <div>${companyDetails}</div>
+  </div>
+
+  <div class="soa-title">SOA for ${esc(customer)}</div>
+
+  <div class="to-section">
+    To,<br>
+    ${esc(customer)}<br>
+    Accounts Department<br>
+    Dear Sir,<br>
+    Here is the accounts statement of the outstanding amount details are as follows
+  </div>
 
   <table>
     <thead>
       <tr>
         <th>S No.</th>
-        <th>Customer</th>
+        <th>Company Name</th>
         <th>Invoice Date</th>
-        <th>Month</th>
-        <th>DO No</th>
-        <th>Invoice No</th>
+        <th>Invoice Month</th>
+        <th>Delivery Order No</th>
+        <th>Invoice Number</th>
         <th>Currency</th>
-        <th>Outstanding</th>
+        <th>Amount</th>
         <th>LPO</th>
-        <th>Due Date</th>
+        <th>Invoice Due Date</th>
       </tr>
     </thead>
+
     <tbody>
       ${rows}
-      <tr class="total">
-        <td colspan="7" style="text-align:right">Total Outstanding</td>
-        <td style="text-align:right">OMR ${mv(total)}</td>
-        <td colspan="2"></td>
+
+      <tr class="total-row">
+        <td colspan="6"></td>
+        <td style="text-align:right">Total Amount:</td>
+        <td>OMR</td>
+        <td style="text-align:right">${mv(total)}</td>
+        <td></td>
+      </tr>
+
+      <tr>
+        <td colspan="10" class="words">
+          Amount in Word&nbsp;&nbsp; ${esc(numberToWords(total))}
+        </td>
       </tr>
     </tbody>
   </table>
+
+  <div class="footer">
+    <div>Receiver Signature:</div>
+    <div>Date:</div>
+  </div>
 
   <div class="no-print">
     <button onclick="window.print()">Print / Save PDF</button>
     <button onclick="window.close()">Close</button>
   </div>
+
 </div>
 </body>
-</html>`;
+</html>
+`;
 
   let w=window.open("","_blank");
   w.document.open();
