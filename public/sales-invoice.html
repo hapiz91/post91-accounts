@@ -477,8 +477,8 @@ th{background:#f8fbff}
   </div>
 </div>
 
-<div class="card editor">
-  <h2>Pump / Vehicle / Technical Details</h2>
+<div class="card editor" id="technicalDetailsSection">
+  <h2 id="technicalDetailsTitle">Pump / Vehicle / Technical Details</h2>
 
   <div class="grid3">
     <div><label>Pump Type / Vehicle / Machine Type</label><input id="pumpType" list="typeList"></div>
@@ -603,7 +603,7 @@ th{background:#f8fbff}
       </div>
     </div>
 
-    <div class="print-box" style="margin-top:8px;">
+    <div class="print-box" id="printTechnicalBox" style="margin-top:8px;">
       <div class="print-row">
         <div class="print-label">PUMP TYPE:</div><div class="print-value" id="pPumpType">-</div>
         <div class="print-label">CYLINDER.NO:</div><div class="print-value" id="pCylinderNo">-</div>
@@ -657,6 +657,18 @@ th{background:#f8fbff}
       <div>Receiver Signature:<br><br>Signature:</div>
       <div>Date:<br><br>Stamp:</div>
     </div>
+
+<div style="
+margin-top:10px;
+padding-top:6px;
+border-top:1px solid #ccc;
+text-align:center;
+font-size:11px;
+color:#555;
+font-weight:700;
+">
+Powered by <b>Post91 Accounts</b> | Simple Accounting for Smart Businesses | accounts.vehicallapp.com
+</div>
 
   </div>
 </div>
@@ -739,6 +751,7 @@ th{background:#f8fbff}
 <script src="/firebase-config.js"></script>
 <script src="/firebase-db.js"></script>
 <script src="/financial-year-utils.js"></script>
+<script src="/industry-template.js"></script>
 
 <script>
 let EDIT="";
@@ -747,6 +760,45 @@ let CLOUD_CUSTOMERS=[];
 let CLOUD_ITEMS=[];
 let CLOUD_DOS=[];
 let COMPANY_PROFILE={};
+
+let CURRENT_TEMPLATE_KEY = "pump_service";
+let CURRENT_TEMPLATE = null;
+
+function loadCurrentTemplate(){
+  CURRENT_TEMPLATE_KEY =
+    COMPANY_PROFILE.industryTemplate ||
+    COMPANY_PROFILE.businessType ||
+    "pump_service";
+
+  CURRENT_TEMPLATE =
+    typeof getIndustryTemplate === "function"
+      ? getIndustryTemplate(CURRENT_TEMPLATE_KEY)
+      : null;
+
+  applyInvoiceTemplate();
+}
+
+function applyInvoiceTemplate(){
+  const isPump = CURRENT_TEMPLATE_KEY === "pump_service";
+
+  const technicalSection = document.getElementById("technicalDetailsSection");
+  const printBox = document.getElementById("printTechnicalBox");
+  const title = document.getElementById("technicalDetailsTitle");
+
+  if(technicalSection){
+    technicalSection.style.display = isPump ? "block" : "none";
+  }
+
+  if(printBox){
+    printBox.style.display = isPump ? "block" : "none";
+  }
+
+  if(title){
+    title.textContent = isPump
+      ? "Pump / Vehicle / Technical Details"
+      : "Additional Details";
+  }
+}
 
 function today(){return new Date().toISOString().split("T")[0]}
 function mv(n){return Number(n||0).toFixed(3)}
@@ -808,6 +860,7 @@ async function initCloud(){
   CLOUD_ITEMS=items||[];
   CLOUD_DOS=dos||[];
   COMPANY_PROFILE=profiles[0]||JSON.parse(localStorage.getItem("post91CompanyProfile")||"{}");
+loadCurrentTemplate();
 
   console.log("Customers:",CLOUD_CUSTOMERS.length);
   console.log("Items:",CLOUD_ITEMS.length);
@@ -841,7 +894,9 @@ async function saveQuickCustomer(){
     email:qcEmail.value.trim(),
     vatNumber:qcVat.value.trim(),
     creditPeriod:qcCredit.value.trim(),
-    status:"Active"
+    status:"Active",
+industryTemplate: CURRENT_TEMPLATE_KEY || "pump_service",
+industryTemplateName: CURRENT_TEMPLATE?.name || "Pump Service"
   };
 
   if(!c.customerName)return alert("Customer name required");
@@ -1215,6 +1270,8 @@ async function saveDoc(e){
     sourceType:sourceType.value,
     invoiceNo:invoiceNo.value,
     invoiceDate:invoiceDate.value,
+    industryTemplate: CURRENT_TEMPLATE_KEY || "pump_service",
+    industryTemplateName: CURRENT_TEMPLATE?.name || "Pump Service",
     customerName:customerName.value,
     customerAddress:customerAddress.value,
     attention:attention.value,
