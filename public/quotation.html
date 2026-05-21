@@ -47,7 +47,17 @@ th{background:#f8fbff}
 .opt span{font-size:12px;color:#64748b}
 
 /* PRINT */
-.paper{background:#fff;border:1px solid #111;max-width:1000px;width:100%;min-height:1120px;margin:auto;color:#000;padding:10px}
+.paper{
+  background:#fff;
+  border:2px solid #111;
+  max-width:1000px;
+  width:100%;
+  min-height:1120px;
+  margin:auto;
+  color:#000;
+  padding:14px;
+  box-shadow:0 10px 40px rgba(0,0,0,.08);
+}
 .doc-letterhead-space{width:100%;height:4cm;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:14px;border-bottom:3px double #111}
 .letterhead-img{width:100%;height:100%;object-fit:contain;display:none}
 .company-header-fallback{width:100%;height:100%;display:none;align-items:center;justify-content:center;text-align:center}
@@ -209,8 +219,8 @@ th{background:#f8fbff}
   </div>
 </div>
 
-<div class="card editor">
-  <h2>Pump / Vehicle / Technical Details</h2>
+<div class="card editor" id="technicalDetailsSection">
+  <h2 id="technicalDetailsTitle">Pump / Vehicle / Technical Details</h2>
 
   <div class="grid3">
     <div><label>Pump Type / Vehicle / Machine Type</label><input id="pumpType" list="typeList"></div>
@@ -327,7 +337,7 @@ th{background:#f8fbff}
       </div>
     </div>
 
-    <div class="tech-grid">
+    <div class="tech-grid" id="printTechnicalBox">
       <div class="tech-label">PUMP TYPE:</div>
       <div class="tech-value" id="pPumpType">-</div>
       <div class="tech-label">CYLINDER.NO:</div>
@@ -378,9 +388,13 @@ th{background:#f8fbff}
 
     <div class="footer-sign">
       <div><span id="pSignature">For Company</span><br><br>Authorized Signatory</div>
-      <div>Customer Approval:<br><br>Signature:</div>
-      <div>Date:<br><br>Stamp:</div>
+<div>Customer Approval:<br><br>Signature:</div>
+<div>Date:<br><br>Stamp:</div>
     </div>
+
+<div style="margin-top:10px;padding-top:6px;border-top:1px solid #ccc;text-align:center;font-size:11px;color:#555;font-weight:700;">
+  Powered by <b>Post91 Accounts</b> | Simple Accounting for Smart Businesses | accounts.vehicallapp.com
+</div>
 
   </div>
 </div>
@@ -477,6 +491,40 @@ let CLOUD_BRANDS = [];
 let CLOUD_TYPES = [];
 
 let COMPANY_PROFILE = {};
+let CURRENT_TEMPLATE_KEY = "pump_service";
+let CURRENT_TEMPLATE = null;
+
+function loadCurrentTemplate(){
+  CURRENT_TEMPLATE_KEY =
+    COMPANY_PROFILE.industryTemplate ||
+    COMPANY_PROFILE.businessType ||
+    "pump_service";
+
+  CURRENT_TEMPLATE =
+    typeof getIndustryTemplate === "function"
+      ? getIndustryTemplate(CURRENT_TEMPLATE_KEY)
+      : null;
+
+  applyQuotationTemplate();
+}
+
+function applyQuotationTemplate(){
+  const isPump = CURRENT_TEMPLATE_KEY === "pump_service";
+
+  if(technicalDetailsSection){
+    technicalDetailsSection.style.display = isPump ? "block" : "none";
+  }
+
+  if(printTechnicalBox){
+    printTechnicalBox.style.display = isPump ? "grid" : "none";
+  }
+
+  if(technicalDetailsTitle){
+    technicalDetailsTitle.textContent = isPump
+      ? "Pump / Vehicle / Technical Details"
+      : "Additional Details";
+  }
+}
 
 function today(){return new Date().toISOString().split("T")[0]}
 function mv(n){return Number(n||0).toFixed(3)}
@@ -564,6 +612,7 @@ async function initCloudData(){
     COMPANY_PROFILE =
       profiles[0] ||
       JSON.parse(localStorage.getItem("post91CompanyProfile") || "{}");
+      loadCurrentTemplate();
 
     refreshLists();
 
@@ -903,12 +952,48 @@ function calc(){
 }
 
 function silent(){
-  return calc();
+  let total=0;
+
+  document.querySelectorAll("#itemsBody tr").forEach(r=>{
+    total += Number(r.querySelector(".amount").value || 0);
+  });
+
+  let disc=Number(discount.value || 0);
+  let after=Math.max(total-disc,0);
+  let v=Number(vatPercent.value || 0);
+  let type=vatType.value;
+
+  let vat=0,before=after,grand=after;
+
+  if(type==="VAT Exclusive"){
+    vat=before*v/100;
+    grand=before+vat;
+  }
+
+  if(type==="VAT Inclusive"){
+    vat=after-(after/(1+v/100));
+    before=after-vat;
+    grand=after;
+  }
+
+  if(["Non-VAT","Zero Rated","Exempt"].includes(type)){
+    vat=0;
+    before=after;
+    grand=after;
+  }
+
+  return {
+    total,
+    discountAmount:disc,
+    beforeTax:before,
+    vatAmount:vat,
+    grandTotal:grand
+  };
 }
 
 function pumpTypeDisplay(){
-  let type=pumpType.value||"-";
-  let brand=brandName.value||"";
+  let type = pumpType.value || "-";
+  let brand = brandName.value || "";
   return brand ? `${type} (${brand})` : type;
 }
 
@@ -962,23 +1047,45 @@ function updatePreview(){
   pWorkOrderNo.textContent=workOrderNo.value||"-";
   pSerialNo.textContent=serialNo.value||"-";
 
-  pItems.innerHTML="";
+    pItems.innerHTML="";
+
+  let printedRows=0;
 
   document.querySelectorAll("#itemsBody tr").forEach(r=>{
+
+    let itemName=r.querySelector(".itemSearch").value.trim();
+    let desc=r.querySelector(".desc").value.trim();
+    let printDesc=desc || itemName || "-";
 
     let tr=document.createElement("tr");
 
     tr.innerHTML=`
-      <td>${r.querySelector(".sr").value}</td>
-      <td style="white-space:pre-line;">${r.querySelector(".desc").value||"-"}</td>
-      <td>${r.querySelector(".qty").value}</td>
-      <td>${r.querySelector(".unit").value}</td>
-      <td class="priceCol">${mv(r.querySelector(".rate").value)}</td>
-      <td class="priceCol">${mv(r.querySelector(".amount").value)}</td>
+      <td style="text-align:center;">${r.querySelector(".sr").value}</td>
+      <td style="white-space:pre-line;">${printDesc}</td>
+      <td style="text-align:center;">${r.querySelector(".qty").value || 0}</td>
+      <td style="text-align:center;">${r.querySelector(".unit").value || "-"}</td>
+      <td class="priceCol" style="text-align:right;">${mv(r.querySelector(".rate").value)}</td>
+      <td class="priceCol" style="text-align:right;">${mv(r.querySelector(".amount").value)}</td>
     `;
 
     pItems.appendChild(tr);
+    printedRows++;
   });
+
+  for(let i=printedRows+1;i<=14;i++){
+    let tr=document.createElement("tr");
+
+    tr.innerHTML=`
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td class="priceCol"></td>
+      <td class="priceCol"></td>
+    `;
+
+    pItems.appendChild(tr);
+  }
 
   let t=silent();
 
@@ -1041,6 +1148,9 @@ async function saveDoc(e){
 
     quotationNo:quotationNo.value,
     quotationDate:quotationDate.value,
+
+industryTemplate: CURRENT_TEMPLATE_KEY || "pump_service",
+industryTemplateName: CURRENT_TEMPLATE?.name || "Pump Service",
 
     customerName:customerName.value,
     customerAddress:customerAddress.value,
