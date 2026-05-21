@@ -1238,10 +1238,12 @@ async function loadSaved(){
       <td>${d.customerName||"-"}</td>
       <td>${mt(d.grandTotal)}</td>
       <td>${statusBadge(d.docStatus)}</td>
-      <td>
-        <button class="btn btn-light" onclick="editDoc(${i})">Edit/Open</button>
-        <button class="btn btn-danger" onclick="delDoc('${d.id}')">Delete</button>
-      </td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap;">
+  <button class="btn btn-light" onclick="editDoc(${i})">Edit</button>
+  <button class="btn" onclick="convertToDO(${i})">Convert DO</button>
+  <button class="btn" onclick="convertToInvoice(${i})">Convert Invoice</button>
+  <button class="btn btn-danger" onclick="delDoc('${d.id}')">Delete</button>
+</td>
     `;
 
     savedBody.appendChild(tr);
@@ -1345,6 +1347,28 @@ function setDefaults(){
   addRow();
 
   calc();
+}
+
+function convertToDO(i){
+  let d = CURRENT_QUOTES[i];
+
+  if(!d || !d.id){
+    alert("Quotation cloud ID not found.");
+    return;
+  }
+
+  window.location.href = "/delivery-order.html?quotationId=" + encodeURIComponent(d.id);
+}
+
+function convertToInvoice(i){
+  let d = CURRENT_QUOTES[i];
+
+  if(!d || !d.id){
+    alert("Quotation cloud ID not found.");
+    return;
+  }
+
+  window.location.href = "/sales-invoice.html?quotationId=" + encodeURIComponent(d.id);
 }
 
 document.addEventListener("click",e=>{

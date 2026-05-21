@@ -954,25 +954,10 @@ async function smartLoad(collection){
 }
 
 async function initCloudData(){
-
-  savedBody.innerHTML = `
-    <tr>
-      <td colspan="6">Loading...</td>
-    </tr>
-  `;
+  savedBody.innerHTML = `<tr><td colspan="6">Loading...</td></tr>`;
 
   try{
-
-    const [
-      customers,
-      items,
-      categories,
-      brands,
-      types,
-      quotations,
-      profiles
-    ] = await Promise.all([
-
+    const [customers, items, categories, brands, types, quotations, profiles] = await Promise.all([
       smartLoad(COLLECTIONS.CUSTOMERS),
       smartLoad(COLLECTIONS.ITEMS),
       smartLoad(COLLECTIONS.CATEGORIES),
@@ -980,7 +965,6 @@ async function initCloudData(){
       smartLoad(COLLECTIONS.MACHINE_TYPES),
       smartLoad(COLLECTIONS.QUOTATIONS),
       smartLoad("companyProfile")
-
     ]);
 
     CLOUD_CUSTOMERS = customers || [];
@@ -994,39 +978,33 @@ async function initCloudData(){
       profiles[0] ||
       JSON.parse(localStorage.getItem("post91CompanyProfile") || "{}");
 
-loadCurrentTemplate();
-
-    console.log("Customers:", CLOUD_CUSTOMERS.length);
-    console.log("Items:", CLOUD_ITEMS.length);
-    console.log("DO:", CLOUD_QUOTATIONS.length);
-
+    loadCurrentTemplate();
     refreshLists();
     loadSourceDropdown();
     setDefaults();
+    loadConvertedQuotation();
 
     await loadSaved();
 
   }catch(err){
-
     console.error("INIT ERROR:", err);
-
-    savedBody.innerHTML = `
-      <tr>
-        <td colspan="6">Failed loading cloud data</td>
-      </tr>
-    `;
-
+    savedBody.innerHTML = `<tr><td colspan="6">Failed loading cloud data</td></tr>`;
   }
 }
+
 function refreshLists(){
   dl("typeList",[...CLOUD_TYPES.map(x=>x.name),...CLOUD_ITEMS.map(ity)]);
   dl("brandList",[...CLOUD_BRANDS.map(x=>x.name),...CLOUD_ITEMS.map(ibr)]);
   dl("catList",[...CLOUD_CATEGORIES.map(x=>x.name),...CLOUD_ITEMS.map(icat)]);
 }
 
-function openM(id){document.getElementById(id).classList.add("show")}
-function closeM(id){document.getElementById(id).classList.remove("show")}
+function openM(id){
+  document.getElementById(id).classList.add("show");
+}
 
+function closeM(id){
+  document.getElementById(id).classList.remove("show");
+}
 async function saveQuickCustomer(){
   let c={
     customerName:qcName.value.trim(),
@@ -1561,10 +1539,19 @@ async function loadSaved(){
       <td>${d.customerName||"-"}</td>
       <td>${mt(d.grandTotal)}</td>
       <td>${statusBadge(d.docStatus)}</td>
-      <td>
-        <button class="btn btn-light" onclick="editDoc(${i})">Edit/Open</button>
-        <button class="btn btn-danger" onclick="delDoc('${d.id}')">Delete</button>
-      </td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap;">
+  <button class="btn btn-light" onclick="editDoc(${i})">
+    Edit
+  </button>
+
+  <button class="btn" onclick="convertDOToInvoice(${i})">
+    Convert Invoice
+  </button>
+
+  <button class="btn btn-danger" onclick="delDoc('${d.id}')">
+    Delete
+  </button>
+</td>
     `;
 
     savedBody.appendChild(tr);
@@ -1622,7 +1609,50 @@ async function delDoc(id){
     await loadSaved();
   }
 }
+function getUrlParam(name){
+  return new URLSearchParams(window.location.search).get(name);
+}
 
+function loadConvertedQuotation(){
+  const quotationId = getUrlParam("quotationId");
+  if(!quotationId) return;
+
+  const q = CLOUD_QUOTATIONS.find(x => x.id === quotationId);
+
+  if(!q){
+    alert("Quotation not found in cloud.");
+    return;
+  }
+
+  customerName.value = q.customerName || "";
+  customerAddress.value = q.customerAddress || "";
+  attention.value = q.attention || "";
+  mobile.value = q.mobile || "";
+  email.value = q.email || "";
+
+  quotationRef.value = q.quotationNo || "";
+  workOrderRef.value = q.referenceNo || "";
+
+  pumpType.value = q.pumpType || "";
+  brandName.value = q.brandName || "";
+  cylinderNo.value = q.cylinderNo || "";
+  noOfNozzles.value = q.noOfNozzles || "";
+  pumpNo.value = q.pumpNo || "";
+  jobNo.value = q.jobNo || "";
+  govNo.value = q.govNo || "";
+  workOrderNo.value = q.workOrderNo || "";
+  serialNo.value = q.serialNo || "";
+
+  vatType.value = q.vatType || "VAT Exclusive";
+  vatPercent.value = q.vatPercent || 5;
+  discount.value = q.discountAmount || "0.000";
+
+  itemsBody.innerHTML = "";
+  (q.items || []).forEach(x => addRow(x));
+  if((q.items || []).length === 0) addRow();
+
+  calc();
+}
 function setDefaults(){
   EDIT="";
   docForm.reset();
@@ -1642,6 +1672,17 @@ function setDefaults(){
   sourceChanged();
   addRow();
   calc();
+}
+
+function convertDOToInvoice(i){
+  let d = CURRENT_DOS[i];
+
+  if(!d || !d.id){
+    alert("Delivery Order cloud ID not found.");
+    return;
+  }
+
+  window.location.href = "/sales-invoice.html?doId=" + encodeURIComponent(d.id);
 }
 
 document.addEventListener("click",e=>{

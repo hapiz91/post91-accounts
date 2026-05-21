@@ -761,44 +761,8 @@ let CLOUD_ITEMS=[];
 let CLOUD_DOS=[];
 let COMPANY_PROFILE={};
 
-let CURRENT_TEMPLATE_KEY = "pump_service";
-let CURRENT_TEMPLATE = null;
-
-function loadCurrentTemplate(){
-  CURRENT_TEMPLATE_KEY =
-    COMPANY_PROFILE.industryTemplate ||
-    COMPANY_PROFILE.businessType ||
-    "pump_service";
-
-  CURRENT_TEMPLATE =
-    typeof getIndustryTemplate === "function"
-      ? getIndustryTemplate(CURRENT_TEMPLATE_KEY)
-      : null;
-
-  applyInvoiceTemplate();
-}
-
-function applyInvoiceTemplate(){
-  const isPump = CURRENT_TEMPLATE_KEY === "pump_service";
-
-  const technicalSection = document.getElementById("technicalDetailsSection");
-  const printBox = document.getElementById("printTechnicalBox");
-  const title = document.getElementById("technicalDetailsTitle");
-
-  if(technicalSection){
-    technicalSection.style.display = isPump ? "block" : "none";
-  }
-
-  if(printBox){
-    printBox.style.display = isPump ? "block" : "none";
-  }
-
-  if(title){
-    title.textContent = isPump
-      ? "Pump / Vehicle / Technical Details"
-      : "Additional Details";
-  }
-}
+let CURRENT_TEMPLATE_KEY="pump_service";
+let CURRENT_TEMPLATE=null;
 
 function today(){return new Date().toISOString().split("T")[0]}
 function mv(n){return Number(n||0).toFixed(3)}
@@ -834,11 +798,13 @@ function isub(i){
   return a.join(" | ");
 }
 
+function getUrlParam(name){
+  return new URLSearchParams(window.location.search).get(name);
+}
+
 async function smartLoad(collection){
   try{
-    if(typeof loadFromCloudSmart==="function"){
-      return await loadFromCloudSmart(collection);
-    }
+    if(typeof loadFromCloudSmart==="function") return await loadFromCloudSmart(collection);
     return await loadFromCloud(collection);
   }catch(err){
     console.error("Load Error:",collection,err);
@@ -846,30 +812,31 @@ async function smartLoad(collection){
   }
 }
 
-async function initCloud(){
-  savedBody.innerHTML=`<tr><td colspan="6">Loading...</td></tr>`;
+function loadCurrentTemplate(){
+  CURRENT_TEMPLATE_KEY =
+    COMPANY_PROFILE.industryTemplate ||
+    COMPANY_PROFILE.businessType ||
+    "pump_service";
 
-  const [customers,items,dos,profiles]=await Promise.all([
-    smartLoad(COLLECTIONS.CUSTOMERS),
-    smartLoad(COLLECTIONS.ITEMS),
-    smartLoad(COLLECTIONS.DELIVERY_ORDERS),
-    smartLoad("companyProfile")
-  ]);
+  CURRENT_TEMPLATE =
+    typeof getIndustryTemplate==="function"
+      ? getIndustryTemplate(CURRENT_TEMPLATE_KEY)
+      : null;
 
-  CLOUD_CUSTOMERS=customers||[];
-  CLOUD_ITEMS=items||[];
-  CLOUD_DOS=dos||[];
-  COMPANY_PROFILE=profiles[0]||JSON.parse(localStorage.getItem("post91CompanyProfile")||"{}");
-loadCurrentTemplate();
+  applyInvoiceTemplate();
+}
 
-  console.log("Customers:",CLOUD_CUSTOMERS.length);
-  console.log("Items:",CLOUD_ITEMS.length);
-  console.log("Delivery Orders:",CLOUD_DOS.length);
+function applyInvoiceTemplate(){
+  const isPump=CURRENT_TEMPLATE_KEY==="pump_service";
 
-  refreshLists();
-  sourceChanged();
-  setDefaults();
-  await loadSaved();
+  if(technicalDetailsSection) technicalDetailsSection.style.display=isPump?"block":"none";
+  if(printTechnicalBox) printTechnicalBox.style.display=isPump?"block":"none";
+
+  if(technicalDetailsTitle){
+    technicalDetailsTitle.textContent=isPump
+      ? "Pump / Vehicle / Technical Details"
+      : "Additional Details";
+  }
 }
 
 function refreshLists(){
@@ -895,8 +862,8 @@ async function saveQuickCustomer(){
     vatNumber:qcVat.value.trim(),
     creditPeriod:qcCredit.value.trim(),
     status:"Active",
-industryTemplate: CURRENT_TEMPLATE_KEY || "pump_service",
-industryTemplateName: CURRENT_TEMPLATE?.name || "Pump Service"
+    industryTemplate:CURRENT_TEMPLATE_KEY||"pump_service",
+    industryTemplateName:CURRENT_TEMPLATE?.name||"Pump Service"
   };
 
   if(!c.customerName)return alert("Customer name required");
@@ -991,12 +958,16 @@ function loadSource(){
   if(sourceSelect.value==="")return alert("Select Delivery Order");
 
   const d=CLOUD_DOS[sourceSelect.value];
+  fillFromDO(d);
+}
 
+function fillFromDO(d){
   customerName.value=d.customerName||"";
   customerAddress.value=d.customerAddress||"";
   attention.value=d.attention||"";
   mobile.value=d.mobile||"";
   email.value=d.email||"";
+  customerVatNo.value=d.customerVatNo||"";
 
   reference.value=d.doNo||"";
   doDate.value=d.doDate||"";
@@ -1020,6 +991,22 @@ function loadSource(){
   if((d.items||[]).length===0)addRow();
 
   calc();
+}
+
+function loadConvertedDO(){
+  const doId=getUrlParam("doId");
+  if(!doId)return;
+
+  const d=CLOUD_DOS.find(x=>x.id===doId);
+
+  if(!d){
+    alert("Delivery Order not found in cloud.");
+    return;
+  }
+
+  invoiceNo.value="SI-"+(1001+CURRENT_INVOICES.length);
+  invoiceDate.value=today();
+  fillFromDO(d);
 }
 
 function addRow(d=null){
@@ -1092,14 +1079,17 @@ function selectItem(r,i){
   r.querySelector(".desc").value=desc;
   r.querySelector(".unit").value=iunit(i);
   r.querySelector(".rate").value=mv(iprice(i));
+
   calc();
 }
 
 function remRow(b){
   b.closest("tr").remove();
+
   [...document.querySelectorAll("#itemsBody tr")].forEach((r,i)=>{
     r.querySelector(".sr").value=i+1;
   });
+
   calc();
 }
 
@@ -1132,11 +1122,13 @@ function calc(){
   grandText.textContent=mt(grand);
 
   updatePreview();
+
   return {total,discountAmount:disc,beforeTax:before,vatAmount:vat,grandTotal:grand};
 }
 
 function silent(){
   let total=0;
+
   document.querySelectorAll("#itemsBody tr").forEach(r=>{
     total+=+(r.querySelector(".amount").value)||0;
   });
@@ -1166,6 +1158,7 @@ function updatePreview(){
     pLetterhead.removeAttribute("src");
     pLetterhead.style.display="none";
     pCompanyHeader.style.display="flex";
+
     pCompanyHeader.innerHTML=`
       <div>
         <div class="company-name">${company.companyName||company.name||"Company Name"}</div>
@@ -1191,8 +1184,7 @@ function updatePreview(){
   pRef.textContent=reference.value||"-";
   pDoDate.textContent=doDate.value||"-";
 
-  pPumpType.textContent =pumpType.value? `${pumpType.value}${brandName.value ? " (" + brandName.value + ")" : ""}`
-    : "-";
+  pPumpType.textContent=pumpType.value ? `${pumpType.value}${brandName.value ? " ("+brandName.value+")" : ""}` : "-";
   pCylinderNo.textContent=cylinderNo.value||"-";
   pNoOfNozzles.textContent=noOfNozzles.value||"-";
   pPumpNo.textContent=pumpNo.value||"-";
@@ -1270,8 +1262,8 @@ async function saveDoc(e){
     sourceType:sourceType.value,
     invoiceNo:invoiceNo.value,
     invoiceDate:invoiceDate.value,
-    industryTemplate: CURRENT_TEMPLATE_KEY || "pump_service",
-    industryTemplateName: CURRENT_TEMPLATE?.name || "Pump Service",
+    industryTemplate:CURRENT_TEMPLATE_KEY||"pump_service",
+    industryTemplateName:CURRENT_TEMPLATE?.name||"Pump Service",
     customerName:customerName.value,
     customerAddress:customerAddress.value,
     attention:attention.value,
@@ -1301,20 +1293,57 @@ async function saveDoc(e){
     ...t
   };
 
-  if(typeof attachFinancialYearToTransaction === "function"){
-  rec = await attachFinancialYearToTransaction(rec, invoiceDate.value);
-
-  if(!rec){
-    return;
+  if(typeof attachFinancialYearToTransaction==="function"){
+    rec=await attachFinancialYearToTransaction(rec,invoiceDate.value);
+    if(!rec)return;
   }
-}
 
-let id=await saveToCloud(COLLECTIONS.SALES_INVOICES,rec,EDIT||null);
+  let id=await saveToCloud(COLLECTIONS.SALES_INVOICES,rec,EDIT||null);
+
+  if(id && rec.docStatus==="Submitted" && !rec.stockReduced){
+    await reduceStockFromSalesInvoice(rec,id);
+    rec.stockReduced=true;
+    await saveToCloud(COLLECTIONS.SALES_INVOICES,rec,id);
+  }
 
   if(id){
     alert(EDIT?"Sales Invoice updated successfully.":"Sales Invoice saved successfully.");
     EDIT="";
     await loadSaved();
+  }
+}
+
+async function reduceStockFromSalesInvoice(invoice,invoiceId){
+  try{
+    if(!invoice.items||invoice.items.length===0)return;
+
+    for(const line of invoice.items){
+      const itemName=(line.itemName||"").trim();
+      const qty=Number(line.qty||0);
+
+      if(!itemName||qty<=0)continue;
+
+      const item=CLOUD_ITEMS.find(x=>
+        (x.itemName||"").trim().toLowerCase()===itemName.toLowerCase()
+      );
+
+      if(!item||!item.id)continue;
+
+      const oldStock=Number(item.currentStock||item.stockQty||item.openingStock||0);
+      const newStock=oldStock-qty; // negative stock allowed
+
+      await saveToCloud(COLLECTIONS.ITEMS,{
+        ...item,
+        currentStock:newStock,
+        lastStockReducedByInvoiceId:invoiceId,
+        lastStockReducedAt:new Date().toISOString()
+      },item.id);
+
+      item.currentStock=newStock;
+    }
+  }catch(err){
+    console.error("Stock reduction error:",err);
+    alert("Invoice saved, but stock reduction failed. Please check console.");
   }
 }
 
@@ -1331,7 +1360,7 @@ async function loadSaved(){
   CURRENT_INVOICES.sort((a,b)=>new Date(b.invoiceDate||"1900")-new Date(a.invoiceDate||"1900"));
 
   CURRENT_INVOICES.forEach((d,i)=>{
-    if(q && !JSON.stringify(d).toLowerCase().includes(q))return;
+    if(q&&!JSON.stringify(d).toLowerCase().includes(q))return;
 
     let tr=document.createElement("tr");
     tr.innerHTML=`
@@ -1425,6 +1454,7 @@ function setDefaults(){
 
   sourceChanged();
   addRow();
+  loadConvertedDO();
   calc();
 }
 
@@ -1433,6 +1463,32 @@ document.addEventListener("click",e=>{
     if(!p.parentElement.contains(e.target))p.classList.remove("show");
   });
 });
+
+async function initCloud(){
+  savedBody.innerHTML=`<tr><td colspan="6">Loading...</td></tr>`;
+
+  const [customers,items,dos,profiles]=await Promise.all([
+    smartLoad(COLLECTIONS.CUSTOMERS),
+    smartLoad(COLLECTIONS.ITEMS),
+    smartLoad(COLLECTIONS.DELIVERY_ORDERS),
+    smartLoad("companyProfile")
+  ]);
+
+  CLOUD_CUSTOMERS=customers||[];
+  CLOUD_ITEMS=items||[];
+  CLOUD_DOS=dos||[];
+  COMPANY_PROFILE=profiles[0]||JSON.parse(localStorage.getItem("post91CompanyProfile")||"{}");
+
+  loadCurrentTemplate();
+  refreshLists();
+  sourceChanged();
+
+  CURRENT_INVOICES=await smartLoad(COLLECTIONS.SALES_INVOICES);
+  CURRENT_INVOICES.sort((a,b)=>new Date(b.invoiceDate||"1900")-new Date(a.invoiceDate||"1900"));
+
+  setDefaults();
+  await loadSaved();
+}
 
 initCloud();
 </script>
