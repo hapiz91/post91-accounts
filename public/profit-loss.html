@@ -255,21 +255,40 @@ async function smartLoad(collection){
 }
 
 async function loadCompanyProfile(){
-  let profiles = await smartLoad("companyProfile");
+
+  let profiles = [];
+
+  profiles = await smartLoad("companyProfile");
+
+  if(!profiles || profiles.length===0){
+    profiles = await smartLoad("companyProfiles");
+  }
+
+  if(!profiles || profiles.length===0){
+    profiles = await smartLoad("companies");
+  }
+
+  if(!profiles || profiles.length===0){
+    profiles = [JSON.parse(localStorage.getItem("post91CompanyProfile") || "{}")];
+  }
+
   COMPANY_PROFILE = profiles[0] || {};
+
+  console.log("P&L Company Profile:", COMPANY_PROFILE);
 
   printCompanyName.textContent =
     COMPANY_PROFILE.companyName ||
+    COMPANY_PROFILE.businessName ||
     COMPANY_PROFILE.name ||
     "Company Name";
 
   printCompanyDetails.innerHTML = `
-    ${COMPANY_PROFILE.address || ""}<br>
+    ${COMPANY_PROFILE.address || COMPANY_PROFILE.companyAddress || ""}<br>
     ${COMPANY_PROFILE.phone ? "Tel: " + COMPANY_PROFILE.phone : ""}
     ${COMPANY_PROFILE.mobile ? " | Mobile: " + COMPANY_PROFILE.mobile : ""}
     ${COMPANY_PROFILE.email ? " | Email: " + COMPANY_PROFILE.email : ""}<br>
-    ${COMPANY_PROFILE.vatNumber ? "VAT IN: " + COMPANY_PROFILE.vatNumber : ""}
-    ${COMPANY_PROFILE.crNumber ? " | C.R. No: " + COMPANY_PROFILE.crNumber : ""}
+    ${COMPANY_PROFILE.vatNumber || COMPANY_PROFILE.vatIn ? "VAT IN: " + (COMPANY_PROFILE.vatNumber || COMPANY_PROFILE.vatIn) : ""}
+    ${COMPANY_PROFILE.crNumber || COMPANY_PROFILE.crNo ? " | C.R. No: " + (COMPANY_PROFILE.crNumber || COMPANY_PROFILE.crNo) : ""}
   `;
 }
 
@@ -417,7 +436,7 @@ function clearFilters(){
   loadCompanyProfile().then(generatePL);
 }
 
-generatePL();
+loadCompanyProfile().then(generatePL);
 </script>
 
 </body>
