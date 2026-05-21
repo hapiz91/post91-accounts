@@ -265,7 +265,7 @@ function generateLedger(){
       customer:inv.customerName||"",
       type:"Sales Invoice",
       docNo:inv.invoiceNo||"",
-      ref:inv.referenceNo||inv.lpoNo||inv.doNo||"",
+      ref:getWorkOrderNumber(inv) || inv.lpoNo || inv.referenceNo || inv.doNo || "",
       debit:Number(inv.grandTotal||inv.total||0),
       credit:0,
       advance:0
@@ -460,6 +460,18 @@ function getInvoiceDueDate(inv){
   return inv.invoiceDate || "";
 }
 
+function getWorkOrderNumber(inv){
+  return inv.workOrderNo ||
+    inv.workerOrderNo ||
+    inv.workOrderNumber ||
+    inv.workerOrderNumber ||
+    inv.workOrder ||
+    inv.workerOrder ||
+    inv.woNo ||
+    inv.woNumber ||
+    "";
+}
+
 function numberToWords(num){
   num=Number(num||0).toFixed(3);
 
@@ -536,7 +548,7 @@ function exportSOA(){
         invoiceNo:inv.invoiceNo || "",
         currency:inv.currency || "OMR",
         amount:gross-paid,
-        lpo:inv.lpoNo || inv.referenceNo || "",
+        lpo:getWorkOrderNumber(inv),
         dueDate:getInvoiceDueDate(inv)
       };
     });
@@ -584,25 +596,123 @@ function exportSOA(){
 <title>SOA - ${esc(customer)}</title>
 
 <style>
-body{font-family:Calibri,Arial,sans-serif;margin:0;background:white;color:#000}
-.sheet{width:100%;padding:10px}
-.company{text-align:center;margin-bottom:12px}
-.company h1{margin:0;font-family:Georgia,serif;font-style:italic;font-size:34px;font-weight:500}
-.company div{font-size:14px;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:6px}
-.soa-title{text-align:center;font-size:18px;font-weight:bold;margin:12px 0}
-.to-section{font-size:15px;line-height:1.35;margin-bottom:15px}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{background:#2f75b5;color:white;border:1px solid #000;padding:6px 4px;text-align:left}
-td{border:1px solid #000;padding:4px}
-.total-row td{font-weight:bold}
-.words{text-align:center;font-weight:bold}
-.footer{display:flex;justify-content:space-between;margin-top:35px;font-size:15px}
-.no-print{text-align:center;margin-top:25px}
+body{
+  font-family:Calibri,Arial,sans-serif;
+  margin:0;
+  background:white;
+  color:#000;
+}
+
+.sheet{
+  width:100%;
+  max-width:100%;
+  padding:8mm;
+}
+
+.company{
+  text-align:center;
+  margin-bottom:10px;
+}
+
+.company h1{
+  margin:0;
+  font-family:Georgia,serif;
+  font-style:italic;
+  font-size:30px;
+  font-weight:500;
+}
+
+.company div{
+  font-size:12px;
+  font-weight:bold;
+  border-bottom:1px solid #ddd;
+  padding-bottom:5px;
+}
+
+.soa-title{
+  text-align:center;
+  font-size:17px;
+  font-weight:bold;
+  margin:10px 0;
+}
+
+.to-section{
+  font-size:13px;
+  line-height:1.25;
+  margin-bottom:12px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:10.5px;
+  table-layout:fixed;
+}
+
+th{
+  background:#2f75b5;
+  color:white;
+  border:1px solid #000;
+  padding:5px 3px;
+  text-align:left;
+}
+
+td{
+  border:1px solid #000;
+  padding:3px;
+}
+
+th,td{
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+}
+
+.total-row td{
+  font-weight:bold;
+}
+
+.words{
+  text-align:center;
+  font-weight:bold;
+}
+
+.footer{
+  display:flex;
+  justify-content:space-between;
+  margin-top:28px;
+  font-size:13px;
+}
+
+.no-print{
+  text-align:center;
+  margin-top:25px;
+}
+
 @media print{
-  @page{size:A4 landscape;margin:8mm}
-  .no-print{display:none}
-  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .sheet{padding:0}
+  @page{
+    size:A4 landscape;
+    margin:8mm;
+  }
+
+  html,body{
+    width:100%;
+    margin:0;
+    padding:0;
+  }
+
+  .no-print{
+    display:none;
+  }
+
+  body{
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+
+  .sheet{
+    padding:0;
+    width:100%;
+  }
 }
 </style>
 </head>
@@ -636,7 +746,7 @@ td{border:1px solid #000;padding:4px}
         <th>Invoice Number</th>
         <th>Currency</th>
         <th>Amount</th>
-        <th>LPO</th>
+        <th>LPO Number</th>
         <th>Invoice Due Date</th>
       </tr>
     </thead>
