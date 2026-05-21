@@ -49,6 +49,9 @@ th{background:#f8fbff}
 <div class="note">
   Item Master is connected to Firebase Firestore. Data will sync between laptop, mobile and cloud.
 </div>
+<div class="note" id="templateNote">
+  Current Business Type: Loading...
+</div>
 
 <div class="card">
   <h2>Create Type</h2>
@@ -126,6 +129,7 @@ th{background:#f8fbff}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="/firebase-config.js"></script>
+<script src="/industry-template.js"></script>
 
 <script>
 const COLLECTIONS = {
@@ -136,6 +140,72 @@ const COLLECTIONS = {
 };
 
 let currentMode = "ITEM";
+let CURRENT_TEMPLATE_KEY = "pump_service";
+let CURRENT_TEMPLATE = null;
+
+function loadCurrentTemplate(){
+  let company = JSON.parse(localStorage.getItem("post91CompanyProfile") || "{}");
+
+  CURRENT_TEMPLATE_KEY =
+    company.industryTemplate ||
+    company.businessType ||
+    "pump_service";
+
+  CURRENT_TEMPLATE =
+    typeof getIndustryTemplate === "function"
+      ? getIndustryTemplate(CURRENT_TEMPLATE_KEY)
+      : null;
+
+  templateNote.textContent =
+    "Current Business Type: " +
+    (CURRENT_TEMPLATE?.name || company.industryTemplateName || "Pump Service");
+
+  applyItemTemplateFields();
+}
+
+function applyItemTemplateFields(){
+  if(!CURRENT_TEMPLATE || !CURRENT_TEMPLATE.itemFields)return;
+
+  const f = CURRENT_TEMPLATE.itemFields;
+
+  // Pump / Machine Type field
+  const machineTypeBox = machineType.closest(".itemFields");
+  const typeModeBox = document.getElementById("modeTYPE");
+
+  if(machineTypeBox){
+    machineTypeBox.style.display = f.showPumpFields ? "block" : "none";
+  }
+
+  if(typeModeBox){
+    typeModeBox.textContent = f.showPumpFields
+      ? "Create Pump / Machine Type"
+      : "Create Type";
+  }
+
+  // Part and OEM fields
+  const partBox = partNo.closest(".itemFields");
+  const oemBox = oemNo.closest(".itemFields");
+
+  if(partBox){
+    partBox.style.display = f.showSpareFields ? "block" : "none";
+  }
+
+  if(oemBox){
+    oemBox.style.display = f.showSpareFields ? "block" : "none";
+  }
+
+  // Stock fields
+  const stockBox = openingStock.closest(".itemFields");
+  const reorderBox = reorderLevel.closest(".itemFields");
+
+  if(stockBox){
+    stockBox.style.display = f.showTradingFields ? "block" : "none";
+  }
+
+  if(reorderBox){
+    reorderBox.style.display = f.showTradingFields ? "block" : "none";
+  }
+}
 let EDIT_ID = "";
 let ALL = {
   ITEM: [],
@@ -156,6 +226,7 @@ function getCurrentCompanyId(){
 function baseData(){
   return {
     companyId:getCurrentCompanyId(),
+    industryTemplate:CURRENT_TEMPLATE_KEY || "pump_service",
     updatedAt:new Date().toISOString()
   };
 }
@@ -436,6 +507,7 @@ async function deleteRecord(type,id){
   await loadAll();
 }
 
+loadCurrentTemplate();
 loadAll();
 </script>
 
