@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial Year | Post91 Accounts</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:58px;height:58px;object-fit:contain;border-radius:14px;background:#fff;padding:6px;box-shadow:0 8px 20px #0001}
+.header h1{margin:0;color:#0d6efd}
+.back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+label{display:block;font-weight:800;margin-bottom:6px}
+input,select{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
+.btn{border:0;background:#0d6efd;color:white;padding:11px 15px;border-radius:11px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-danger{background:#dc2626}
+.btn-green{background:#16a34a}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #dbe4f0;padding:9px;text-align:left;vertical-align:top}
+th{background:#f8fbff}
+.badge{display:inline-block;padding:5px 10px;border-radius:999px;font-weight:900;font-size:12px}
+.active{background:#dcfce7;color:#166534}
+.locked{background:#fee2e2;color:#991b1b}
+.open{background:#e0f2fe;color:#075985}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.header{align-items:flex-start;gap:10px;flex-direction:column}table{display:block;overflow-x:auto;white-space:nowrap}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="brand">
+    <img src="/images/post91-logo.png" class="logo" alt="Post91 Logo">
+    <div>
+      <h1>Financial Year</h1>
+      <p>Create, activate and lock accounting years.</p>
+    </div>
+  </div>
+  <a class="back" href="/dashboard.html">Back</a>
+</div>
+
+<div class="note">
+  Simple financial year control for small businesses. Active year will later be connected to invoices, ledgers, VAT and reports.
+</div>
+
+<div class="card">
+  <h2>Create / Update Financial Year</h2>
+
+  <input type="hidden" id="editId">
+
+  <div class="grid">
+    <div>
+      <label>Year Name</label>
+      <input id="yearName" placeholder="FY2026">
+    </div>
+
+    <div>
+      <label>Start Date</label>
+      <input type="date" id="startDate">
+    </div>
+
+    <div>
+      <label>End Date</label>
+      <input type="date" id="endDate">
+    </div>
+
+    <div>
+      <label>Status</label>
+      <select id="yearStatus">
+        <option value="Open">Open</option>
+        <option value="Active">Active</option>
+        <option value="Locked">Locked</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="saveFinancialYear()">Save Financial Year</button>
+    <button class="btn btn-light" onclick="clearForm()">Clear</button>
+    <button class="btn btn-green" onclick="createDefaultYear()">Create Current Calendar Year</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Saved Financial Years</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Year Name</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Status</th>
+        <th>Active</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="yearBody"></tbody>
+  </table>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/firebase-db.js"></script>
+
+<script>
+const FY_COLLECTION = "financialYears";
+let YEARS = [];
+
+function esc(v){
+  return String(v||"").replace(/[&<>"']/g,m=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+}
+
+async function smartLoad(collection){
+  try{
+    if(typeof loadFromCloudSmart==="function") return await loadFromCloudSmart(collection);
+    if(typeof loadFromCloud==="function") return await loadFromCloud(collection);
+    return [];
+  }catch(err){
+    console.error("Financial year load error:", err);
+    return [];
+  }
+}
+
+function badge(status){
+  let cls = status==="Active" ? "active" : status==="Locked" ? "locked" : "open";
+  return `<span class="badge ${cls}">${status||"Open"}</span>`;
+}
+
+async function loadYears(){
+  yearBody.innerHTML = `<tr><td colspan="6">Loading...</td></tr>`;
+
+  YEARS = await smartLoad(FY_COLLECTION);
+
+  YEARS.sort((a,b)=>new Date(b.startDate||"1900-01-01")-new Date(a.startDate||"1900-01-01"));
+
+  renderYears();
+}
+
+function renderYears(){
+  if(!YEARS.length){
+    yearBody.innerHTML = `<tr><td colspan="6">No financial year created yet.</td></tr>`;
+    return;
+  }
+
+  yearBody.innerHTML = YEARS.map(y=>`
+    <tr>
+      <td>${esc(y.yearName)}</td>
+      <td>${esc(y.startDate)}</td>
+      <td>${esc(y.endDate)}</td>
+      <td>${badge(y.status)}</td>
+      <td>${y.isActive ? "Yes" : "No"}</td>
+      <td>
+        <button class="btn btn-light" onclick="editYear('${y.id}')">Edit</button>
+        <button class="btn btn-green" onclick="setActiveYear('${y.id}')">Set Active</button>
+        <button class="btn btn-danger" onclick="deleteYear('${y.id}')">Delete</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function clearForm(){
+  editId.value="";
+  yearName.value="";
+  startDate.value="";
+  endDate.value="";
+  yearStatus.value="Open";
+}
+
+function createDefaultYear(){
+  let y = new Date().getFullYear();
+  yearName.value = "FY" + y;
+  startDate.value = y + "-01-01";
+  endDate.value = y + "-12-31";
+  yearStatus.value = "Active";
+}
+
+async function saveFinancialYear(){
+  if(!yearName.value.trim()) return alert("Enter financial year name.");
+  if(!startDate.value) return alert("Select start date.");
+  if(!endDate.value) return alert("Select end date.");
+
+  if(new Date(endDate.value) < new Date(startDate.value)){
+    return alert("End date cannot be before start date.");
+  }
+
+  let rec = {
+    yearName:yearName.value.trim(),
+    startDate:startDate.value,
+    endDate:endDate.value,
+    status:yearStatus.value,
+    isActive:yearStatus.value==="Active",
+    updatedAt:new Date().toISOString()
+  };
+
+  let id = editId.value || null;
+
+  if(rec.isActive){
+    await deactivateAllYears();
+  }
+
+  if(typeof saveToCloud==="function"){
+    await saveToCloud(FY_COLLECTION, rec, id);
+  }else{
+    if(id){
+      await db.collection(FY_COLLECTION).doc(id).set(rec,{merge:true});
+    }else{
+      await db.collection(FY_COLLECTION).add(rec);
+    }
+  }
+
+  if(typeof clearCloudCache==="function") clearCloudCache(FY_COLLECTION);
+
+  alert("Financial year saved.");
+  clearForm();
+  loadYears();
+}
+
+async function deactivateAllYears(){
+  for(const y of YEARS){
+    if(y.isActive || y.status==="Active"){
+      await db.collection(FY_COLLECTION).doc(y.id).set({
+        isActive:false,
+        status:y.status==="Locked" ? "Locked" : "Open",
+        updatedAt:new Date().toISOString()
+      },{merge:true});
+    }
+  }
+
+  if(typeof clearCloudCache==="function") clearCloudCache(FY_COLLECTION);
+}
+
+function editYear(id){
+  let y = YEARS.find(x=>x.id===id);
+  if(!y)return;
+
+  editId.value = y.id;
+  yearName.value = y.yearName || "";
+  startDate.value = y.startDate || "";
+  endDate.value = y.endDate || "";
+  yearStatus.value = y.status || "Open";
+
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+async function setActiveYear(id){
+  let y = YEARS.find(x=>x.id===id);
+  if(!y)return;
+
+  if(y.status==="Locked"){
+    alert("Locked year cannot be activated. Unlock it first.");
+    return;
+  }
+
+  await deactivateAllYears();
+
+  await db.collection(FY_COLLECTION).doc(id).set({
+    status:"Active",
+    isActive:true,
+    updatedAt:new Date().toISOString()
+  },{merge:true});
+
+  if(typeof clearCloudCache==="function") clearCloudCache(FY_COLLECTION);
+
+  localStorage.setItem("post91ActiveFinancialYear", JSON.stringify({
+    id:y.id,
+    yearName:y.yearName,
+    startDate:y.startDate,
+    endDate:y.endDate
+  }));
+
+  alert("Active financial year updated.");
+  loadYears();
+}
+
+async function deleteYear(id){
+  if(!confirm("Delete this financial year?"))return;
+
+  if(typeof deleteFromCloud==="function"){
+    await deleteFromCloud(FY_COLLECTION,id);
+  }else{
+    await db.collection(FY_COLLECTION).doc(id).delete();
+  }
+
+  if(typeof clearCloudCache==="function") clearCloudCache(FY_COLLECTION);
+
+  loadYears();
+}
+
+loadYears();
+</script>
+
+</body>
+</html>

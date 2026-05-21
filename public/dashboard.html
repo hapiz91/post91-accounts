@@ -9,9 +9,10 @@
 *{box-sizing:border-box}
 :root{--primary:#0d6efd;--sidebar:#061833;--bg:#eef3f8;--card:#ffffff}
 body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:#061833}
-.app-header{position:sticky;top:0;z-index:50;height:118px;background:linear-gradient(90deg,#061833,#082b57);color:#fff;display:grid;grid-template-columns:260px 1fr 300px;align-items:center;border-bottom:1px solid #123b70;box-shadow:0 8px 25px #0002}
-.header-brand{padding:18px 24px;border-right:1px solid #ffffff22}
-.header-brand h2{margin:0;font-size:24px;font-weight:900}
+.app-header{position:sticky;top:0;z-index:50;height:118px;background:linear-gradient(90deg,#061833,#082b57);color:#fff;display:grid;grid-template-columns:300px 1fr 260px;align-items:center;border-bottom:1px solid #123b70;box-shadow:0 8px 25px #0002}
+.header-brand{padding:18px 24px;border-right:1px solid #ffffff22;display:flex;align-items:center;gap:14px}
+.brand-logo{width:58px;height:58px;object-fit:contain;background:#fff;border-radius:14px;padding:6px}
+.header-brand h2{margin:0;font-size:23px;font-weight:900}
 .header-brand p{margin:6px 0 0;font-size:12px;color:#cfe0ff;font-weight:700}
 .header-company{padding:14px 28px;display:flex;gap:16px;align-items:center}
 .company-icon{width:54px;height:54px;border:2px solid #ffffff99;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px}
@@ -19,9 +20,7 @@ body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:#
 .company-info p{margin:4px 0 0;font-size:13px;color:#e7efff;font-weight:700}
 .company-info small{display:block;margin-top:4px;color:#ffdba0;font-weight:800}
 .header-logo-box{padding:14px 24px;text-align:right}
-.header-logo{max-width:230px;max-height:86px;object-fit:contain}
-.header-logo-text{font-size:42px;font-weight:900;letter-spacing:-1px}
-.header-logo-text span{color:#ff3333}
+.header-logo{max-width:210px;max-height:86px;object-fit:contain;background:#fff;border-radius:16px;padding:8px}
 .layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 118px)}
 .sidebar{background:var(--sidebar);color:white;padding:20px 16px;position:sticky;top:118px;height:calc(100vh - 118px);overflow:auto}
 .nav-title{font-size:12px;text-transform:uppercase;color:#7ea6d9;font-weight:900;margin:22px 0 8px}
@@ -50,8 +49,9 @@ table{width:100%;border-collapse:collapse}
 th,td{border:1px solid #dbe4f0;padding:8px;vertical-align:top}
 th{background:#f8fbff;text-align:left}
 .mobile-menu{display:none;background:#061833;color:white;padding:12px 16px;justify-content:space-between;align-items:center}
+.mobile-menu img{width:42px;height:42px;object-fit:contain;background:#fff;border-radius:10px;padding:4px;margin-right:8px}
 .mobile-menu button{background:var(--primary);color:white;border:0;border-radius:10px;padding:8px 12px;font-weight:900}
-@media(max-width:1100px){.grid,.module-grid{grid-template-columns:repeat(2,1fr)}.app-header{grid-template-columns:220px 1fr 220px}}
+@media(max-width:1100px){.grid,.module-grid{grid-template-columns:repeat(2,1fr)}.app-header{grid-template-columns:260px 1fr 210px}}
 @media(max-width:800px){.app-header{display:none}.mobile-menu{display:flex}.layout{display:block}.sidebar{display:none;position:static;height:auto}.sidebar.show{display:block}.main{padding:18px}.grid,.module-grid{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
 </style>
 </head>
@@ -74,14 +74,20 @@ if(currentUser && currentUser.accountActive === false){
 </script>
 
 <div class="mobile-menu">
-  <b id="mobileBrand">Post91 Accounts</b>
+  <div style="display:flex;align-items:center;">
+    <img src="/images/post91-logo.png" alt="Post91 Logo">
+    <b id="mobileBrand">Post91 Accounts</b>
+  </div>
   <button onclick="toggleMenu()">Menu</button>
 </div>
 
 <header class="app-header">
   <div class="header-brand">
-    <h2 id="headerBrandName">Post91 Accounts</h2>
-    <p id="headerTagline">Simple Accounting for Smart Businesses</p>
+    <img src="/images/post91-logo.png" class="brand-logo" alt="Post91 Logo">
+    <div>
+      <h2 id="headerBrandName">Post91 Accounts</h2>
+      <p id="headerTagline">Simple Accounting for Smart Businesses</p>
+    </div>
   </div>
 
   <div class="header-company">
@@ -94,8 +100,7 @@ if(currentUser && currentUser.accountActive === false){
   </div>
 
   <div class="header-logo-box">
-    <img id="topLogo" class="header-logo" style="display:none;">
-    <div id="topLogoText" class="header-logo-text">Post<span>91</span></div>
+    <img src="/images/post91-logo.png" class="header-logo" alt="Post91 Logo">
   </div>
 </header>
 
@@ -107,6 +112,9 @@ if(currentUser && currentUser.accountActive === false){
     <a class="active" href="/dashboard.html">Dashboard</a>
     <a href="/dashboard-report.html">Dashboard Report</a>
     <a href="/backup-restore.html">Backup & Restore</a>
+
+    <div class="nav-title">Settings</div>
+    <a href="/financial-year.html">Financial Year</a>
 
     <div class="nav-title">Masters</div>
     <a href="/company-profile.html">Company Profile</a>
@@ -168,17 +176,19 @@ if(currentUser && currentUser.accountActive === false){
     <a class="btn btn-light" href="/purchase-invoice.html">New Purchase</a>
     <a class="btn btn-light" href="/payment-voucher.html">New Payment</a>
     <a class="btn btn-light" href="/expense-entry.html">New Expense</a>
+    <a class="btn btn-light" href="/financial-year.html">Financial Year</a>
   </div>
 </div>
 
 <div class="section">
-  <h2>Masters</h2>
+  <h2>Settings & Masters</h2>
   <div class="module-grid">
+    <a class="module" href="/financial-year.html"><h3>Financial Year</h3><p>Create, activate and lock accounting years.</p></a>
     <a class="module" href="/company-profile.html"><h3>Company Profile</h3><p>Company details, VAT, CR, contacts and letterhead.</p></a>
     <a class="module" href="/user-management.html"><h3>User Management</h3><p>Create users and control module access limitations.</p></a>
     <a class="module" href="/customer-master.html"><h3>Customer Master</h3><p>Create, edit and manage customer records.</p></a>
     <a class="module" href="/supplier-master.html"><h3>Supplier Master</h3><p>Create, edit and manage supplier records.</p></a>
-    <a class="module" href="/item-master.html"><h3>Item Master</h3><p>Items, parts, OEM, brands, categories and pricing.</p></a>
+    <a class="module" href="/item-master.html"><h3>Item Master</h3><p>Items, products, brands, categories and pricing.</p></a>
     <a class="module" href="/cash-bank-master.html"><h3>Cash / Bank Master</h3><p>Manage bank and cash accounts.</p></a>
   </div>
 </div>
@@ -252,13 +262,6 @@ function moneyFromAny(obj,keys){
       return Number(obj[k]||0);
     }
   }
-
-  if(obj.total !== undefined)return Number(obj.total||0);
-  if(obj.grandTotal !== undefined)return Number(obj.grandTotal||0);
-  if(obj.netTotal !== undefined)return Number(obj.netTotal||0);
-  if(obj.totalAmount !== undefined)return Number(obj.totalAmount||0);
-  if(obj.amount !== undefined)return Number(obj.amount||0);
-
   return 0;
 }
 
@@ -274,30 +277,24 @@ async function loadDashboard(){
 
   const sales=(await safeLoad("salesInvoices")).filter(x=>!isCancelled(x.docStatus || x.status));
   const receipts=(await safeLoad("receiptVouchers")).filter(x=>!isCancelled(x.docStatus || x.status));
-  const purchases=(await safeLoad("purchaseInvoices")).filter(x=>!isCancelled(x.docStatus));
-  const expenses=(await safeLoad("expenseEntries")).filter(x=>!isCancelled(x.status));
+  const purchases=(await safeLoad("purchaseInvoices")).filter(x=>!isCancelled(x.docStatus || x.status));
+  const expenses=(await safeLoad("expenseEntries")).filter(x=>!isCancelled(x.status || x.docStatus));
 
   totalSales.textContent=mt(
-  sales.reduce(
-    (s,x)=>
-      s + moneyFromAny(
-        x,
-        [
-          "grandTotal",
-          "totalAmount",
-          "netTotal",
-          "amount",
-          "total",
-          "invoiceTotal",
-          "finalTotal"
-        ]
-      ),
-    0
-  )
-);
-  totalReceipts.textContent=mt(receipts.reduce((s,x)=>(s,x)=> s + moneyFromAny(x,["totalReceiptAmount","amountReceived","amount"]),0));
-  totalPurchases.textContent=mt(purchases.reduce((s,x)=>(s,x)=> s + moneyFromAny(x,["grandTotal","totalAmount","netTotal","amount"]),0));
-  totalExpenses.textContent=mt(expenses.reduce((s,x)=>s+moneyFromAny(x,["totalAmount","amount","baseAmount"]),0));
+    sales.reduce((s,x)=>s + moneyFromAny(x,["grandTotal","totalAmount","netTotal","amount","total","invoiceTotal","finalTotal"]),0)
+  );
+
+  totalReceipts.textContent=mt(
+    receipts.reduce((s,x)=>s + moneyFromAny(x,["totalReceiptAmount","amountReceived","amount","totalAmount"]),0)
+  );
+
+  totalPurchases.textContent=mt(
+    purchases.reduce((s,x)=>s + moneyFromAny(x,["grandTotal","totalAmount","netTotal","amount","total","purchaseTotal"]),0)
+  );
+
+  totalExpenses.textContent=mt(
+    expenses.reduce((s,x)=>s + moneyFromAny(x,["totalAmount","amount","baseAmount","grandTotal"]),0)
+  );
 
   recentSalesBody.innerHTML="";
 
@@ -322,16 +319,25 @@ async function loadDashboard(){
 }
 
 async function applyBranding(){
-  const companyList=await safeLoad("companyProfile");
-  const company=companyList[0] || JSON.parse(localStorage.getItem("post91CompanyProfile")||"{}");
+  let companyList=await safeLoad("companyProfile");
+
+  if(!companyList || companyList.length===0){
+    companyList=await safeLoad("companyProfiles");
+  }
+
+  if(!companyList || companyList.length===0){
+    companyList=[JSON.parse(localStorage.getItem("post91CompanyProfile")||"{}")];
+  }
+
+  const company=companyList[0] || {};
 
   headerBrandName.textContent="Post91 Accounts";
   mobileBrand.textContent="Post91 Accounts";
   headerTagline.textContent="Simple Accounting for Smart Businesses";
 
-  companyNameTop.textContent=company.companyName || company.name || "Company Name";
-  companyAddressTop.textContent=company.address || "Muscat, Sultanate of Oman";
-  companyVatTop.textContent="VAT IN: " + (company.vatNumber || company.vatIn || "-") + " | C.R No: " + (company.crNumber || "-");
+  companyNameTop.textContent=company.companyName || company.businessName || company.name || "Company Name";
+  companyAddressTop.textContent=company.address || company.companyAddress || "Muscat, Sultanate of Oman";
+  companyVatTop.textContent="VAT IN: " + (company.vatNumber || company.vatIn || "-") + " | C.R No: " + (company.crNumber || company.crNo || "-");
 }
 
 function logout(){
