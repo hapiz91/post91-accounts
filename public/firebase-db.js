@@ -73,10 +73,13 @@ async function saveToCloud(collection,data,id=null){
         .doc(id)
         .set(data,{merge:true});
 
+      clearCloudCache(collection);
       return id;
     }
 
     const ref = await db.collection(collection).add(data);
+
+    clearCloudCache(collection);
     return ref.id;
 
   }catch(err){
@@ -90,8 +93,43 @@ async function saveToCloud(collection,data,id=null){
    GENERIC LOAD
 ========================================================= */
 
-async function loadFromCloud(collection){
+const CACHE_TIME = 10 * 60 * 1000;
+
+function cacheKey(collection){
+  return "post91_cache_" + getCurrentCompanyId() + "_" + collection;
+}
+
+function cacheTimeKey(collection){
+  return "post91_cache_time_" + getCurrentCompanyId() + "_" + collection;
+}
+
+function clearCloudCache(collection=null){
+  if(collection){
+    localStorage.removeItem(cacheKey(collection));
+    localStorage.removeItem(cacheTimeKey(collection));
+    return;
+  }
+
+  Object.keys(localStorage).forEach(k=>{
+    if(k.startsWith("post91_cache_") || k.startsWith("post91_cache_time_")){
+      localStorage.removeItem(k);
+    }
+  });
+}
+
+async function loadFromCloud(collection, forceRefresh=false){
   try{
+    const now = Date.now();
+    const cKey = cacheKey(collection);
+    const tKey = cacheTimeKey(collection);
+
+    const cached = localStorage.getItem(cKey);
+    const cachedTime = Number(localStorage.getItem(tKey) || 0);
+
+    if(!forceRefresh && cached && now - cachedTime < CACHE_TIME){
+      return JSON.parse(cached);
+    }
+
     const companyId = getCurrentCompanyId();
 
     let snapshot = await db.collection(collection)
@@ -107,10 +145,21 @@ async function loadFromCloud(collection){
       });
     });
 
+    localStorage.setItem(cKey, JSON.stringify(arr));
+    localStorage.setItem(tKey, String(now));
+
     return arr;
 
   }catch(err){
     console.error(err);
+
+    try{
+      const cached = localStorage.getItem(cacheKey(collection));
+      if(cached){
+        return JSON.parse(cached);
+      }
+    }catch(e){}
+
     return [];
   }
 }
@@ -174,7 +223,10 @@ async function loadFromCloudSmart(collection){
 async function deleteFromCloud(collection,id){
   try{
     await db.collection(collection).doc(id).delete();
+
+    clearCloudCache(collection);
     return true;
+
   }catch(err){
     console.error(err);
     alert("Firebase delete error: " + (err.message || err));
