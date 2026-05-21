@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Opening Balance | Post91 Accounts</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:58px;height:58px;object-fit:contain;background:#fff;border-radius:14px;padding:6px;box-shadow:0 8px 20px #0001}
+.header h1{margin:0;color:#0d6efd}
+.back{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001}
+.note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
+.card{background:#fff;border:1px solid #e5edf7;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 14px 34px #0001}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.box{background:#f8fbff;border:1px solid #dbe4f0;border-radius:15px;padding:16px}
+.box b{display:block;font-size:13px;color:#64748b}
+.box span{font-size:22px;font-weight:900;color:#0d6efd}
+label{display:block;font-weight:800;margin-bottom:6px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
+textarea{min-height:70px}
+.btn{border:0;background:#0d6efd;color:white;padding:11px 15px;border-radius:11px;font-weight:900;cursor:pointer}
+.btn-light{background:#e2e8f0;color:#0f172a}
+.btn-danger{background:#dc2626}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #dbe4f0;padding:8px;text-align:left;vertical-align:top}
+th{background:#f8fbff}
+.right{text-align:right}
+.hidden{display:none}
+@media(max-width:900px){.grid,.summary{grid-template-columns:1fr}.header{align-items:flex-start;gap:10px;flex-direction:column}table{display:block;overflow-x:auto;white-space:nowrap}}
+@media print{
+  @page{size:A4 landscape;margin:8mm}
+  body{background:#fff;padding:0}
+  .header,.note,.form-card,.btn-row{display:none!important}
+  .card{box-shadow:none;border:0;padding:0;margin:0}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="brand">
+    <img src="/images/post91-logo.png" class="logo" alt="Post91 Logo">
+    <div>
+      <h1>Opening Balance</h1>
+      <p>Enter customer, supplier, cash/bank and inventory opening balances.</p>
+    </div>
+  </div>
+  <a class="back" href="/dashboard.html">Back</a>
+</div>
+
+<div class="note">
+  Opening Balance is used when an existing business starts using Post91 Accounts. It helps continue old receivables, payables, bank balances and stock balances.
+</div>
+
+<div class="card form-card">
+  <h2>Create Opening Balance</h2>
+
+  <input type="hidden" id="editId">
+
+  <div class="grid">
+    <div>
+      <label>Financial Year</label>
+      <select id="financialYear"></select>
+    </div>
+
+    <div>
+      <label>Opening Type</label>
+      <select id="openingType" onchange="changeType()">
+        <option value="Customer">Customer Receivable</option>
+        <option value="Supplier">Supplier Payable</option>
+        <option value="CashBank">Cash / Bank Balance</option>
+        <option value="Inventory">Inventory Stock</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Opening Date</label>
+      <input type="date" id="openingDate">
+    </div>
+
+    <div>
+      <label>Status</label>
+      <select id="status">
+        <option>Active</option>
+        <option>Inactive</option>
+      </select>
+    </div>
+
+    <div id="partyBox">
+      <label>Party / Account Name</label>
+      <select id="partyName"></select>
+    </div>
+
+    <div id="itemBox" class="hidden">
+      <label>Item Name</label>
+      <select id="itemName"></select>
+    </div>
+
+    <div id="qtyBox" class="hidden">
+      <label>Opening Qty</label>
+      <input type="number" step="0.001" id="qty" oninput="calculateInventoryValue()">
+    </div>
+
+    <div id="rateBox" class="hidden">
+      <label>Rate</label>
+      <input type="number" step="0.001" id="rate" oninput="calculateInventoryValue()">
+    </div>
+
+    <div>
+      <label>Amount / Value</label>
+      <input type="number" step="0.001" id="amount">
+    </div>
+
+    <div>
+      <label>Reference No</label>
+      <input id="referenceNo" placeholder="Old invoice / statement / opening ref">
+    </div>
+
+    <div>
+      <label>Balance Nature</label>
+      <select id="balanceNature">
+        <option value="Debit">Debit</option>
+        <option value="Credit">Credit</option>
+      </select>
+    </div>
+
+    <div style="grid-column:1/-1">
+      <label>Remarks</label>
+      <textarea id="remarks"></textarea>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="saveOpeningBalance()">Save Opening Balance</button>
+    <button class="btn btn-light" onclick="clearForm()">Clear</button>
+    <button class="btn btn-light" onclick="window.print()">Print</button>
+    <button class="btn btn-light" onclick="downloadCSV()">Download CSV</button>
+  </div>
+</div>
+
+<div class="summary">
+  <div class="box"><b>Customer Opening</b><span id="sumCustomer">OMR 0.000</span></div>
+  <div class="box"><b>Supplier Opening</b><span id="sumSupplier">OMR 0.000</span></div>
+  <div class="box"><b>Cash / Bank Opening</b><span id="sumCashBank">OMR 0.000</span></div>
+  <div class="box"><b>Inventory Value</b><span id="sumInventory">OMR 0.000</span></div>
+</div>
+
+<br>
+
+<div class="card">
+  <h2>Saved Opening Balances</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Financial Year</th>
+        <th>Type</th>
+        <th>Date</th>
+        <th>Party / Item</th>
+        <th class="right">Qty</th>
+        <th class="right">Rate</th>
+        <th class="right">Amount</th>
+        <th>Nature</th>
+        <th>Reference</th>
+        <th>Status</th>
+        <th class="form-card">Action</th>
+      </tr>
+    </thead>
+    <tbody id="openingBody"></tbody>
+  </table>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/firebase-db.js"></script>
+
+<script>
+const OPENING_COLLECTION = "openingBalances";
+
+let OPENINGS = [];
+let CUSTOMERS = [];
+let SUPPLIERS = [];
+let ITEMS = [];
+let CASHBANK = [];
+let YEARS = [];
+let EXPORT_ROWS = [];
+
+function mv(n){return Number(n||0).toFixed(3)}
+function mt(n){return "OMR "+mv(n)}
+
+function esc(v){
+  return String(v||"").replace(/[&<>"']/g,m=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+}
+
+async function smartLoad(collection){
+  try{
+    if(typeof loadFromCloudSmart==="function") return await loadFromCloudSmart(collection);
+    if(typeof loadFromCloud==="function") return await loadFromCloud(collection);
+    return [];
+  }catch(err){
+    console.error("Opening balance load error:", collection, err);
+    return [];
+  }
+}
+
+async function loadData(){
+  openingBody.innerHTML=`<tr><td colspan="11">Loading...</td></tr>`;
+
+  [
+    OPENINGS,
+    CUSTOMERS,
+    SUPPLIERS,
+    ITEMS,
+    CASHBANK,
+    YEARS
+  ] = await Promise.all([
+    smartLoad(OPENING_COLLECTION),
+    smartLoad(COLLECTIONS.CUSTOMERS),
+    smartLoad("suppliers"),
+    smartLoad(COLLECTIONS.ITEMS),
+    smartLoad("cashBankAccounts"),
+    smartLoad("financialYears")
+  ]);
+
+  loadFinancialYears();
+  loadParties();
+  renderOpenings();
+}
+
+function loadFinancialYears(){
+  financialYear.innerHTML = "";
+
+  let active = YEARS.find(y=>y.isActive || y.status==="Active");
+
+  if(!YEARS.length){
+    financialYear.innerHTML = `<option value="">No financial year created</option>`;
+    return;
+  }
+
+  YEARS
+    .sort((a,b)=>new Date(b.startDate||"1900-01-01")-new Date(a.startDate||"1900-01-01"))
+    .forEach(y=>{
+      let selected = active && active.id===y.id ? "selected" : "";
+      financialYear.innerHTML += `
+        <option value="${esc(y.yearName)}" data-id="${esc(y.id||"")}" ${selected}>
+          ${esc(y.yearName)} ${y.isActive || y.status==="Active" ? "(Active)" : ""}
+        </option>
+      `;
+    });
+}
+
+function loadParties(){
+  partyName.innerHTML = "";
+  itemName.innerHTML = "";
+
+  let type = openingType.value;
+
+  if(type==="Customer"){
+    partyName.innerHTML = `<option value="">Select Customer</option>`;
+    CUSTOMERS.forEach(c=>{
+      let name=c.customerName||c.name||"";
+      if(name) partyName.innerHTML += `<option value="${esc(name)}">${esc(name)}</option>`;
+    });
+    balanceNature.value="Debit";
+  }
+
+  if(type==="Supplier"){
+    partyName.innerHTML = `<option value="">Select Supplier</option>`;
+    SUPPLIERS.forEach(s=>{
+      let name=s.supplierName||s.name||"";
+      if(name) partyName.innerHTML += `<option value="${esc(name)}">${esc(name)}</option>`;
+    });
+    balanceNature.value="Credit";
+  }
+
+  if(type==="CashBank"){
+    partyName.innerHTML = `<option value="">Select Cash / Bank</option>`;
+    CASHBANK.forEach(a=>{
+      let name=a.accountName||a.name||"";
+      if(name) partyName.innerHTML += `<option value="${esc(name)}">${esc(name)}</option>`;
+    });
+    balanceNature.value="Debit";
+  }
+
+  if(type==="Inventory"){
+    itemName.innerHTML = `<option value="">Select Item</option>`;
+    ITEMS.forEach(i=>{
+      let name=i.itemName||i.name||"";
+      if(name) itemName.innerHTML += `<option value="${esc(name)}">${esc(name)}</option>`;
+    });
+    balanceNature.value="Debit";
+  }
+}
+
+function changeType(){
+  let type = openingType.value;
+
+  itemBox.classList.add("hidden");
+  qtyBox.classList.add("hidden");
+  rateBox.classList.add("hidden");
+  partyBox.classList.remove("hidden");
+
+  if(type==="Inventory"){
+    partyBox.classList.add("hidden");
+    itemBox.classList.remove("hidden");
+    qtyBox.classList.remove("hidden");
+    rateBox.classList.remove("hidden");
+  }
+
+  loadParties();
+}
+
+function calculateInventoryValue(){
+  if(openingType.value==="Inventory"){
+    amount.value = mv(Number(qty.value||0) * Number(rate.value||0));
+  }
+}
+
+async function saveOpeningBalance(){
+  if(!financialYear.value) return alert("Select financial year.");
+  if(!openingDate.value) return alert("Select opening date.");
+  if(!amount.value) return alert("Enter amount/value.");
+
+  let type = openingType.value;
+  let accountName = type==="Inventory" ? itemName.value : partyName.value;
+
+  if(!accountName) return alert("Select party/account/item.");
+
+  let rec = {
+    financialYear:financialYear.value,
+    openingType:type,
+    openingDate:openingDate.value,
+    accountName,
+    itemName:type==="Inventory" ? itemName.value : "",
+    qty:type==="Inventory" ? Number(qty.value||0) : 0,
+    rate:type==="Inventory" ? Number(rate.value||0) : 0,
+    amount:Number(amount.value||0),
+    balanceNature:balanceNature.value,
+    referenceNo:referenceNo.value.trim(),
+    remarks:remarks.value.trim(),
+    status:status.value,
+    updatedAt:new Date().toISOString()
+  };
+
+  let id = editId.value || null;
+
+  if(typeof saveToCloud==="function"){
+    await saveToCloud(OPENING_COLLECTION, rec, id);
+  }else{
+    if(id){
+      await db.collection(OPENING_COLLECTION).doc(id).set(rec,{merge:true});
+    }else{
+      await db.collection(OPENING_COLLECTION).add(rec);
+    }
+  }
+
+  if(typeof clearCloudCache==="function") clearCloudCache(OPENING_COLLECTION);
+
+  alert("Opening balance saved.");
+  clearForm();
+  loadData();
+}
+
+function renderOpenings(){
+  OPENINGS.sort((a,b)=>new Date(b.openingDate||"1900-01-01")-new Date(a.openingDate||"1900-01-01"));
+
+  let customer=0;
+  let supplier=0;
+  let cashBank=0;
+  let inventory=0;
+
+  EXPORT_ROWS = OPENINGS.map(o=>{
+    let amt=Number(o.amount||0);
+
+    if(o.openingType==="Customer") customer += amt;
+    if(o.openingType==="Supplier") supplier += amt;
+    if(o.openingType==="CashBank") cashBank += o.balanceNature==="Credit" ? -amt : amt;
+    if(o.openingType==="Inventory") inventory += amt;
+
+    return {
+      FinancialYear:o.financialYear||"",
+      Type:o.openingType||"",
+      Date:o.openingDate||"",
+      Account:o.accountName||"",
+      Qty:mv(o.qty||0),
+      Rate:mv(o.rate||0),
+      Amount:mv(o.amount||0),
+      Nature:o.balanceNature||"",
+      Reference:o.referenceNo||"",
+      Status:o.status||""
+    };
+  });
+
+  sumCustomer.textContent=mt(customer);
+  sumSupplier.textContent=mt(supplier);
+  sumCashBank.textContent=mt(cashBank);
+  sumInventory.textContent=mt(inventory);
+
+  if(!OPENINGS.length){
+    openingBody.innerHTML=`<tr><td colspan="11">No opening balances found.</td></tr>`;
+    return;
+  }
+
+  openingBody.innerHTML = OPENINGS.map(o=>`
+    <tr>
+      <td>${esc(o.financialYear||"-")}</td>
+      <td>${esc(o.openingType||"-")}</td>
+      <td>${esc(o.openingDate||"-")}</td>
+      <td>${esc(o.accountName||"-")}</td>
+      <td class="right">${o.openingType==="Inventory" ? mv(o.qty) : "-"}</td>
+      <td class="right">${o.openingType==="Inventory" ? mv(o.rate) : "-"}</td>
+      <td class="right">${mt(o.amount)}</td>
+      <td>${esc(o.balanceNature||"-")}</td>
+      <td>${esc(o.referenceNo||"-")}</td>
+      <td>${esc(o.status||"Active")}</td>
+      <td class="form-card">
+        <button class="btn btn-light" onclick="editOpening('${o.id}')">Edit</button>
+        <button class="btn btn-danger" onclick="deleteOpening('${o.id}')">Delete</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function editOpening(id){
+  let o = OPENINGS.find(x=>x.id===id);
+  if(!o)return;
+
+  editId.value=o.id;
+  financialYear.value=o.financialYear||"";
+  openingType.value=o.openingType||"Customer";
+  changeType();
+
+  setTimeout(()=>{
+    if(o.openingType==="Inventory"){
+      itemName.value=o.accountName||o.itemName||"";
+    }else{
+      partyName.value=o.accountName||"";
+    }
+  },50);
+
+  openingDate.value=o.openingDate||"";
+  qty.value=o.qty||"";
+  rate.value=o.rate||"";
+  amount.value=o.amount||"";
+  balanceNature.value=o.balanceNature||"Debit";
+  referenceNo.value=o.referenceNo||"";
+  remarks.value=o.remarks||"";
+  status.value=o.status||"Active";
+
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+async function deleteOpening(id){
+  if(!confirm("Delete this opening balance?"))return;
+
+  if(typeof deleteFromCloud==="function"){
+    await deleteFromCloud(OPENING_COLLECTION,id);
+  }else{
+    await db.collection(OPENING_COLLECTION).doc(id).delete();
+  }
+
+  if(typeof clearCloudCache==="function") clearCloudCache(OPENING_COLLECTION);
+
+  loadData();
+}
+
+function clearForm(){
+  editId.value="";
+  openingType.value="Customer";
+  openingDate.value="";
+  partyName.value="";
+  itemName.value="";
+  qty.value="";
+  rate.value="";
+  amount.value="";
+  balanceNature.value="Debit";
+  referenceNo.value="";
+  remarks.value="";
+  status.value="Active";
+  changeType();
+}
+
+function downloadCSV(){
+  if(!EXPORT_ROWS.length){
+    alert("No data to download.");
+    return;
+  }
+
+  let headers=Object.keys(EXPORT_ROWS[0]);
+
+  let csv=[
+    headers.join(","),
+    ...EXPORT_ROWS.map(row=>
+      headers.map(h=>`"${String(row[h]??"").replace(/"/g,'""')}"`).join(",")
+    )
+  ].join("\n");
+
+  let blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  let url=URL.createObjectURL(blob);
+
+  let a=document.createElement("a");
+  a.href=url;
+  a.download=`opening-balance-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+loadData();
+</script>
+
+</body>
+</html>

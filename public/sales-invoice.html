@@ -738,6 +738,7 @@ th{background:#f8fbff}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="/firebase-config.js"></script>
 <script src="/firebase-db.js"></script>
+<script src="/financial-year-utils.js"></script>
 
 <script>
 let EDIT="";
@@ -1243,7 +1244,15 @@ async function saveDoc(e){
     ...t
   };
 
-  let id=await saveToCloud(COLLECTIONS.SALES_INVOICES,rec,EDIT||null);
+  if(typeof attachFinancialYearToTransaction === "function"){
+  rec = await attachFinancialYearToTransaction(rec, invoiceDate.value);
+
+  if(!rec){
+    return;
+  }
+}
+
+let id=await saveToCloud(COLLECTIONS.SALES_INVOICES,rec,EDIT||null);
 
   if(id){
     alert(EDIT?"Sales Invoice updated successfully.":"Sales Invoice saved successfully.");

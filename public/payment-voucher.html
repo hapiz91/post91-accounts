@@ -258,21 +258,35 @@ th{background:#f8fbff;text-align:left}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script src="/firebase-config.js"></script>
-<script src="/data-sync.js"></script>
+<script src="/firebase-db.js"></script>
+<script src="/financial-year-utils.js"></script>
 
 <script>
 const STORE="post91PaymentVouchers";
 let EDIT="";
 
 function gd(k){return JSON.parse(localStorage.getItem(k)||"[]")}
-function sd(k,d){localStorage.setItem(k,JSON.stringify(d))}
 function today(){return new Date().toISOString().split("T")[0]}
 function mv(n){return Number(n||0).toFixed(3)}
 function mt(n){return "OMR "+mv(n)}
-function loadCashBankAccounts(){
+
+async function smartLoad(collection){
+  try{
+    if(typeof loadFromCloudSmart==="function") return await loadFromCloudSmart(collection);
+    if(typeof loadFromCloud==="function") return await loadFromCloud(collection);
+    return [];
+  }catch(err){
+    console.error("Payment voucher load error:", collection, err);
+    return [];
+  }
+}
+
+async function loadCashBankAccounts(){
   cashBankAccount.innerHTML = `<option value="">Select Cash / Bank Account</option>`;
 
-  gd("post91CashBankAccounts")
+  let accounts = await smartLoad("cashBankAccounts");
+
+  accounts
     .filter(a => (a.status || "Active") === "Active")
     .forEach((a,i)=>{
       let o = document.createElement("option");
@@ -280,22 +294,27 @@ function loadCashBankAccounts(){
       o.textContent = `${a.accountName || a.name || "-"} (${a.accountType || "Bank"})`;
       cashBankAccount.appendChild(o);
     });
+
+  window.CLOUD_ACCOUNTS = accounts;
 }
 
 function selectedCashBank(){
-  let accounts = gd("post91CashBankAccounts");
+  let accounts = window.CLOUD_ACCOUNTS || [];
   let idx = cashBankAccount.value;
-
   if(idx === "") return {};
-
   return accounts[idx] || {};
 }
 
-function supplierSearch(){
-
+async function supplierSearch(){
   let q=supplierName.value.toLowerCase();
 
-  let list=gd("post91Suppliers")
+  let suppliers = await smartLoad(COLLECTIONS.SUPPLIERS || "suppliers");
+
+  if(!suppliers.length){
+    suppliers = gd("post91Suppliers");
+  }
+
+  let list=suppliers
     .filter(s=>JSON.stringify(s).toLowerCase().includes(q))
     .slice(0,40);
 
@@ -309,27 +328,23 @@ function supplierSearch(){
   supplierPanel.classList.add("show");
 
   [...supplierPanel.querySelectorAll("[data-i]")].forEach((e,i)=>{
-
     e.onclick=()=>{
-
       let s=list[i];
 
       supplierName.value=s.supplierName||s.name||"";
-      supplierAddress.value=s.address||"";
-      attention.value=s.contactPerson||"";
-      mobile.value=s.mobile||"";
+      supplierAddress.value=s.address||s.supplierAddress||"";
+      attention.value=s.contactPerson||s.attention||"";
+      mobile.value=s.mobile||s.phone||"";
       email.value=s.email||"";
-      supplierVatNo.value=s.vatNumber||"";
+      supplierVatNo.value=s.vatNumber||s.vatIn||"";
 
       supplierPanel.classList.remove("show");
-
       loadOpenInvoices();
     };
   });
 }
 
 function paymentTypeChanged(){
-
   if(paymentType.value==="Against Purchase Invoice"){
     invoiceAllocationCard.style.display="block";
     loadOpenInvoices();
@@ -340,20 +355,17 @@ function paymentTypeChanged(){
   }
 }
 
-function getInvoicePaid(invoiceNo, excludeIndex=""){
-
+async function getInvoicePaid(invoiceNo, excludeId=""){
   if(!invoiceNo)return 0;
 
-  let payments=gd(STORE);
+  let payments = await smartLoad(COLLECTIONS.PAYMENTS);
   let total=0;
 
-  payments.forEach((p,i)=>{
-
-    if(String(i)===String(excludeIndex))return;
+  payments.forEach(p=>{
+    if(excludeId && p.id===excludeId)return;
     if((p.docStatus||"Posted")==="Cancelled")return;
 
     (p.allocations||[]).forEach(a=>{
-
       if(a.invoiceNo===invoiceNo){
         total+=Number(a.amountPaid||0);
       }
@@ -363,27 +375,22 @@ function getInvoicePaid(invoiceNo, excludeIndex=""){
   return total;
 }
 
-function loadOpenInvoices(){
-
+async function loadOpenInvoices(){
   allocationBody.innerHTML="";
 
   if(paymentType.value!=="Against Purchase Invoice")return;
 
   let supplier=(supplierName.value||"").toLowerCase();
+  let invoices = await smartLoad(COLLECTIONS.PURCHASE_INVOICES);
 
-  let invoices=gd("post91PurchaseInvoices");
-
-  invoices.forEach(inv=>{
-
-    if(supplier && (inv.supplierName||"").toLowerCase()!==supplier)return;
+  for(const inv of invoices){
+    if(supplier && (inv.supplierName||"").toLowerCase()!==supplier)continue;
 
     let total=Number(inv.grandTotal||0);
-
-    let prev=getInvoicePaid(inv.purchaseNo, EDIT);
-
+    let prev=await getInvoicePaid(inv.purchaseNo, EDIT);
     let bal=Math.max(total-prev,0);
 
-    if(bal<=0)return;
+    if(bal<=0)continue;
 
     let tr=document.createElement("tr");
 
@@ -391,32 +398,24 @@ function loadOpenInvoices(){
       <td style="text-align:center;">
         <input type="checkbox" class="useInv" onchange="rowUseChanged(this)">
       </td>
-
       <td class="invNo">${inv.purchaseNo||""}</td>
-
       <td class="invDate">${inv.purchaseDate||""}</td>
-
       <td class="invTotal">${mv(total)}</td>
-
       <td class="prevPaid">${mv(prev)}</td>
-
       <td class="balanceBefore">${mv(bal)}</td>
-
       <td>
         <input type="number" step=".001" class="allocAmount" value="0.000" oninput="manualAllocateChanged(this)">
       </td>
-
       <td class="balanceAfter">${mv(bal)}</td>
     `;
 
     allocationBody.appendChild(tr);
-  });
+  }
 
   recalculateAllocation();
 }
 
 function rowUseChanged(chk){
-
   let row=chk.closest("tr");
 
   if(!chk.checked){
@@ -427,11 +426,8 @@ function rowUseChanged(chk){
 }
 
 function manualAllocateChanged(inp){
-
   let row=inp.closest("tr");
-
   let bal=Number(row.querySelector(".balanceBefore").textContent||0);
-
   let val=Number(inp.value||0);
 
   if(val>0){
@@ -446,17 +442,13 @@ function manualAllocateChanged(inp){
 }
 
 function autoAllocate(){
-
   let remaining=Number(totalPaymentAmount.value||0);
 
   document.querySelectorAll("#allocationBody tr").forEach(row=>{
-
     let bal=Number(row.querySelector(".balanceBefore").textContent||0);
-
     let alloc=Math.min(remaining,bal);
 
     row.querySelector(".allocAmount").value=mv(alloc);
-
     row.querySelector(".useInv").checked=alloc>0;
 
     remaining-=alloc;
@@ -466,9 +458,7 @@ function autoAllocate(){
 }
 
 function clearAllocations(){
-
   document.querySelectorAll("#allocationBody tr").forEach(row=>{
-
     row.querySelector(".useInv").checked=false;
     row.querySelector(".allocAmount").value="0.000";
     row.querySelector(".balanceAfter").textContent=row.querySelector(".balanceBefore").textContent;
@@ -478,15 +468,11 @@ function clearAllocations(){
 }
 
 function recalculateAllocation(){
-
   let total=Number(totalPaymentAmount.value||0);
-
   let allocated=0;
 
   document.querySelectorAll("#allocationBody tr").forEach(row=>{
-
     let bal=Number(row.querySelector(".balanceBefore").textContent||0);
-
     let amt=Number(row.querySelector(".allocAmount").value||0);
 
     if(amt>bal){
@@ -500,7 +486,6 @@ function recalculateAllocation(){
     }
 
     row.querySelector(".balanceAfter").textContent=mv(Math.max(bal-amt,0));
-
     allocated+=amt;
   });
 
@@ -512,17 +497,13 @@ function recalculateAllocation(){
 }
 
 function collectAllocations(){
-
   let arr=[];
 
   document.querySelectorAll("#allocationBody tr").forEach(row=>{
-
     let amt=Number(row.querySelector(".allocAmount").value||0);
 
     if(amt>0){
-
       arr.push({
-
         invoiceNo:row.querySelector(".invNo").textContent,
         invoiceDate:row.querySelector(".invDate").textContent,
         invoiceTotal:row.querySelector(".invTotal").textContent,
@@ -537,8 +518,7 @@ function collectAllocations(){
   return arr;
 }
 
-function saveDoc(e){
-
+async function saveDoc(e){
   e.preventDefault();
 
   if(!supplierName.value.trim()){
@@ -556,7 +536,6 @@ function saveDoc(e){
   let allocations=[];
 
   if(paymentType.value==="Against Purchase Invoice"){
-
     allocations=collectAllocations();
 
     if(allocations.length===0){
@@ -566,14 +545,10 @@ function saveDoc(e){
   }
 
   let allocated=allocations.reduce((s,a)=>s+Number(a.amountPaid||0),0);
-
   let unallocated=Math.max(total-allocated,0);
-
-  let list=gd(STORE);
   let acc = selectedCashBank();
 
   let rec={
-
     paymentNo:paymentNo.value,
     paymentDate:paymentDate.value,
 
@@ -597,134 +572,83 @@ function saveDoc(e){
     unallocatedAmount:mv(unallocated),
 
     manualAgainst:manualAgainst.value,
-
-    allocations:allocations,
-
+    allocations,
     remarks:remarks.value,
-
     updatedAt:new Date().toISOString()
   };
 
-  let oldInvoices=[];
+  if(typeof attachFinancialYearToTransaction === "function"){
+    rec = await attachFinancialYearToTransaction(rec, paymentDate.value);
 
-  if(EDIT!==""){
-    oldInvoices=(list[EDIT].allocations||[]).map(a=>a.invoiceNo);
+    if(!rec){
+      return;
+    }
   }
 
-  if(EDIT===""){
+  let id = await saveToCloud(COLLECTIONS.PAYMENTS, rec, EDIT || null);
 
-    rec.createdAt=new Date().toISOString();
-
-    list.push(rec);
-
-    alert("Payment Voucher saved.");
-
-  }else{
-
-    rec.createdAt=list[EDIT].createdAt||new Date().toISOString();
-
-    list[EDIT]={...list[EDIT],...rec};
-
-    alert("Payment Voucher updated.");
+  if(id){
+    alert(EDIT ? "Payment Voucher updated." : "Payment Voucher saved.");
+    EDIT = "";
+    setDefaults();
+    await loadSaved();
   }
-
-  sd(STORE,list);
-
-  let affected=[...new Set([...oldInvoices,...allocations.map(a=>a.invoiceNo)])];
-
-  affected.forEach(invNo=>updatePurchaseInvoiceStatus(invNo));
-
-  EDIT="";
-
-  setDefaults();
-
-  loadSaved();
-}
-
-function updatePurchaseInvoiceStatus(invoiceNo){
-
-  if(!invoiceNo)return;
-
-  let invoices=gd("post91PurchaseInvoices");
-
-  let idx=invoices.findIndex(x=>x.purchaseNo===invoiceNo);
-
-  if(idx<0)return;
-
-  let total=Number(invoices[idx].grandTotal||0);
-
-  let paid=getInvoicePaid(invoiceNo);
-
-  if(paid<=0){
-    invoices[idx].paymentStatus="Unpaid";
-  }else if(paid>=total){
-    invoices[idx].paymentStatus="Paid";
-  }else{
-    invoices[idx].paymentStatus="Partial";
-  }
-
-  invoices[idx].amountPaid=mv(paid);
-
-  invoices[idx].balanceAmount=mv(Math.max(total-paid,0));
-
-  sd("post91PurchaseInvoices",invoices);
 }
 
 function badge(s){
-
   let cls="draft";
-
   if(s==="Posted")cls="posted";
   if(s==="Cancelled")cls="cancelled";
-
   return `<span class="badge ${cls}">${s||"Draft"}</span>`;
 }
 
-function loadSaved(){
-
+async function loadSaved(){
   let q=(savedSearch.value||"").toLowerCase();
+
+  savedBody.innerHTML='<tr><td colspan="9">Loading...</td></tr>';
+
+  let list = await smartLoad(COLLECTIONS.PAYMENTS);
 
   savedBody.innerHTML="";
 
-  gd(STORE).forEach((p,i)=>{
-
+  list.forEach(p=>{
     if(q && !JSON.stringify(p).toLowerCase().includes(q))return;
 
     let tr=document.createElement("tr");
 
     tr.innerHTML=`
-
       <td>${p.paymentNo||"-"}</td>
-
       <td>${p.paymentDate||"-"}</td>
-
       <td>${p.supplierName||"-"}</td>
-
       <td>${p.paymentType||"-"}</td>
-
       <td>${mt(p.totalPaymentAmount)}</td>
-
       <td>${mt(p.allocatedAmount)}</td>
-
       <td>${mt(p.unallocatedAmount)}</td>
-
       <td>${badge(p.docStatus)}</td>
-
       <td>
-        <button class="btn btn-light" onclick="editDoc(${i})">Edit</button>
-        <button class="btn btn-danger" onclick="delDoc(${i})">Delete</button>
+        <button class="btn btn-light" onclick="editDoc('${p.id}')">Edit</button>
+        <button class="btn btn-danger" onclick="delDoc('${p.id}')">Delete</button>
       </td>
     `;
 
     savedBody.appendChild(tr);
   });
+
+  if(savedBody.innerHTML.trim()===""){
+    savedBody.innerHTML='<tr><td colspan="9">No payment vouchers found.</td></tr>';
+  }
 }
 
-function editDoc(i){
+async function editDoc(id){
+  let list = await smartLoad(COLLECTIONS.PAYMENTS);
+  let p = list.find(x=>x.id===id);
 
-  let p=gd(STORE)[i];
+  if(!p){
+    alert("Payment voucher not found.");
+    return;
+  }
 
-  EDIT=i;
+  EDIT=id;
 
   paymentNo.value=p.paymentNo||"";
   paymentDate.value=p.paymentDate||today();
@@ -741,27 +665,19 @@ function editDoc(i){
   cashBankAccount.value = p.cashBankAccountIndex || "";
   paymentReference.value=p.paymentReference||"";
   docStatus.value=p.docStatus||"Posted";
-
   totalPaymentAmount.value=p.totalPaymentAmount||"0.000";
-
   manualAgainst.value=p.manualAgainst||"";
-
   remarks.value=p.remarks||"";
 
-  paymentTypeChanged();
+  await paymentTypeChanged();
 
   if(paymentType.value==="Against Purchase Invoice"){
-
-    loadOpenInvoices();
+    await loadOpenInvoices();
 
     (p.allocations||[]).forEach(a=>{
-
       [...document.querySelectorAll("#allocationBody tr")].forEach(row=>{
-
         if(row.querySelector(".invNo").textContent===a.invoiceNo){
-
           row.querySelector(".useInv").checked=true;
-
           row.querySelector(".allocAmount").value=mv(a.amountPaid);
         }
       });
@@ -769,68 +685,45 @@ function editDoc(i){
   }
 
   recalculateAllocation();
-
   scrollTo({top:0,behavior:"smooth"});
 }
 
-function delDoc(i){
-
+async function delDoc(id){
   if(!confirm("Delete payment voucher?"))return;
 
-  let list=gd(STORE);
-
-  let affected=(list[i].allocations||[]).map(a=>a.invoiceNo);
-
-  list.splice(i,1);
-
-  sd(STORE,list);
-
-  affected.forEach(invNo=>updatePurchaseInvoiceStatus(invNo));
-
-  loadSaved();
+  await deleteFromCloud(COLLECTIONS.PAYMENTS,id);
+  await loadSaved();
 }
 
 function setDefaults(){
-
   EDIT="";
-
   docForm.reset();
 
-  paymentNo.value="PV-"+(1001+gd(STORE).length);
-
+  paymentNo.value="PV-"+Date.now().toString().slice(-6);
   paymentDate.value=today();
-
   paymentType.value="Against Purchase Invoice";
-
   paymentMode.value="Cash";
   cashBankAccount.value="";
-
   docStatus.value="Posted";
-
   totalPaymentAmount.value="0.000";
-
   allocationBody.innerHTML="";
 
   paymentTypeChanged();
-
   recalculateAllocation();
 }
 
 document.addEventListener("click",e=>{
-
   document.querySelectorAll(".panel").forEach(p=>{
-
     if(!p.parentElement.contains(e.target)){
       p.classList.remove("show");
     }
   });
 });
 
-loadCashBankAccounts();
-setDefaults();
-
-loadSaved();
+loadCashBankAccounts().then(()=>{
+  setDefaults();
+  loadSaved();
+});
 </script>
-
 </body>
 </html>

@@ -245,6 +245,7 @@ th{background:#f8fbff;text-align:left}
 
 <script src="/firebase-config.js"></script>
 <script src="/firebase-db.js"></script>
+<script src="/financial-year-utils.js"></script>
 <script>
 
 const STORE="receiptVouchers";
@@ -866,12 +867,20 @@ async function saveDoc(e){
     remarks:remarks.value
   };
 
-  let id=
-    await saveToCloud(
-      COLLECTIONS.RECEIPTS,
-      rec,
-      EDIT || null
-    );
+  if(typeof attachFinancialYearToTransaction === "function"){
+  rec = await attachFinancialYearToTransaction(rec, receiptDate.value);
+
+  if(!rec){
+    return;
+  }
+}
+
+let id=
+  await saveToCloud(
+    COLLECTIONS.RECEIPTS,
+    rec,
+    EDIT || null
+  );
 
   if(id){
 

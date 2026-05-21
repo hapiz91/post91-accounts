@@ -204,31 +204,47 @@ th{background:#f8fbff;text-align:left}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script src="/firebase-config.js"></script>
-<script src="/data-sync.js"></script>
+<script src="/firebase-db.js"></script>
+<script src="/financial-year-utils.js"></script>
 
 <script>
-const EXPENSE_KEY="post91ExpenseEntries";
-let EDIT_INDEX="";
+const EXPENSE_COLLECTION = "expenseEntries";
+let EDIT_ID="";
+let CLOUD_ACCOUNTS=[];
 
-function gd(k){return JSON.parse(localStorage.getItem(k)||"[]")}
-function sd(k,d){localStorage.setItem(k,JSON.stringify(d))}
 function today(){return new Date().toISOString().split("T")[0]}
 function mv(n){return Number(n||0).toFixed(3)}
 function mt(n){return "OMR "+mv(n)}
 
-function loadSuppliers(){
+async function smartLoad(collection){
+  try{
+    if(typeof loadFromCloudSmart==="function") return await loadFromCloudSmart(collection);
+    if(typeof loadFromCloud==="function") return await loadFromCloud(collection);
+    return [];
+  }catch(err){
+    console.error("Expense load error:", collection, err);
+    return [];
+  }
+}
+
+async function loadSuppliers(){
   supplierList.innerHTML="";
-  gd("post91Suppliers").forEach(s=>{
+
+  let suppliers = await smartLoad(COLLECTIONS.SUPPLIERS || "suppliers");
+
+  suppliers.forEach(s=>{
     let o=document.createElement("option");
     o.value=s.supplierName||s.name||"";
     supplierList.appendChild(o);
   });
 }
 
-function loadCashBankAccounts(){
+async function loadCashBankAccounts(){
   cashBankAccount.innerHTML=`<option value="">Select Account</option>`;
 
-  gd("post91CashBankAccounts")
+  CLOUD_ACCOUNTS = await smartLoad("cashBankAccounts");
+
+  CLOUD_ACCOUNTS
     .filter(a=>(a.status||"Active")==="Active")
     .forEach((a,i)=>{
       let o=document.createElement("option");
@@ -276,15 +292,14 @@ function calcExpense(){
 }
 
 function selectedCashBank(){
-  let accounts=gd("post91CashBankAccounts");
   let idx=cashBankAccount.value;
 
   if(idx==="")return {};
 
-  return accounts[idx]||{};
+  return CLOUD_ACCOUNTS[idx]||{};
 }
 
-function saveExpense(e){
+async function saveExpense(e){
   e.preventDefault();
 
   if(!expenseCategory.value){
@@ -294,8 +309,6 @@ function saveExpense(e){
 
   let totals=calcExpense();
   let acc=selectedCashBank();
-
-  let list=gd(EXPENSE_KEY);
 
   let rec={
     expenseNo:expenseNo.value,
@@ -324,25 +337,33 @@ function saveExpense(e){
     updatedAt:new Date().toISOString()
   };
 
-  if(EDIT_INDEX===""){
-    rec.createdAt=new Date().toISOString();
-    list.push(rec);
-    alert("Expense saved successfully.");
-  }else{
-    rec.createdAt=list[EDIT_INDEX].createdAt||new Date().toISOString();
-    list[EDIT_INDEX]={...list[EDIT_INDEX],...rec};
-    alert("Expense updated successfully.");
+  if(typeof attachFinancialYearToTransaction === "function"){
+    rec = await attachFinancialYearToTransaction(rec, expenseDate.value);
+
+    if(!rec){
+      return;
+    }
   }
 
-  sd(EXPENSE_KEY,list);
-  clearForm();
-  loadExpenses();
+  let id = await saveToCloud(COLLECTIONS.EXPENSES, rec, EDIT_ID || null);
+
+  if(id){
+    alert(EDIT_ID ? "Expense updated successfully." : "Expense saved successfully.");
+    clearForm();
+    await loadExpenses();
+  }
 }
 
-function editExpense(i){
-  let e=gd(EXPENSE_KEY)[i];
+async function editExpense(id){
+  let list = await smartLoad(COLLECTIONS.EXPENSES);
+  let e = list.find(x=>x.id===id);
 
-  EDIT_INDEX=i;
+  if(!e){
+    alert("Expense not found.");
+    return;
+  }
+
+  EDIT_ID=id;
   formTitle.textContent="Edit Expense";
 
   expenseNo.value=e.expenseNo||"";
@@ -362,22 +383,20 @@ function editExpense(i){
   scrollTo({top:0,behavior:"smooth"});
 }
 
-function deleteExpense(i){
+async function deleteExpense(id){
   if(!confirm("Delete this expense?"))return;
 
-  let list=gd(EXPENSE_KEY);
-  list.splice(i,1);
-  sd(EXPENSE_KEY,list);
-  loadExpenses();
+  await deleteFromCloud(COLLECTIONS.EXPENSES,id);
+  await loadExpenses();
 }
 
 function clearForm(){
-  EDIT_INDEX="";
+  EDIT_ID="";
   formTitle.textContent="Add Expense";
 
   expenseForm.reset();
 
-  expenseNo.value="EXP-"+(1001+gd(EXPENSE_KEY).length);
+  expenseNo.value="EXP-"+Date.now().toString().slice(-6);
   expenseDate.value=today();
   status.value="Posted";
   vatType.value="VAT Exclusive";
@@ -396,41 +415,51 @@ function badge(s){
   return `<span class="badge ${cls}">${s||"Posted"}</span>`;
 }
 
-function loadExpenses(){
+async function loadExpenses(){
   let q=(searchText.value||"").toLowerCase();
-  let list=gd(EXPENSE_KEY);
+  let list=await smartLoad(COLLECTIONS.EXPENSES);
 
   expenseBody.innerHTML="";
 
-  list.forEach((e,i)=>{
-    if(q && !JSON.stringify(e).toLowerCase().includes(q))return;
+  list
+    .sort((a,b)=>new Date(b.expenseDate||"1900-01-01")-new Date(a.expenseDate||"1900-01-01"))
+    .forEach(e=>{
+      if(q && !JSON.stringify(e).toLowerCase().includes(q))return;
 
-    let tr=document.createElement("tr");
+      let tr=document.createElement("tr");
 
-    tr.innerHTML=`
-      <td>${e.expenseNo||"-"}</td>
-      <td>${e.expenseDate||"-"}</td>
-      <td>${e.expenseCategory||"-"}</td>
-      <td>${e.paidTo||"-"}</td>
-      <td>${e.paymentMode||"-"}<br><small>${e.cashBankAccountName||""}</small></td>
-      <td>${mt(e.baseAmount)}</td>
-      <td>${mt(e.vatAmount)}</td>
-      <td><b>${mt(e.totalAmount)}</b></td>
-      <td>${badge(e.status)}</td>
-      <td>
-        <button class="btn btn-light" onclick="editExpense(${i})">Edit</button>
-        <button class="btn btn-danger" onclick="deleteExpense(${i})">Delete</button>
-      </td>
-    `;
+      tr.innerHTML=`
+        <td>${e.expenseNo||"-"}</td>
+        <td>${e.expenseDate||"-"}</td>
+        <td>${e.expenseCategory||"-"}</td>
+        <td>${e.paidTo||"-"}</td>
+        <td>${e.paymentMode||"-"}<br><small>${e.cashBankAccountName||""}</small></td>
+        <td>${mt(e.baseAmount)}</td>
+        <td>${mt(e.vatAmount)}</td>
+        <td><b>${mt(e.totalAmount)}</b></td>
+        <td>${badge(e.status)}</td>
+        <td>
+          <button class="btn btn-light" onclick="editExpense('${e.id}')">Edit</button>
+          <button class="btn btn-danger" onclick="deleteExpense('${e.id}')">Delete</button>
+        </td>
+      `;
 
-    expenseBody.appendChild(tr);
-  });
+      expenseBody.appendChild(tr);
+    });
+
+  if(expenseBody.innerHTML.trim()===""){
+    expenseBody.innerHTML=`<tr><td colspan="10">No expenses found.</td></tr>`;
+  }
 }
 
-loadSuppliers();
-loadCashBankAccounts();
-clearForm();
-loadExpenses();
+async function initPage(){
+  await loadSuppliers();
+  await loadCashBankAccounts();
+  clearForm();
+  await loadExpenses();
+}
+
+initPage();
 </script>
 
 </body>

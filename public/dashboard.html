@@ -96,6 +96,7 @@ if(currentUser && currentUser.accountActive === false){
       <h3 id="companyNameTop">Company Name</h3>
       <p id="companyAddressTop">Muscat, Sultanate of Oman</p>
       <small id="companyVatTop">VAT IN: - | C.R No: -</small>
+<small id="companyTemplateTop">Business Type: General Business</small>
     </div>
   </div>
 
@@ -243,6 +244,7 @@ if(currentUser && currentUser.accountActive === false){
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="/firebase-config.js"></script>
 <script src="/firebase-db.js"></script>
+<script src="/industry-template.js"></script>
 
 <script>
 function mv(n){return Number(n||0).toFixed(3)}
@@ -338,8 +340,23 @@ async function applyBranding(){
   companyNameTop.textContent=company.companyName || company.businessName || company.name || "Company Name";
   companyAddressTop.textContent=company.address || company.companyAddress || "Muscat, Sultanate of Oman";
   companyVatTop.textContent="VAT IN: " + (company.vatNumber || company.vatIn || "-") + " | C.R No: " + (company.crNumber || company.crNo || "-");
-}
+const templateKey = company.industryTemplate || company.businessType || "general";
 
+const template = typeof getIndustryTemplate === "function"
+  ? getIndustryTemplate(templateKey)
+  : {
+      name: company.industryTemplateName || "General Business",
+      dashboardTitle: "Dashboard"
+    };
+
+companyTemplateTop.textContent = "Business Type: " + (template.name || "General Business");
+
+const dashboardHeading = document.querySelector(".topbar h1");
+
+if(dashboardHeading){
+  dashboardHeading.textContent = template.dashboardTitle || "Dashboard";
+}
+}
 function logout(){
   localStorage.removeItem("post91CurrentUser");
   localStorage.removeItem("post91LoggedInUser");
