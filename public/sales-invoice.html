@@ -1193,9 +1193,9 @@ function updatePreview(){
   pVatNo.textContent=customerVatNo.value||"-";
 
   pNo.textContent=invoiceNo.value||"-";
-  pDate.textContent=invoiceDate.value||"-";
+  pDate.textContent=formatDate(invoiceDate.value);
   pRef.textContent=reference.value||"-";
-  pDoDate.textContent=doDate.value||"-";
+  pDoDate.textContent=formatDate(doDate.value);
 
   pPumpType.textContent=pumpType.value ? `${pumpType.value}${brandName.value ? " ("+brandName.value+")" : ""}` : "-";
   pCylinderNo.textContent=cylinderNo.value||"-";
