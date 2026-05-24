@@ -983,7 +983,12 @@ function fillFromDO(d){
   pumpNo.value=d.pumpNo||"";
   jobNo.value=d.jobNo||"";
   govNo.value=d.govNo||"";
-  workOrderNo.value=d.workOrderNo||"";
+  workOrderNo.value =
+  d.workOrderNo ||
+  d.workOrderRef ||
+  d.workOrderNumber ||
+  d.referenceNo ||
+  "";
   serialNo.value=d.serialNo||"";
 
   itemsBody.innerHTML="";
@@ -1190,7 +1195,10 @@ function updatePreview(){
   pPumpNo.textContent=pumpNo.value||"-";
   pJobNo.textContent=jobNo.value||"-";
   pGovNo.textContent=govNo.value||"-";
-  pWorkOrderNo.textContent=workOrderNo.value||"-";
+  pWorkOrderNo.textContent =
+  workOrderNo.value ||
+  reference.value ||
+  "-";
   pSerialNo.textContent=serialNo.value||"-";
 
   pItems.innerHTML="";
@@ -1284,7 +1292,9 @@ async function saveDoc(e){
     pumpNo:pumpNo.value,
     jobNo:jobNo.value,
     govNo:govNo.value,
-    workOrderNo:workOrderNo.value,
+    workOrderNo: workOrderNo.value,
+workOrderRef: workOrderNo.value,
+workOrderNumber: workOrderNo.value,
     serialNo:serialNo.value,
     terms:terms.value,
     companyEmail:companyEmail.value,
@@ -1413,7 +1423,11 @@ function editDoc(i){
   pumpNo.value=d.pumpNo||"";
   jobNo.value=d.jobNo||"";
   govNo.value=d.govNo||"";
-  workOrderNo.value=d.workOrderNo||"";
+  workOrderNo.value =
+  d.workOrderNo ||
+  d.workOrderRef ||
+  d.workOrderNumber ||
+  "";
   serialNo.value=d.serialNo||"";
 
   terms.value=d.terms||"";
