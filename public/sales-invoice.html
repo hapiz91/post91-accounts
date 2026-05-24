@@ -1369,6 +1369,18 @@ function statusBadge(s){
   return `<span class="badge ${(s||"Draft")==="Submitted"?"submitted":"draft"}">${s||"Draft"}</span>`;
 }
 
+function formatDate(dateStr){
+  if(!dateStr) return "-";
+
+  const d = new Date(dateStr);
+
+  const day = String(d.getDate()).padStart(2,"0");
+  const month = String(d.getMonth()+1).padStart(2,"0");
+  const year = d.getFullYear();
+
+  return `${day}-${month}-${year}`;
+}
+
 async function loadSaved(){
   let q=(savedSearch.value||"").toLowerCase();
   savedBody.innerHTML="";
@@ -1383,7 +1395,7 @@ async function loadSaved(){
     let tr=document.createElement("tr");
     tr.innerHTML=`
       <td>${d.invoiceNo||"-"}</td>
-      <td>${d.invoiceDate||"-"}</td>
+      <td>${formatDate(d.invoiceDate)||"-"}</td>
       <td>${d.customerName||"-"}</td>
       <td>${mt(d.grandTotal)}</td>
       <td>${statusBadge(d.docStatus)}</td>
