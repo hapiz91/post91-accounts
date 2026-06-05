@@ -525,6 +525,34 @@ th{background:#f8fbff}
     <button type="button" class="btn btn-light" onclick="addRow()">+ Add Item</button>
   </div>
 
+<div class="card editor">
+
+<h2>Service Related Fees</h2>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th style="width:60px">SR</th>
+
+<th>Charge Name</th>
+
+<th style="width:170px">Amount</th>
+
+<th style="width:90px">Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="serviceFeesBody"></tbody>
+
+</table>
+
+</div>
+
   <div class="total-box priceBlock">
     <div class="total-row"><span>Total</span><span id="totalText">OMR 0.000</span></div>
     <div class="total-row"><span>Less Discount</span><span id="discountText">OMR 0.000</span></div>
@@ -1000,10 +1028,41 @@ function fillFromDO(d){
   serialNo.value=d.serialNo||"";
 
   itemsBody.innerHTML="";
-  (d.items||[]).forEach(item=>addRow(item));
-  if((d.items||[]).length===0)addRow();
 
-  calc();
+(d.items||[]).forEach(
+item=>addRow(item)
+);
+
+if((d.items||[]).length===0)
+addRow();
+
+
+serviceFeesBody.innerHTML="";
+
+if(
+d.serviceFees &&
+d.serviceFees.length
+){
+
+d.serviceFees.forEach(
+x=>addServiceFee(x)
+);
+
+}else{
+
+addServiceFee({
+name:"Charge of Nozzles Pressure Settings",
+amount:"0.000"
+});
+
+addServiceFee({
+name:"Pump Calibration Charges",
+amount:"0.000"
+});
+
+}
+
+calc();
 }
 
 function loadConvertedDO(){
@@ -1096,6 +1155,64 @@ function selectItem(r,i){
   calc();
 }
 
+function addServiceFee(d=null){
+
+let tr=document.createElement("tr");
+
+tr.innerHTML=`
+
+<td>
+
+${serviceFeesBody.children.length+1}
+
+</td>
+
+<td>
+
+<input class="feeName">
+
+</td>
+
+<td>
+
+<input
+class="feeAmount"
+type="number"
+step=".001"
+value="0.000"
+oninput="calc()">
+
+</td>
+
+<td>
+
+<button
+type="button"
+class="btn btn-danger"
+onclick="this.closest('tr').remove();calc()">
+
+X
+
+</button>
+
+</td>
+
+`;
+
+serviceFeesBody.appendChild(tr);
+
+if(d){
+
+tr.querySelector(".feeName").value=d.name||"";
+
+tr.querySelector(".feeAmount").value=d.amount||0;
+
+}
+
+calc();
+
+}
+
 function remRow(b){
   b.closest("tr").remove();
 
@@ -1107,57 +1224,114 @@ function remRow(b){
 }
 
 function calc(){
-  let total=0;
+
+  let itemTotal = 0;
 
   document.querySelectorAll("#itemsBody tr").forEach(r=>{
-    let q=+r.querySelector(".qty").value||0;
-    let rate=+r.querySelector(".rate").value||0;
-    let am=q*rate;
-    r.querySelector(".amount").value=mv(am);
-    total+=am;
+    let q = +r.querySelector(".qty").value || 0;
+    let rate = +r.querySelector(".rate").value || 0;
+    let am = q * rate;
+
+    r.querySelector(".amount").value = mv(am);
+    itemTotal += am;
   });
 
-  let disc=+discount.value||0;
-  let after=Math.max(total-disc,0);
-  let v=+vatPercent.value||0;
-  let type=vatType.value;
+  let feeTotal = 0;
 
-  let vat=0,before=after,grand=after;
+  document.querySelectorAll("#serviceFeesBody tr").forEach(r=>{
+    feeTotal += +(r.querySelector(".feeAmount").value || 0);
+  });
 
-  if(type==="VAT Exclusive"){vat=before*v/100;grand=before+vat}
-  if(type==="VAT Inclusive"){vat=after-(after/(1+v/100));before=after-vat;grand=after}
-  if(["Non-VAT","Zero Rated","Exempt"].includes(type)){vat=0;before=after;grand=after}
+  let disc = +discount.value || 0;
+  let before = Math.max(itemTotal + feeTotal - disc, 0);
+  let v = +vatPercent.value || 0;
+  let type = vatType.value;
 
-  totalText.textContent=mt(total);
-  discountText.textContent=mt(disc);
-  beforeText.textContent=mt(before);
-  vatText.textContent=mt(vat);
-  grandText.textContent=mt(grand);
+  let vat = 0;
+  let grand = before;
+
+  if(type === "VAT Exclusive"){
+    vat = before * v / 100;
+    grand = before + vat;
+  }
+
+  if(type === "VAT Inclusive"){
+    vat = before - (before / (1 + v / 100));
+    before = before - vat;
+    grand = before + vat;
+  }
+
+  if(["Non-VAT","Zero Rated","Exempt"].includes(type)){
+    vat = 0;
+    grand = before;
+  }
+
+  totalText.textContent = mt(itemTotal);
+  discountText.textContent = mt(disc);
+  beforeText.textContent = mt(before);
+  vatText.textContent = mt(vat);
+  grandText.textContent = mt(grand);
 
   updatePreview();
 
-  return {total,discountAmount:disc,beforeTax:before,vatAmount:vat,grandTotal:grand};
+  return {
+    itemTotal,
+    serviceFeeTotal: feeTotal,
+    total: itemTotal,
+    discountAmount: disc,
+    beforeTax: before,
+    vatAmount: vat,
+    grandTotal: grand
+  };
 }
 
 function silent(){
-  let total=0;
+
+  let itemTotal = 0;
 
   document.querySelectorAll("#itemsBody tr").forEach(r=>{
-    total+=+(r.querySelector(".amount").value)||0;
+    itemTotal += +(r.querySelector(".amount").value || 0);
   });
 
-  let disc=+discount.value||0;
-  let after=Math.max(total-disc,0);
-  let v=+vatPercent.value||0;
-  let type=vatType.value;
+  let feeTotal = 0;
 
-  let vat=0,before=after,grand=after;
+  document.querySelectorAll("#serviceFeesBody tr").forEach(r=>{
+    feeTotal += +(r.querySelector(".feeAmount").value || 0);
+  });
 
-  if(type==="VAT Exclusive"){vat=before*v/100;grand=before+vat}
-  if(type==="VAT Inclusive"){vat=after-(after/(1+v/100));before=after-vat;grand=after}
-  if(["Non-VAT","Zero Rated","Exempt"].includes(type)){vat=0;before=after;grand=after}
+  let disc = +discount.value || 0;
+  let before = Math.max(itemTotal + feeTotal - disc, 0);
+  let v = +vatPercent.value || 0;
+  let type = vatType.value;
 
-  return {total,discountAmount:disc,beforeTax:before,vatAmount:vat,grandTotal:grand};
+  let vat = 0;
+  let grand = before;
+
+  if(type === "VAT Exclusive"){
+    vat = before * v / 100;
+    grand = before + vat;
+  }
+
+  if(type === "VAT Inclusive"){
+    vat = before - (before / (1 + v / 100));
+    before = before - vat;
+    grand = before + vat;
+  }
+
+  if(["Non-VAT","Zero Rated","Exempt"].includes(type)){
+    vat = 0;
+    grand = before;
+  }
+
+  return {
+    itemTotal,
+    serviceFeeTotal: feeTotal,
+    total: itemTotal,
+    discountAmount: disc,
+    beforeTax: before,
+    vatAmount: vat,
+    grandTotal: grand
+  };
 }
 
 function updatePreview(){
@@ -1238,8 +1412,35 @@ function updatePreview(){
 
   let t=silent();
 
-  pTotal.textContent=mv(t.total);
+document.querySelectorAll(".servicePrintRow").forEach(x=>x.remove());
+
+document.querySelectorAll("#serviceFeesBody tr").forEach(r=>{
+  const name = r.querySelector(".feeName").value.trim();
+  const amount = Number(r.querySelector(".feeAmount").value || 0);
+
+  if(!name || amount === 0) return;
+
+  const row = document.createElement("div");
+  row.className = "print-total-row servicePrintRow";
+  row.innerHTML = `
+    <div>${name}</div>
+    <div>${mv(amount)}</div>
+  `;
+
+  const discountRow = pDisc.parentElement;
+  discountRow.parentElement.insertBefore(row, discountRow);
+});
+
+  let itemOnlyTotal = 0;
+
+document.querySelectorAll("#itemsBody tr").forEach(r=>{
+  itemOnlyTotal += +(r.querySelector(".amount").value || 0);
+});
+
+pTotal.textContent = mv(itemOnlyTotal);
   pDisc.textContent=mv(t.discountAmount);
+pDisc.parentElement.style.display =
+  t.discountAmount > 0 ? "grid" : "none";
   pBefore.textContent=mv(t.beforeTax);
   pVatP.textContent=vatPercent.value||0;
   pVat.textContent=mv(t.vatAmount);
@@ -1273,6 +1474,34 @@ async function saveDoc(e){
   });
 
   if(items.length===0)return alert("Add item");
+
+let serviceFees=[];
+
+document
+.querySelectorAll("#serviceFeesBody tr")
+.forEach(r=>{
+
+let n=
+r.querySelector(".feeName")
+.value.trim();
+
+let a=
+r.querySelector(".feeAmount")
+.value;
+
+if(n||Number(a)>0){
+
+serviceFees.push({
+
+name:n,
+
+amount:a
+
+});
+
+}
+
+});
 
   let rec={
     sourceType:sourceType.value,
@@ -1308,7 +1537,8 @@ workOrderNumber: workOrderNo.value,
     companyEmail:companyEmail.value,
     signatureText:signatureText.value,
     items,
-    ...t
+serviceFees,
+...t
   };
 
   if(typeof attachFinancialYearToTransaction==="function"){
@@ -1455,8 +1685,39 @@ function editDoc(i){
   signatureText.value=d.signatureText||"For Company";
 
   itemsBody.innerHTML="";
-  (d.items||[]).forEach(x=>addRow(x));
-  if((d.items||[]).length===0)addRow();
+
+(d.items||[]).forEach(
+x=>addRow(x)
+);
+
+if((d.items||[]).length===0)
+addRow();
+
+
+serviceFeesBody.innerHTML="";
+
+if(
+d.serviceFees &&
+d.serviceFees.length
+){
+
+d.serviceFees.forEach(
+x=>addServiceFee(x)
+);
+
+}else{
+
+addServiceFee({
+name:"Charge of Nozzles Pressure Settings",
+amount:"0.000"
+});
+
+addServiceFee({
+name:"Pump Calibration Charges",
+amount:"0.000"
+});
+
+}
 
   sourceChanged();
   calc();
@@ -1488,8 +1749,22 @@ function setDefaults(){
 
   sourceChanged();
   addRow();
-  loadConvertedDO();
-  calc();
+
+serviceFeesBody.innerHTML="";
+
+addServiceFee({
+name:"Charge of Nozzles Pressure Settings",
+amount:"0.000"
+});
+
+addServiceFee({
+name:"Pump Calibration Charges",
+amount:"0.000"
+});
+
+loadConvertedDO();
+
+calc();
 }
 
 document.addEventListener("click",e=>{

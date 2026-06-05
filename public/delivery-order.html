@@ -64,22 +64,21 @@ th{background:#f8fbff}
 /* Letterhead / company header space */
 .doc-letterhead-space{
   width:100%;
-  height:4cm;
+  height:4.2cm;
   display:flex;
   align-items:center;
   justify-content:center;
   overflow:hidden;
-  margin-bottom:14px;
+  margin-bottom:10px;
   border-bottom:3px double #111;
 }
 
 .letterhead-img{
   width:100%;
   height:100%;
-  object-fit:contain;
+  object-fit:fill;
   display:none;
 }
-
 .company-header-fallback{
   width:100%;
   height:100%;
@@ -291,9 +290,9 @@ th{background:#f8fbff}
   }
 
   .doc-letterhead-space{
-    height:4cm;
-    margin-bottom:10px;
-  }
+  height:4.2cm;
+  margin-bottom:10px;
+}
 
   .print-title{
     font-size:16px;
@@ -618,6 +617,27 @@ th{background:#f8fbff}
   <div class="btn-row">
     <button type="button" class="btn btn-light" onclick="addRow()">+ Add Item</button>
   </div>
+
+<div class="card editor">
+  <h2>Service Related Fees</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:60px;">SR</th>
+        <th>Charge Name</th>
+        <th style="width:160px;">Amount</th>
+        <th style="width:90px;">Action</th>
+      </tr>
+    </thead>
+
+    <tbody id="serviceFeesBody"></tbody>
+  </table>
+
+  <div class="btn-row">
+    <!-- Fixed service fee rows only -->
+  </div>
+</div>
 
   <div class="total-box priceBlock">
     <div class="total-row"><span>Total</span><span id="totalText">OMR 0.000</span></div>
@@ -1145,6 +1165,19 @@ function loadSource(){
   discount.value=q.discountAmount||"0.000";
 
   itemsBody.innerHTML="";
+
+serviceFeesBody.innerHTML="";
+
+addServiceFee({
+name:"Charge of Nozzles Pressure Settings",
+amount:"0.000"
+});
+
+addServiceFee({
+name:"Pump Calibration Charges",
+amount:"0.000"
+});
+
   (q.items||[]).forEach(item=>addRow(item));
   if((q.items||[]).length===0)addRow();
 
@@ -1239,6 +1272,47 @@ function selectItem(r,i){
   calc();
 }
 
+function addServiceFee(d=null){
+
+  let tr=document.createElement("tr");
+
+  tr.innerHTML=`
+    <td>
+      ${serviceFeesBody.children.length+1}
+    </td>
+
+    <td>
+      <input class="feeName"
+      placeholder="Pump Calibration Charges">
+    </td>
+
+    <td>
+      <input type="number"
+      step=".001"
+      class="feeAmount"
+      value="0.000"
+      oninput="calc()">
+    </td>
+
+    <td>
+      <button type="button"
+      class="btn btn-danger"
+      onclick="this.closest('tr').remove();calc()">
+      X
+      </button>
+    </td>
+  `;
+
+  serviceFeesBody.appendChild(tr);
+
+  if(d){
+    tr.querySelector(".feeName").value=d.name||"";
+    tr.querySelector(".feeAmount").value=d.amount||"0.000";
+  }
+
+  calc();
+}
+
 function remRow(b){
   b.closest("tr").remove();
 
@@ -1250,84 +1324,114 @@ function remRow(b){
 }
 
 function calc(){
-  let total=0;
+
+  let itemTotal = 0;
 
   document.querySelectorAll("#itemsBody tr").forEach(r=>{
-    let q=+r.querySelector(".qty").value||0;
-    let rate=+r.querySelector(".rate").value||0;
-    let am=q*rate;
+    let q = +r.querySelector(".qty").value || 0;
+    let rate = +r.querySelector(".rate").value || 0;
+    let am = q * rate;
 
-    r.querySelector(".amount").value=mv(am);
-    total+=am;
+    r.querySelector(".amount").value = mv(am);
+    itemTotal += am;
   });
 
-  let disc=+discount.value||0;
-  let after=Math.max(total-disc,0);
-  let v=+vatPercent.value||0;
-  let type=vatType.value;
+  let feeTotal = 0;
 
-  let vat=0,before=after,grand=after;
+  document.querySelectorAll("#serviceFeesBody tr").forEach(r=>{
+    feeTotal += +(r.querySelector(".feeAmount").value || 0);
+  });
 
-  if(type==="VAT Exclusive"){
-    vat=before*v/100;
-    grand=before+vat;
+  let disc = +discount.value || 0;
+  let before = Math.max(itemTotal + feeTotal - disc, 0);
+  let v = +vatPercent.value || 0;
+  let type = vatType.value;
+
+  let vat = 0;
+  let grand = before;
+
+  if(type === "VAT Exclusive"){
+    vat = before * v / 100;
+    grand = before + vat;
   }
 
-  if(type==="VAT Inclusive"){
-    vat=after-(after/(1+v/100));
-    before=after-vat;
-    grand=after;
+  if(type === "VAT Inclusive"){
+    vat = before - (before / (1 + v / 100));
+    before = before - vat;
+    grand = before + vat;
   }
 
   if(["Non-VAT","Zero Rated","Exempt"].includes(type)){
-    vat=0;
-    before=after;
-    grand=after;
+    vat = 0;
+    grand = before;
   }
 
-  totalText.textContent=mt(total);
-  discountText.textContent=mt(disc);
-  beforeText.textContent=mt(before);
-  vatText.textContent=mt(vat);
-  grandText.textContent=mt(grand);
+  totalText.textContent = mt(itemTotal);
+  discountText.textContent = mt(disc);
+  beforeText.textContent = mt(before);
+  vatText.textContent = mt(vat);
+  grandText.textContent = mt(grand);
 
   updatePreview();
 
-  return {total,discountAmount:disc,beforeTax:before,vatAmount:vat,grandTotal:grand};
+  return {
+    itemTotal,
+    serviceFeeTotal: feeTotal,
+    total: itemTotal,
+    discountAmount: disc,
+    beforeTax: before,
+    vatAmount: vat,
+    grandTotal: grand
+  };
 }
 
 function silent(){
-  let total=0;
+
+  let itemTotal = 0;
 
   document.querySelectorAll("#itemsBody tr").forEach(r=>{
-    total+=+(r.querySelector(".amount").value)||0;
+    itemTotal += +(r.querySelector(".amount").value || 0);
   });
 
-  let disc=+discount.value||0;
-  let after=Math.max(total-disc,0);
-  let v=+vatPercent.value||0;
-  let type=vatType.value;
+  let feeTotal = 0;
 
-  let vat=0,before=after,grand=after;
+  document.querySelectorAll("#serviceFeesBody tr").forEach(r=>{
+    feeTotal += +(r.querySelector(".feeAmount").value || 0);
+  });
 
-  if(type==="VAT Exclusive"){
-    vat=before*v/100;
-    grand=before+vat;
+  let disc = +discount.value || 0;
+  let before = Math.max(itemTotal + feeTotal - disc, 0);
+  let v = +vatPercent.value || 0;
+  let type = vatType.value;
+
+  let vat = 0;
+  let grand = before;
+
+  if(type === "VAT Exclusive"){
+    vat = before * v / 100;
+    grand = before + vat;
   }
 
-  if(type==="VAT Inclusive"){
-    vat=after-(after/(1+v/100));
-    before=after-vat;
-    grand=after;
+  if(type === "VAT Inclusive"){
+    vat = before - (before / (1 + v / 100));
+    before = before - vat;
+    grand = before + vat;
   }
 
   if(["Non-VAT","Zero Rated","Exempt"].includes(type)){
-    vat=0;
-    before=after;
-    grand=after;
+    vat = 0;
+    grand = before;
   }
 
-  return {total,discountAmount:disc,beforeTax:before,vatAmount:vat,grandTotal:grand};
+  return {
+    itemTotal,
+    serviceFeeTotal: feeTotal,
+    total: itemTotal,
+    discountAmount: disc,
+    beforeTax: before,
+    vatAmount: vat,
+    grandTotal: grand
+  };
 }
 
 function pumpTypeDisplay(){
@@ -1424,8 +1528,45 @@ function updatePreview(){
 
   let t=silent();
 
+document
+.querySelectorAll(".servicePrintRow")
+.forEach(x=>x.remove());
+
+document
+.querySelectorAll("#serviceFeesBody tr")
+.forEach(r=>{
+
+  let name =
+    r.querySelector(".feeName").value;
+
+  let amount =
+    r.querySelector(".feeAmount").value;
+
+  if(!name)return;
+
+  let div=document.createElement("div");
+
+  div.className="print-total-row servicePrintRow";
+
+  div.innerHTML=`
+    <div>${name}</div>
+    <div>${mv(amount)}</div>
+  `;
+
+  pVatRow.parentElement.insertBefore(
+    div,
+    pVatRow.previousElementSibling.nextSibling
+  );
+
+});
+
   pTotal.textContent=mv(t.total);
   pDisc.textContent=mv(t.discountAmount);
+document.getElementById("pDisc")
+.parentElement.style.display =
+  t.discountAmount > 0
+    ? "grid"
+    : "none";
   pBefore.textContent=mv(t.beforeTax);
   pVatP.textContent=vatPercent.value||0;
   pVat.textContent=mv(t.vatAmount);
@@ -1470,6 +1611,26 @@ async function saveDoc(e){
     return;
   }
 
+let serviceFees=[];
+
+document.querySelectorAll("#serviceFeesBody tr")
+.forEach(r=>{
+
+  let name =
+    r.querySelector(".feeName").value.trim();
+
+  let amount =
+    r.querySelector(".feeAmount").value;
+
+  if(name || Number(amount)>0){
+
+    serviceFees.push({
+      name:name,
+      amount:amount
+    });
+  }
+});
+
   let rec={
   doNo:doNo.value,
   doDate:doDate.value,
@@ -1504,6 +1665,7 @@ async function saveDoc(e){
     companyEmail:companyEmail.value,
 
     items,
+serviceFees,
     ...t
   };
 
@@ -1594,7 +1756,24 @@ function editDoc(i){
   signatureText.value=d.signatureText||"For Company";
   companyEmail.value=d.companyEmail||"";
 
-  itemsBody.innerHTML="";
+itemsBody.innerHTML="";
+serviceFeesBody.innerHTML="";
+
+(d.serviceFees||[]).forEach(x=>addServiceFee(x));
+
+if((d.serviceFees||[]).length===0){
+
+addServiceFee({
+name:"Charge of Nozzles Pressure Settings",
+amount:"0.000"
+});
+
+addServiceFee({
+name:"Pump Calibration Charges",
+amount:"0.000"
+});
+
+}
   (d.items||[]).forEach(item=>addRow(item));
   if((d.items||[]).length===0)addRow();
 
@@ -1657,6 +1836,18 @@ function setDefaults(){
   EDIT="";
   docForm.reset();
   itemsBody.innerHTML="";
+
+serviceFeesBody.innerHTML="";
+
+addServiceFee({
+  name:"Charge of Nozzles Pressure Settings",
+  amount:"0.000"
+});
+
+addServiceFee({
+  name:"Pump Calibration Charges",
+  amount:"0.000"
+});
 
   doNo.value="DO-"+(1001+CURRENT_DOS.length);
   doDate.value=today();
