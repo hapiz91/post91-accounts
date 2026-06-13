@@ -119,169 +119,202 @@ th{background:#f8fbff;text-align:left}
   </table>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/firebase-db.js"></script>
+
 <script>
-function gd(k){return JSON.parse(localStorage.getItem(k)||"[]")}
+let ACCOUNTS = [];
+let RECEIPTS = [];
+let PAYMENTS = [];
+let EXPENSES = [];
+
 function mv(n){return Number(n||0).toFixed(3)}
-function mt(n){return "OMR "+mv(n)}
+function mt(n){return "OMR " + mv(n)}
 
 function accountNameOf(a){
   return a.accountName || a.name || "";
 }
 
-function loadAccounts(){
-  accountSelect.innerHTML='<option value="">All Accounts</option>';
+async function loadAccounts(){
+  accountSelect.innerHTML = '<option value="">All Accounts</option>';
 
-  gd("post91CashBankAccounts").forEach((a,i)=>{
-    let name=accountNameOf(a);
-    if(!name)return;
+  ACCOUNTS = await loadFromCloudSmart("cashBankAccounts");
 
-    let o=document.createElement("option");
-    o.value=name;
-    o.textContent=`${name} (${a.accountType||"Bank"})`;
-    accountSelect.appendChild(o);
-  });
+  ACCOUNTS
+    .filter(a => (a.status || "Active") === "Active")
+    .forEach(a=>{
+      let name = accountNameOf(a);
+      if(!name) return;
+
+      let o = document.createElement("option");
+      o.value = a.id;
+      o.textContent = `${name} (${a.accountType || a.type || "Bank"})`;
+      accountSelect.appendChild(o);
+    });
+}
+
+function selectedAccount(){
+  if(!accountSelect.value) return null;
+  return ACCOUNTS.find(a => a.id === accountSelect.value) || null;
 }
 
 function dateOk(date){
-  if(!date)return true;
+  if(!date) return true;
 
-  let d=new Date(date);
-  let f=fromDate.value ? new Date(fromDate.value) : null;
-  let t=toDate.value ? new Date(toDate.value) : null;
+  let d = new Date(date);
+  let f = fromDate.value ? new Date(fromDate.value) : null;
+  let t = toDate.value ? new Date(toDate.value) : null;
 
-  if(f && d<f)return false;
-  if(t && d>t)return false;
+  if(f && d < f) return false;
+  if(t && d > t) return false;
 
   return true;
 }
 
-function accountOk(name){
-  if(!accountSelect.value)return true;
-  return (name||"").toLowerCase()===accountSelect.value.toLowerCase();
+function accountOk(row){
+  const selected = selectedAccount();
+
+  if(!selected) return true;
+
+  const selectedName = accountNameOf(selected).toLowerCase();
+  const rowName = String(row.accountName || "").toLowerCase();
+  const rowId = String(row.accountId || "");
+
+  return rowId === selected.id || rowName === selectedName;
 }
 
 function selectedOpeningBalance(){
-  let accounts=gd("post91CashBankAccounts");
+  const selected = selectedAccount();
 
-  if(accountSelect.value){
-    let a=accounts.find(x=>accountNameOf(x)===accountSelect.value);
-    if(!a)return 0;
-
-    let bal=Number(a.openingBalance||0);
-    return (a.openingBalanceType||"Debit")==="Credit" ? -bal : bal;
+  if(selected){
+    let bal = Number(selected.openingBalance || 0);
+    return (selected.openingBalanceType || "Debit") === "Credit" ? -bal : bal;
   }
 
-  let total=0;
+  let total = 0;
 
-  accounts.forEach(a=>{
-    let bal=Number(a.openingBalance||0);
-    total += (a.openingBalanceType||"Debit")==="Credit" ? -bal : bal;
+  ACCOUNTS.forEach(a=>{
+    let bal = Number(a.openingBalance || 0);
+    total += (a.openingBalanceType || "Debit") === "Credit" ? -bal : bal;
   });
 
   return total;
 }
 
 function addRow(rows, obj){
-  if(!obj.accountName)return;
-  if(!accountOk(obj.accountName))return;
-  if(!dateOk(obj.date))return;
+  if(!obj.accountName) return;
+  if(!accountOk(obj)) return;
+  if(!dateOk(obj.date)) return;
   rows.push(obj);
 }
 
-function generateLedger(){
-  let rows=[];
+async function generateLedger(){
+  RECEIPTS = await loadFromCloudSmart("receiptVouchers");
+  PAYMENTS = await loadFromCloudSmart("paymentVouchers");
+  EXPENSES = await loadFromCloudSmart("expenseEntries");
 
-  gd("post91ReceiptVouchers").forEach(rv=>{
-    if((rv.docStatus||"Posted")==="Cancelled")return;
+  let rows = [];
+
+  RECEIPTS.forEach(rv=>{
+    if((rv.docStatus || rv.status || "Posted") === "Cancelled") return;
 
     addRow(rows,{
-      date:rv.receiptDate||"",
-      accountName:rv.cashBankAccountName || rv.paymentMode || "Cash/Bank Not Selected",
-      type:"Receipt Voucher",
-      docNo:rv.receiptNo||"",
-      ref:rv.customerName||rv.paymentReference||"",
-      moneyIn:Number(rv.totalReceiptAmount||0),
-      moneyOut:0
+      date: rv.receiptDate || rv.date || "",
+      accountId: rv.cashBankAccountId || "",
+      accountName: rv.cashBankAccountName || rv.bankAccountName || rv.paymentMode || "Cash/Bank Not Selected",
+      type: "Receipt Voucher",
+      docNo: rv.receiptNo || rv.voucherNo || "",
+      ref: rv.customerName || rv.paymentReference || rv.referenceNo || "",
+      moneyIn: Number(rv.totalReceiptAmount || rv.amount || 0),
+      moneyOut: 0
     });
   });
 
-  gd("post91PaymentVouchers").forEach(pv=>{
-    if((pv.docStatus||"Posted")==="Cancelled")return;
+  PAYMENTS.forEach(pv=>{
+    if((pv.docStatus || pv.status || "Posted") === "Cancelled") return;
 
     addRow(rows,{
-      date:pv.paymentDate||"",
-      accountName:pv.cashBankAccountName || pv.paymentMode || "Cash/Bank Not Selected",
-      type:"Payment Voucher",
-      docNo:pv.paymentNo||"",
-      ref:pv.supplierName||pv.paymentReference||"",
-      moneyIn:0,
-      moneyOut:Number(pv.totalPaymentAmount||0)
+      date: pv.paymentDate || pv.date || "",
+      accountId: pv.cashBankAccountId || "",
+      accountName: pv.cashBankAccountName || pv.bankAccountName || pv.paymentMode || "Cash/Bank Not Selected",
+      type: "Payment Voucher",
+      docNo: pv.paymentNo || pv.voucherNo || "",
+      ref: pv.supplierName || pv.paymentReference || pv.referenceNo || "",
+      moneyIn: 0,
+      moneyOut: Number(pv.totalPaymentAmount || pv.amount || 0)
     });
   });
 
-  gd("post91ExpenseEntries").forEach(ex=>{
-    if((ex.status||"Posted")==="Cancelled")return;
+  EXPENSES.forEach(ex=>{
+    if((ex.status || "Posted") === "Cancelled") return;
 
     addRow(rows,{
-      date:ex.expenseDate||"",
-      accountName:ex.cashBankAccountName || ex.paymentMode || "Cash/Bank Not Selected",
-      type:"Expense Entry",
-      docNo:ex.expenseNo||"",
-      ref:ex.expenseCategory||ex.paidTo||ex.referenceNo||"",
-      moneyIn:0,
-      moneyOut:Number(ex.totalAmount||0)
+      date: ex.expenseDate || ex.date || "",
+      accountId: ex.cashBankAccountId || "",
+      accountName: ex.cashBankAccountName || ex.paymentMode || "Cash/Bank Not Selected",
+      type: "Expense Entry",
+      docNo: ex.expenseNo || "",
+      ref: ex.paidTo || ex.expenseCategory || ex.referenceNo || "",
+      moneyIn: 0,
+      moneyOut: Number(ex.totalAmount || 0)
     });
   });
 
-  rows.sort((a,b)=>{
-    let da=new Date(a.date||"1900-01-01");
-    let db=new Date(b.date||"1900-01-01");
-    return da-db;
-  });
+  rows.sort((a,b)=>new Date(a.date || "1900-01-01") - new Date(b.date || "1900-01-01"));
 
-  let opening=selectedOpeningBalance();
-  let running=opening;
-  let inTotal=0;
-  let outTotal=0;
+  let opening = selectedOpeningBalance();
+  let running = opening;
+  let inTotal = 0;
+  let outTotal = 0;
 
-  ledgerBody.innerHTML="";
+  ledgerBody.innerHTML = "";
 
   rows.forEach(r=>{
-    inTotal+=r.moneyIn;
-    outTotal+=r.moneyOut;
-    running+=r.moneyIn-r.moneyOut;
+    inTotal += r.moneyIn;
+    outTotal += r.moneyOut;
+    running += r.moneyIn - r.moneyOut;
 
-    let tr=document.createElement("tr");
+    let tr = document.createElement("tr");
 
-    tr.innerHTML=`
-      <td>${r.date||"-"}</td>
-      <td>${r.accountName||"-"}</td>
+    tr.innerHTML = `
+      <td>${r.date || "-"}</td>
+      <td>${r.accountName || "-"}</td>
       <td>${r.type}</td>
-      <td>${r.docNo||"-"}</td>
-      <td>${r.ref||"-"}</td>
-      <td class="inward">${r.moneyIn?mt(r.moneyIn):"-"}</td>
-      <td class="outward">${r.moneyOut?mt(r.moneyOut):"-"}</td>
+      <td>${r.docNo || "-"}</td>
+      <td>${r.ref || "-"}</td>
+      <td class="inward">${r.moneyIn ? mt(r.moneyIn) : "-"}</td>
+      <td class="outward">${r.moneyOut ? mt(r.moneyOut) : "-"}</td>
       <td class="balance">${mt(running)}</td>
     `;
 
     ledgerBody.appendChild(tr);
   });
 
-  openingBalance.textContent=mt(opening);
-  totalIn.textContent=mt(inTotal);
-  totalOut.textContent=mt(outTotal);
-  closingBalance.textContent=mt(running);
+  if(ledgerBody.innerHTML.trim() === ""){
+    ledgerBody.innerHTML = `<tr><td colspan="8">No ledger movement found.</td></tr>`;
+  }
+
+  openingBalance.textContent = mt(opening);
+  totalIn.textContent = mt(inTotal);
+  totalOut.textContent = mt(outTotal);
+  closingBalance.textContent = mt(running);
 }
 
 function clearFilters(){
-  accountSelect.value="";
-  fromDate.value="";
-  toDate.value="";
+  accountSelect.value = "";
+  fromDate.value = "";
+  toDate.value = "";
   generateLedger();
 }
 
-loadAccounts();
-generateLedger();
+async function initPage(){
+  await loadAccounts();
+  await generateLedger();
+}
+
+initPage();
 </script>
 
 </body>
