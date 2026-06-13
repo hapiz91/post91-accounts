@@ -9,6 +9,8 @@ const COLLECTIONS = {
   BRANDS: "brands",
   MACHINE_TYPES: "machineTypes",
 
+  CASH_BANK_ACCOUNTS: "cashBankAccounts",
+
   QUOTATIONS: "quotations",
   DELIVERY_ORDERS: "deliveryOrders",
   SALES_INVOICES: "salesInvoices",

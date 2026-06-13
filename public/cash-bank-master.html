@@ -40,13 +40,13 @@ th{background:#f8fbff;text-align:left}
 <div class="header">
   <div>
     <h1>Cash / Bank Master</h1>
-    <p>Create and manage cash and bank accounts used in receipts and payments.</p>
+    <p>Create and manage cash and bank accounts used in receipts, payments and expense entries.</p>
   </div>
   <a class="back" href="/dashboard.html">Back</a>
 </div>
 
 <div class="note">
-  This master saves in <b>post91CashBankAccounts</b>. Later Receipt Voucher and Payment Voucher will use this list for bank/cash selection.
+  This master now saves in Firebase collection <b>cashBankAccounts</b>.
 </div>
 
 <div class="card">
@@ -58,12 +58,13 @@ th{background:#f8fbff;text-align:left}
       <select id="accountType" onchange="typeChanged()">
         <option>Bank</option>
         <option>Cash</option>
+        <option>Petty Cash</option>
       </select>
     </div>
 
     <div>
       <label>Account Name *</label>
-      <input id="accountName" placeholder="Example: Bank Muscat Current A/C">
+      <input id="accountName" placeholder="Example: Petty Cash / Bank Muscat">
     </div>
 
     <div>
@@ -119,8 +120,8 @@ th{background:#f8fbff;text-align:left}
   </div>
 
   <div class="btn-row">
-    <button class="btn" onclick="saveAccount()">Save Account</button>
-    <button class="btn btn-light" onclick="clearForm()">Clear</button>
+    <button type="button" class="btn" onclick="saveAccount()">Save Account</button>
+    <button type="button" class="btn btn-light" onclick="clearForm()">Clear</button>
   </div>
 </div>
 
@@ -139,7 +140,7 @@ th{background:#f8fbff;text-align:left}
         <th>Opening Balance</th>
         <th>Currency</th>
         <th>Status</th>
-        <th style="width:210px;">Action</th>
+        <th style="width:230px;">Action</th>
       </tr>
     </thead>
     <tbody id="accountBody"></tbody>
@@ -150,25 +151,20 @@ th{background:#f8fbff;text-align:left}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script src="/firebase-config.js"></script>
-<script src="/data-sync.js"></script>
+<script src="/firebase-db.js"></script>
+
 <script>
-const CASH_BANK_KEY = "post91CashBankAccounts";
-let EDIT_INDEX = "";
-
-function gd(k){
-  return JSON.parse(localStorage.getItem(k) || "[]");
-}
-
-function sd(k,d){
-  localStorage.setItem(k, JSON.stringify(d));
-}
+const CASH_BANK_COLLECTION = "cashBankAccounts";
+let EDIT_ID = "";
+let ACCOUNT_LIST = [];
 
 function mv(n){
   return Number(n || 0).toFixed(3);
 }
 
 function typeChanged(){
-  const isCash = accountType.value === "Cash";
+  const type = accountType.value;
+  const isCash = type === "Cash" || type === "Petty Cash";
 
   bankName.disabled = isCash;
   accountNumber.disabled = isCash;
@@ -182,61 +178,64 @@ function typeChanged(){
     branch.value = "";
 
     if(!accountName.value){
-      accountName.value = "Cash in Hand";
+      accountName.value = type === "Petty Cash" ? "Petty Cash" : "Cash in Hand";
     }
   }
 }
 
-function saveAccount(){
-  let accounts = gd(CASH_BANK_KEY);
+function getAccountData(){
+  return {
+    accountType: accountType.value || "Bank",
+    type: accountType.value || "Bank",
 
+    accountName: accountName.value.trim(),
+    name: accountName.value.trim(),
+
+    bankName: bankName.value.trim(),
+    accountNumber: accountNumber.value.trim(),
+    iban: iban.value.trim(),
+    branch: branch.value.trim(),
+
+    openingBalance: mv(openingBalance.value),
+    openingBalanceType: openingBalanceType.value || "Debit",
+    currency: currency.value.trim() || "OMR",
+
+    status: document.getElementById("status")?.value || "Active",
+    remarks: remarks.value.trim(),
+
+    updatedAt: new Date().toISOString()
+  };
+}
+
+async function saveAccount(){
   if(!accountName.value.trim()){
     alert("Account name is required.");
     return;
   }
 
-  let rec = {
-    accountType:accountType.value,
-    accountName:accountName.value.trim(),
-    name:accountName.value.trim(),
+  const rec = getAccountData();
 
-    bankName:bankName.value.trim(),
-    accountNumber:accountNumber.value.trim(),
-    iban:iban.value.trim(),
-    branch:branch.value.trim(),
+  const id = await saveToCloud(CASH_BANK_COLLECTION, rec, EDIT_ID || null);
 
-    openingBalance:mv(openingBalance.value),
-    openingBalanceType:openingBalanceType.value,
-    currency:currency.value.trim() || "OMR",
-
-    status:status.value,
-    remarks:remarks.value.trim(),
-
-    updatedAt:new Date().toISOString()
-  };
-
-  if(EDIT_INDEX === ""){
-    rec.createdAt = new Date().toISOString();
-    accounts.push(rec);
-    alert("Cash / Bank account saved successfully.");
-  }else{
-    rec.createdAt = accounts[EDIT_INDEX].createdAt || new Date().toISOString();
-    accounts[EDIT_INDEX] = {...accounts[EDIT_INDEX], ...rec};
-    alert("Cash / Bank account updated successfully.");
+  if(id){
+    alert(EDIT_ID ? "Cash / Bank account updated successfully." : "Cash / Bank account saved successfully.");
+    clearForm();
+    await loadAccounts(true);
   }
-
-  sd(CASH_BANK_KEY, accounts);
-  clearForm();
-  loadAccounts();
 }
 
-function editAccount(i){
-  let a = gd(CASH_BANK_KEY)[i];
+function editAccount(id){
+  const a = ACCOUNT_LIST.find(x => x.id === id);
 
-  EDIT_INDEX = i;
+  if(!a){
+    alert("Account not found.");
+    return;
+  }
+
+  EDIT_ID = id;
   formTitle.textContent = "Edit Cash / Bank Account";
 
-  accountType.value = a.accountType || "Bank";
+  accountType.value = a.accountType || a.type || "Bank";
   accountName.value = a.accountName || a.name || "";
 
   bankName.value = a.bankName || "";
@@ -252,29 +251,37 @@ function editAccount(i){
   remarks.value = a.remarks || "";
 
   typeChanged();
-
-  scrollTo({top:0,behavior:"smooth"});
+  scrollTo({top:0, behavior:"smooth"});
 }
 
-function deleteAccount(i){
+async function deleteAccount(id){
   if(!confirm("Delete this cash/bank account?")) return;
 
-  let accounts = gd(CASH_BANK_KEY);
-  accounts.splice(i,1);
-  sd(CASH_BANK_KEY, accounts);
-  loadAccounts();
+  await deleteFromCloud(CASH_BANK_COLLECTION, id);
+  await loadAccounts(true);
 }
 
-function toggleStatus(i){
-  let accounts = gd(CASH_BANK_KEY);
-  accounts[i].status = (accounts[i].status || "Active") === "Active" ? "Inactive" : "Active";
-  accounts[i].updatedAt = new Date().toISOString();
-  sd(CASH_BANK_KEY, accounts);
-  loadAccounts();
+async function toggleStatus(id){
+  const a = ACCOUNT_LIST.find(x => x.id === id);
+
+  if(!a){
+    alert("Account not found.");
+    return;
+  }
+
+  const newStatus = (a.status || "Active") === "Active" ? "Inactive" : "Active";
+
+  await saveToCloud(CASH_BANK_COLLECTION, {
+    ...a,
+    status: newStatus,
+    updatedAt: new Date().toISOString()
+  }, id);
+
+  await loadAccounts(true);
 }
 
 function clearForm(){
-  EDIT_INDEX = "";
+  EDIT_ID = "";
   formTitle.textContent = "Add Cash / Bank Account";
 
   accountType.value = "Bank";
@@ -297,24 +304,29 @@ function statusBadge(s){
 }
 
 function typeBadge(t){
-  return `<span class="badge ${t === "Cash" ? "cash" : "bank"}">${t || "Bank"}</span>`;
+  const type = t || "Bank";
+  const cls = type === "Bank" ? "bank" : "cash";
+  return `<span class="badge ${cls}">${type}</span>`;
 }
 
-function loadAccounts(){
+async function loadAccounts(force=false){
   let q = (searchText.value || "").toLowerCase();
-  let accounts = gd(CASH_BANK_KEY);
+
+  ACCOUNT_LIST = await loadFromCloud(CASH_BANK_COLLECTION, force);
 
   accountBody.innerHTML = "";
 
-  accounts.forEach((a,i)=>{
+  ACCOUNT_LIST.forEach((a, i)=>{
     let combined = JSON.stringify(a).toLowerCase();
 
     if(q && !combined.includes(q)) return;
 
+    const type = a.accountType || a.type || "Bank";
+
     let bankDetails = "";
 
-    if((a.accountType || "Bank") === "Cash"){
-      bankDetails = "Cash Account";
+    if(type === "Cash" || type === "Petty Cash"){
+      bankDetails = type + " Account";
     }else{
       bankDetails = `
         <b>Bank:</b> ${a.bankName || "-"}<br>
@@ -327,26 +339,30 @@ function loadAccounts(){
     let tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${i+1}</td>
+      <td>${i + 1}</td>
       <td><b>${a.accountName || a.name || "-"}</b><br><small>${a.remarks || ""}</small></td>
-      <td>${typeBadge(a.accountType)}</td>
+      <td>${typeBadge(type)}</td>
       <td>${bankDetails}</td>
       <td>${mv(a.openingBalance)} ${a.openingBalanceType || "Debit"}</td>
       <td>${a.currency || "OMR"}</td>
       <td>${statusBadge(a.status)}</td>
       <td>
-        <button class="btn btn-light" onclick="editAccount(${i})">Edit</button>
-        <button class="btn btn-light" onclick="toggleStatus(${i})">Status</button>
-        <button class="btn btn-danger" onclick="deleteAccount(${i})">Delete</button>
+        <button type="button" class="btn btn-light" onclick="editAccount('${a.id}')">Edit</button>
+        <button type="button" class="btn btn-light" onclick="toggleStatus('${a.id}')">Status</button>
+        <button type="button" class="btn btn-danger" onclick="deleteAccount('${a.id}')">Delete</button>
       </td>
     `;
 
     accountBody.appendChild(tr);
   });
+
+  if(accountBody.innerHTML.trim() === ""){
+    accountBody.innerHTML = `<tr><td colspan="8">No cash / bank accounts found.</td></tr>`;
+  }
 }
 
 typeChanged();
-loadAccounts();
+loadAccounts(true);
 </script>
 
 </body>
