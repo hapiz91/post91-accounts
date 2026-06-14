@@ -16,6 +16,7 @@ body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#06
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .full{grid-column:1/-1}
+.hidden{display:none!important}
 label{display:block;font-weight:800;margin-bottom:6px}
 input,select,textarea{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
 textarea{min-height:75px}
@@ -42,6 +43,7 @@ th{background:#f8fbff}
 .opt span{font-size:12px;color:#64748b}
 @media(max-width:900px){.grid,.grid3{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
 </style>
+<link rel="stylesheet" href="/app-shell.css">
 </head>
 
 <body>
@@ -140,7 +142,7 @@ th{background:#f8fbff}
         </select>
       </div>
 
-      <div>
+      <div class="hidden">
         <label>VAT %</label>
         <input type="number" id="vatPercent" value="5" oninput="calc()">
       </div>
@@ -250,6 +252,24 @@ function gd(k){return JSON.parse(localStorage.getItem(k)||'[]')}
 function today(){return new Date().toISOString().split('T')[0]}
 function mv(n){return Number(n||0).toFixed(3)}
 function mt(n){return 'OMR '+mv(n)}
+
+function defaultVatPercent(){
+  try{
+    const settings = JSON.parse(localStorage.getItem('post91Settings') || '{}');
+    return Number(settings.vatPercentage || 5);
+  }catch(e){
+    return 5;
+  }
+}
+
+function defaultPurchaseVatType(){
+  try{
+    const settings = JSON.parse(localStorage.getItem('post91Settings') || '{}');
+    return settings.defaultPurchaseVatType || 'VAT Exclusive';
+  }catch(e){
+    return 'VAT Exclusive';
+  }
+}
 
 async function smartLoad(collection){
   try{
@@ -523,8 +543,8 @@ async function editDoc(id){
   supplierInvoiceNo.value=d.supplierInvoiceNo||'';
   reference.value=d.reference||'';
 
-  vatType.value=d.vatType||'VAT Exclusive';
-  vatPercent.value=d.vatPercent||5;
+  vatType.value=d.vatType||defaultPurchaseVatType();
+  vatPercent.value=d.vatPercent||defaultVatPercent();
   discount.value=d.discountAmount||'0.000';
 
   docStatus.value=d.docStatus||'Draft';
@@ -556,8 +576,8 @@ function setDefaults(){
   purchaseNo.value='PINV-'+Date.now().toString().slice(-6);
   purchaseDate.value=today();
 
-  vatType.value='VAT Exclusive';
-  vatPercent.value=5;
+  vatType.value=defaultPurchaseVatType();
+  vatPercent.value=defaultVatPercent();
   discount.value='0.000';
   docStatus.value='Draft';
 
@@ -574,5 +594,7 @@ document.addEventListener('click',e=>{
 setDefaults();
 loadSaved();
 </script>
+<script src="/permission-guard.js"></script>
+<script src="/app-shell.js"></script>
 </body>
 </html>

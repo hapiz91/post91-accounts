@@ -36,6 +36,7 @@ input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4p
 .secondary{background:#e2e8f0;color:#0f172a;}
 @media(max-width:900px){.sidebar{display:none}.main{margin-left:0;width:100%;padding:20px}.grid{grid-template-columns:1fr}.topbar{flex-direction:column;align-items:flex-start;gap:15px}}
 </style>
+<link rel="stylesheet" href="/app-shell.css">
 </head>
 
 <body>
@@ -53,32 +54,32 @@ input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4p
     <a href="/quotation.html"><span>📝</span>Quotation</a>
     <a href="/delivery-order.html"><span>🚚</span>Delivery Order</a>
     <a href="/sales-invoice.html"><span>🧾</span>Sales Invoice</a>
-    <a href="/customer-receipts.html"><span>💰</span>Customer Receipts</a>
+    <a href="/receipt-voucher.html"><span>💰</span>Customer Receipts</a>
 
     <div class="menu-title">Purchases</div>
     <a href="/purchase-invoice.html"><span>📦</span>Purchase Invoice</a>
-    <a href="/supplier-payments.html"><span>💳</span>Supplier Payments</a>
+    <a href="/payment-voucher.html"><span>💳</span>Supplier Payments</a>
 
     <div class="menu-title">Accounts</div>
-    <a href="/expenses.html"><span>💸</span>Expenses</a>
-    <a href="/bank-ledger.html"><span>🏦</span>Bank Ledger</a>
-    <a href="/petty-cash.html"><span>💵</span>Petty Cash</a>
-    <a href="/journal-entry.html"><span>📘</span>Journal Entry</a>
+    <a href="/expense-entry.html"><span>💸</span>Expenses</a>
+    <a href="/cash-bank-ledger.html"><span>🏦</span>Bank Ledger</a>
+    <a href="/cash-bank-master.html"><span>💵</span>Petty Cash</a>
+    <a href="/opening-balance.html"><span>📘</span>Journal Entry</a>
 
     <div class="menu-title">Masters</div>
-    <a href="/customers.html"><span>👥</span>Customers</a>
-    <a href="/suppliers.html"><span>🏭</span>Suppliers</a>
-    <a href="/items.html"><span>📋</span>Items / Services</a>
+    <a href="/customer-master.html"><span>👥</span>Customers</a>
+    <a href="/supplier-master.html"><span>🏭</span>Suppliers</a>
+    <a href="/item-master.html"><span>📋</span>Items / Services</a>
 
     <div class="menu-title">Reports</div>
-    <a href="/reports.html"><span>📊</span>Reports Center</a>
+    <a href="/dashboard-report.html"><span>📊</span>Reports Center</a>
     <a href="/vat-report.html"><span>🧮</span>VAT Report</a>
-    <a href="/soa.html"><span>📄</span>SOA</a>
+    <a href="/customer-ledger.html"><span>📄</span>SOA</a>
 
     <div class="menu-title">Admin</div>
     <a href="/business-profile.html" class="active"><span>🏢</span>Business Profile</a>
-    <a href="/users.html"><span>🔐</span>User Creation</a>
-    <a href="/settings.html"><span>⚙️</span>Settings</a>
+    <a href="/user-management.html"><span>🔐</span>User Creation</a>
+    <a href="/company-profile.html"><span>⚙️</span>Settings</a>
     <a href="/"><span>🚪</span>Logout</a>
   </div>
 </div>
@@ -308,5 +309,7 @@ document.getElementById("profileForm").addEventListener("submit", function(e){
 });
 </script>
 
+<script src="/permission-guard.js"></script>
+<script src="/app-shell.js"></script>
 </body>
 </html>

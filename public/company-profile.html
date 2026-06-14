@@ -30,6 +30,7 @@ textarea{min-height:90px}
 .status{font-weight:900;color:#0d6efd;margin-top:10px}
 @media(max-width:900px){.grid{grid-template-columns:1fr}}
 </style>
+<link rel="stylesheet" href="/app-shell.css">
 </head>
 
 <body>
@@ -64,6 +65,11 @@ textarea{min-height:90px}
     <option value="garage">Garage / Workshop</option>
     <option value="pump_service">Pump Service</option>
     <option value="services">Services Company</option>
+    <option value="contracting">Contracting Company</option>
+    <option value="retail">Retail Shop</option>
+    <option value="manufacturing">Manufacturing</option>
+    <option value="professional_services">Professional Services</option>
+    <option value="logistics">Logistics / Transport</option>
   </select>
 </div>
 
@@ -369,5 +375,7 @@ industryTemplate
 loadCompanyProfile();
 </script>
 
+<script src="/permission-guard.js"></script>
+<script src="/app-shell.js"></script>
 </body>
 </html>

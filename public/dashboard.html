@@ -54,9 +54,10 @@ th{background:#f8fbff;text-align:left}
 @media(max-width:1100px){.grid,.module-grid{grid-template-columns:repeat(2,1fr)}.app-header{grid-template-columns:260px 1fr 210px}}
 @media(max-width:800px){.app-header{display:none}.mobile-menu{display:flex}.layout{display:block}.sidebar{display:none;position:static;height:auto}.sidebar.show{display:block}.main{padding:18px}.grid,.module-grid{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
 </style>
+<link rel="stylesheet" href="/app-shell.css">
 </head>
 
-<body>
+<body class="post91-dashboard">
 
 <script>
 const currentUser = JSON.parse(localStorage.getItem("post91CurrentUser") || "null");
@@ -109,29 +110,21 @@ if(currentUser && currentUser.accountActive === false){
 
 <aside class="sidebar" id="sidebar">
   <div class="nav">
-    <div class="nav-title">Main</div>
+    <div class="nav-title">Workspace</div>
     <a class="active" href="/dashboard.html">Dashboard</a>
     <a href="/dashboard-report.html">Dashboard Report</a>
-    <a href="/backup-restore.html">Backup & Restore</a>
-
-    <div class="nav-title">Settings</div>
-    <a href="/financial-year.html">Financial Year</a>
 
     <div class="nav-title">Masters</div>
-    <a href="/company-profile.html">Company Profile</a>
-    <a href="/user-management.html">User Management</a>
     <a href="/customer-master.html">Customer Master</a>
     <a href="/supplier-master.html">Supplier Master</a>
     <a href="/item-master.html">Item Master</a>
     <a href="/cash-bank-master.html">Cash / Bank Master</a>
 
-    <div class="nav-title">Sales</div>
+    <div class="nav-title">Transactions</div>
     <a href="/quotation.html">Quotation</a>
     <a href="/delivery-order.html">Delivery Order</a>
     <a href="/sales-invoice.html">Sales Invoice</a>
     <a href="/receipt-voucher.html">Receipt Voucher</a>
-
-    <div class="nav-title">Purchase</div>
     <a href="/purchase-invoice.html">Purchase Invoice</a>
     <a href="/payment-voucher.html">Payment Voucher</a>
     <a href="/expense-entry.html">Expense Entry</a>
@@ -144,6 +137,13 @@ if(currentUser && currentUser.accountActive === false){
     <a href="/cash-bank-ledger.html">Cash / Bank Ledger</a>
     <a href="/profit-loss.html">Profit & Loss</a>
     <a href="/vat-report.html">VAT Report</a>
+
+    <div class="nav-title">Admin</div>
+    <a href="/financial-year.html">Financial Year</a>
+    <a href="/company-profile.html">Company Profile</a>
+    <a href="/settings.html">Settings</a>
+    <a href="/user-management.html">User Management</a>
+    <a href="/backup-restore.html">Backup & Restore</a>
   </div>
 </aside>
 
@@ -167,57 +167,62 @@ if(currentUser && currentUser.accountActive === false){
   <div class="card"><b>Total Expenses</b><span id="totalExpenses">OMR 0.000</span></div>
 </div>
 
-<div class="section">
-  <h2>Quick Actions</h2>
-  <div class="quick-row">
-    <a class="btn" href="/quotation.html">New Quotation</a>
-    <a class="btn" href="/delivery-order.html">New Delivery Order</a>
-    <a class="btn" href="/sales-invoice.html">New Sales Invoice</a>
-    <a class="btn" href="/receipt-voucher.html">New Receipt</a>
-    <a class="btn btn-light" href="/purchase-invoice.html">New Purchase</a>
-    <a class="btn btn-light" href="/payment-voucher.html">New Payment</a>
-    <a class="btn btn-light" href="/expense-entry.html">New Expense</a>
-    <a class="btn btn-light" href="/financial-year.html">Financial Year</a>
+<div class="section erp-workbench">
+  <div class="section-head">
+    <div>
+      <h2>ERP Workflow</h2>
+      <p>Start from the document flow your accounts team uses every day.</p>
+    </div>
+    <a class="btn btn-light" href="/dashboard-report.html">Open MIS Report</a>
+  </div>
+
+  <div class="workflow-grid">
+    <div class="workflow-lane">
+      <div class="lane-title">Sales Cycle</div>
+      <a class="workflow-step" href="/quotation.html"><b>01</b><span id="wfQuotation">Quotation</span><small>Prepare customer offer</small></a>
+      <a class="workflow-step" href="/delivery-order.html"><b>02</b><span id="wfDelivery">Delivery Order</span><small>Confirm delivery or service</small></a>
+      <a class="workflow-step" href="/sales-invoice.html"><b>03</b><span id="wfInvoice">Sales Invoice</span><small>Create VAT invoice</small></a>
+      <a class="workflow-step" href="/receipt-voucher.html"><b>04</b><span>Receipt Voucher</span><small>Record customer payment</small></a>
+    </div>
+
+    <div class="workflow-lane">
+      <div class="lane-title">Purchase & Expenses</div>
+      <a class="workflow-step" href="/purchase-invoice.html"><b>01</b><span>Purchase Invoice</span><small>Record supplier invoice</small></a>
+      <a class="workflow-step" href="/payment-voucher.html"><b>02</b><span>Payment Voucher</span><small>Pay suppliers and bills</small></a>
+      <a class="workflow-step" href="/expense-entry.html"><b>03</b><span>Expense Entry</span><small>Office, bank and operating costs</small></a>
+      <a class="workflow-step" href="/cash-bank-ledger.html"><b>04</b><span>Cash / Bank Ledger</span><small>Track money movement</small></a>
+    </div>
+
+    <div class="workflow-lane">
+      <div class="lane-title">Master Data</div>
+      <a class="workflow-step" href="/customer-master.html"><b>CM</b><span>Customer Master</span><small>Customers and credit details</small></a>
+      <a class="workflow-step" href="/supplier-master.html"><b>SM</b><span>Supplier Master</span><small>Supplier records</small></a>
+      <a class="workflow-step" href="/item-master.html"><b>IM</b><span id="wfItemMaster">Item Master</span><small id="wfItemDesc">Items, services and pricing</small></a>
+      <a class="workflow-step" href="/cash-bank-master.html"><b>CB</b><span>Cash / Bank Master</span><small>Bank and cash accounts</small></a>
+    </div>
   </div>
 </div>
 
 <div class="section">
-  <h2>Settings & Masters</h2>
-  <div class="module-grid">
-    <a class="module" href="/financial-year.html"><h3>Financial Year</h3><p>Create, activate and lock accounting years.</p></a>
-    <a class="module" href="/company-profile.html"><h3>Company Profile</h3><p>Company details, VAT, CR, contacts and letterhead.</p></a>
-    <a class="module" href="/user-management.html"><h3>User Management</h3><p>Create users and control module access limitations.</p></a>
-    <a class="module" href="/customer-master.html"><h3>Customer Master</h3><p>Create, edit and manage customer records.</p></a>
-    <a class="module" href="/supplier-master.html"><h3>Supplier Master</h3><p>Create, edit and manage supplier records.</p></a>
-    <a class="module" href="/item-master.html"><h3>Item Master</h3><p>Items, products, brands, categories and pricing.</p></a>
-    <a class="module" href="/cash-bank-master.html"><h3>Cash / Bank Master</h3><p>Manage bank and cash accounts.</p></a>
+  <div class="section-head">
+    <div>
+      <h2>Control Center</h2>
+      <p>Configuration, access control, ledgers and statutory reports.</p>
+    </div>
   </div>
-</div>
-
-<div class="section">
-  <h2>Sales & Purchase</h2>
-  <div class="module-grid">
-    <a class="module" href="/quotation.html"><h3>Quotation</h3><p>Create and print customer quotations.</p></a>
-    <a class="module" href="/delivery-order.html"><h3>Delivery Order</h3><p>Manual or quotation-based delivery order.</p></a>
-    <a class="module" href="/sales-invoice.html"><h3>Sales Invoice</h3><p>Manual or D/O-based invoice with VAT.</p></a>
-    <a class="module" href="/purchase-invoice.html"><h3>Purchase Invoice</h3><p>Supplier purchase and stock inward entry.</p></a>
-    <a class="module" href="/receipt-voucher.html"><h3>Receipt Voucher</h3><p>Customer receipt against one or multiple invoices.</p></a>
-    <a class="module" href="/payment-voucher.html"><h3>Payment Voucher</h3><p>Supplier payment against one or multiple purchases.</p></a>
-    <a class="module" href="/expense-entry.html"><h3>Expense Entry</h3><p>Office, bank, fuel, rent and other expenses.</p></a>
-  </div>
-</div>
-
-<div class="section">
-  <h2>Reports</h2>
-  <div class="module-grid">
-    <a class="module" href="/dashboard-report.html"><h3>Dashboard Report</h3><p>Overall MIS summary and outstanding reports.</p></a>
-    <a class="module" href="/customer-ledger.html"><h3>Customer Ledger</h3><p>Sales, receipts and receivable balance.</p></a>
-    <a class="module" href="/supplier-ledger.html"><h3>Supplier Ledger</h3><p>Purchases, payments and payable balance.</p></a>
-    <a class="module" href="/stock-ledger.html"><h3>Stock Ledger</h3><p>Purchase inward, sales outward and stock balance.</p></a>
-    <a class="module" href="/cash-bank-ledger.html"><h3>Cash / Bank Ledger</h3><p>Money in, money out and account-wise balance.</p></a>
-    <a class="module" href="/profit-loss.html"><h3>Profit & Loss</h3><p>Revenue, purchase cost, expenses and net result.</p></a>
-    <a class="module" href="/vat-report.html"><h3>VAT Report</h3><p>Output VAT, input VAT and net VAT payable.</p></a>
-    <a class="module" href="/backup-restore.html"><h3>Backup & Restore</h3><p>Export, import and cloud backup options.</p></a>
+  <div class="module-grid erp-module-grid">
+    <a class="module" href="/financial-year.html"><h3>Financial Year</h3><p>Activate and manage accounting years.</p></a>
+    <a class="module" href="/company-profile.html"><h3>Company Profile</h3><p>Business details, VAT, CR and letterhead.</p></a>
+    <a class="module" href="/settings.html"><h3>Settings</h3><p>Document numbering, VAT defaults and preferences.</p></a>
+    <a class="module" href="/user-management.html"><h3>User Management</h3><p>Users, roles and module access.</p></a>
+    <a class="module" href="/dashboard-report.html"><h3>MIS Dashboard</h3><p>Sales, collections, payables and overview.</p></a>
+    <a class="module" href="/sales-report.html"><h3>Sales Report</h3><p>Invoice and revenue analysis.</p></a>
+    <a class="module" href="/customer-ledger.html"><h3>Customer Ledger</h3><p>Receivables and customer statement.</p></a>
+    <a class="module" href="/supplier-ledger.html"><h3>Supplier Ledger</h3><p>Payables and supplier statement.</p></a>
+    <a class="module" href="/stock-ledger.html"><h3>Stock Ledger</h3><p>Stock movement where applicable.</p></a>
+    <a class="module" href="/profit-loss.html"><h3>Profit & Loss</h3><p>Revenue, cost, expenses and result.</p></a>
+    <a class="module" href="/vat-report.html"><h3>VAT Report</h3><p>Output VAT, input VAT and payable VAT.</p></a>
+    <a class="module" href="/backup-restore.html"><h3>Backup & Restore</h3><p>Export, import and restore business data.</p></a>
   </div>
 </div>
 
@@ -356,6 +361,19 @@ const dashboardHeading = document.querySelector(".topbar h1");
 if(dashboardHeading){
   dashboardHeading.textContent = template.dashboardTitle || "Dashboard";
 }
+
+const labelMap = {
+  wfQuotation: template.quotationTitle || "Quotation",
+  wfDelivery: template.deliveryTitle || "Delivery Order",
+  wfInvoice: template.invoiceTitle || "Sales Invoice",
+  wfItemMaster: (template.itemName || "Item / Service") + " Master",
+  wfItemDesc: (template.itemName || "Items and services") + " setup, pricing and categories"
+};
+
+Object.keys(labelMap).forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) el.textContent = labelMap[id];
+});
 }
 function logout(){
   localStorage.removeItem("post91CurrentUser");

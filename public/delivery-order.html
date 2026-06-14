@@ -16,6 +16,7 @@ body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#06
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .full{grid-column:1/-1}
+.hidden{display:none!important}
 label{display:block;font-weight:800;margin-bottom:6px}
 input,select,textarea{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
 textarea{min-height:75px}
@@ -387,14 +388,15 @@ th{background:#f8fbff}
   }
 }
 </style>
+<link rel="stylesheet" href="/app-shell.css">
 </head>
 
 <body>
 
 <div class="header">
   <div>
-    <h1>Delivery Order</h1>
-    <p>Manual or quotation-based delivery order with full pump/workshop technical details.</p>
+    <h1 id="pageTitle">Delivery Order</h1>
+    <p id="pageSubtitle">Manual or quotation-based delivery order.</p>
   </div>
   <a class="back" href="/dashboard.html">Back</a>
 </div>
@@ -406,7 +408,7 @@ th{background:#f8fbff}
 <form id="docForm" onsubmit="saveDoc(event)">
 
 <div class="card editor">
-  <h2>Delivery Order Source</h2>
+  <h2 id="documentSourceTitle">Delivery Order Source</h2>
 
   <div class="grid">
     <div>
@@ -515,7 +517,7 @@ th{background:#f8fbff}
         </select>
       </div>
 
-      <div>
+      <div class="hidden">
         <label>VAT %</label>
         <input type="number" id="vatPercent" value="5" oninput="calc()">
       </div>
@@ -674,7 +676,7 @@ th{background:#f8fbff}
 </form>
 
 <div class="card">
-  <h2 class="screen-title">Delivery Order Output</h2>
+  <h2 class="screen-title" id="documentOutputTitle">Delivery Order Output</h2>
 
   <div class="paper">
 
@@ -794,7 +796,7 @@ Powered by <b>Post91 Accounts</b> | Simple Accounting for Smart Businesses | acc
 </div>
 
 <div class="card saved">
-  <h2>Saved Delivery Orders</h2>
+  <h2 id="savedDocumentsTitle">Saved Delivery Orders</h2>
   <input id="savedSearch" placeholder="Search saved delivery orders..." oninput="loadSaved()">
   <br><br>
 
@@ -885,48 +887,76 @@ let CLOUD_TYPES = [];
 let CLOUD_QUOTATIONS = [];
 let COMPANY_PROFILE = {};
 
-let CURRENT_TEMPLATE_KEY = "pump_service";
+let CURRENT_TEMPLATE_KEY = "general";
 let CURRENT_TEMPLATE = null;
 
 function loadCurrentTemplate(){
   CURRENT_TEMPLATE_KEY =
     COMPANY_PROFILE.industryTemplate ||
     COMPANY_PROFILE.businessType ||
-    "pump_service";
+    "general";
 
   CURRENT_TEMPLATE =
     typeof getIndustryTemplate === "function"
       ? getIndustryTemplate(CURRENT_TEMPLATE_KEY)
       : null;
 
+  CURRENT_TEMPLATE_KEY = CURRENT_TEMPLATE?.key || CURRENT_TEMPLATE_KEY || "general";
+
   applyDeliveryTemplate();
 }
 
 function applyDeliveryTemplate(){
-  const isPump = CURRENT_TEMPLATE_KEY === "pump_service";
+  const isTechnical = CURRENT_TEMPLATE?.showTechnicalDetails === true;
 
   const technicalSection = document.getElementById("technicalDetailsSection");
   const printBox = document.getElementById("printTechnicalBox");
   const title = document.getElementById("technicalDetailsTitle");
 
   if(technicalSection){
-    technicalSection.style.display = isPump ? "block" : "none";
+    technicalSection.style.display = isTechnical ? "block" : "none";
   }
 
   if(printBox){
-    printBox.style.display = isPump ? "grid" : "none";
+    printBox.style.display = isTechnical ? "grid" : "none";
   }
 
   if(title){
-    title.textContent = isPump
-      ? "Pump / Vehicle / Technical Details"
-      : "Additional Details";
+    title.textContent = CURRENT_TEMPLATE?.technicalTitle || "Additional Details";
   }
+
+  const documentTitle = CURRENT_TEMPLATE?.deliveryTitle || "Delivery Order";
+
+  if(window.pageTitle) pageTitle.textContent = documentTitle;
+  if(window.pageSubtitle){
+    pageSubtitle.textContent = "Manual or source-based " + documentTitle.toLowerCase() + ".";
+  }
+  if(window.documentSourceTitle) documentSourceTitle.textContent = documentTitle + " Source";
+  if(window.documentOutputTitle) documentOutputTitle.textContent = documentTitle + " Output";
+  if(window.savedDocumentsTitle) savedDocumentsTitle.textContent = "Saved " + documentTitle + "s";
 }
 
 function today(){return new Date().toISOString().split("T")[0]}
 function mv(n){return Number(n||0).toFixed(3)}
 function mt(n){return "OMR "+mv(n)}
+
+function defaultVatPercent(){
+  try{
+    const settings = JSON.parse(localStorage.getItem("post91Settings") || "{}");
+    return Number(settings.vatPercentage || 5);
+  }catch(e){
+    return 5;
+  }
+}
+
+function defaultSalesVatType(){
+  try{
+    const settings = JSON.parse(localStorage.getItem("post91Settings") || "{}");
+    return settings.defaultSalesVatType || "VAT Exclusive";
+  }catch(e){
+    return "VAT Exclusive";
+  }
+}
 
 function nm(c){return c.customerName||c.name||""}
 function addr(c){return c.address||c.customerAddress||""}
@@ -1160,8 +1190,8 @@ function loadSource(){
   workOrderNo.value=q.workOrderNo||"";
   serialNo.value=q.serialNo||"";
 
-  vatType.value=q.vatType||"VAT Exclusive";
-  vatPercent.value=q.vatPercent||5;
+  vatType.value=q.vatType||defaultSalesVatType();
+  vatPercent.value=q.vatPercent||defaultVatPercent();
   discount.value=q.discountAmount||"0.000";
 
   itemsBody.innerHTML="";
@@ -1635,8 +1665,8 @@ document.querySelectorAll("#serviceFeesBody tr")
   doNo:doNo.value,
   doDate:doDate.value,
   sourceType:sourceType.value,
-  industryTemplate: CURRENT_TEMPLATE_KEY || "pump_service",
-  industryTemplateName: CURRENT_TEMPLATE?.name || "Pump Service",
+  industryTemplate: CURRENT_TEMPLATE_KEY || "general",
+  industryTemplateName: CURRENT_TEMPLATE?.name || "General Business",
     customerName:customerName.value,
     customerAddress:customerAddress.value,
     attention:attention.value,
@@ -1738,8 +1768,8 @@ function editDoc(i){
   workOrderRef.value=d.workOrderRef||"";
   docStatus.value=d.docStatus||"Draft";
   printMode.value=d.printMode||"Without Price";
-  vatType.value=d.vatType||"VAT Exclusive";
-  vatPercent.value=d.vatPercent||5;
+  vatType.value=d.vatType||defaultSalesVatType();
+  vatPercent.value=d.vatPercent||defaultVatPercent();
   discount.value=d.discountAmount||"0.000";
 
   pumpType.value=d.pumpType||"";
@@ -1822,8 +1852,8 @@ function loadConvertedQuotation(){
   workOrderNo.value = q.workOrderNo || "";
   serialNo.value = q.serialNo || "";
 
-  vatType.value = q.vatType || "VAT Exclusive";
-  vatPercent.value = q.vatPercent || 5;
+  vatType.value = q.vatType || defaultSalesVatType();
+  vatPercent.value = q.vatPercent || defaultVatPercent();
   discount.value = q.discountAmount || "0.000";
 
   itemsBody.innerHTML = "";
@@ -1853,8 +1883,8 @@ addServiceFee({
   doDate.value=today();
   sourceType.value="Manual Delivery Order";
   printMode.value="Without Price";
-  vatType.value="VAT Exclusive";
-  vatPercent.value=5;
+  vatType.value=defaultSalesVatType();
+  vatPercent.value=defaultVatPercent();
   discount.value="0.000";
   docStatus.value="Draft";
   terms.value="Received the above listed materials/services in good condition.";
@@ -1884,5 +1914,7 @@ document.addEventListener("click",e=>{
 
 initCloudData();
 </script>
+<script src="/permission-guard.js"></script>
+<script src="/app-shell.js"></script>
 </body>
 </html>

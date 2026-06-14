@@ -16,6 +16,7 @@ body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#06
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .full{grid-column:1/-1}
+.hidden{display:none!important}
 label{display:block;font-weight:800;margin-bottom:6px}
 input,select,textarea{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
 textarea{min-height:75px}
@@ -134,20 +135,21 @@ th{background:#f8fbff}
   .print-items th,.print-items td{display:table-cell!important}
 }
 </style>
+<link rel="stylesheet" href="/app-shell.css">
 </head>
 
 <body>
 
 <div class="header">
   <div>
-    <h1>Quotation</h1>
-    <p>Quotation with customer, pump details, VAT and professional A4 print.</p>
+    <h1 id="pageTitle">Quotation</h1>
+    <p id="pageSubtitle">Quotation with customer details, VAT and professional A4 print.</p>
   </div>
   <a class="back" href="/dashboard.html">Back</a>
 </div>
 
 <div class="note">
-  This quotation format includes the same technical/pump section as D/O and Sales Invoice.
+  This quotation format adapts to the selected company business type.
 </div>
 
 <form id="docForm" onsubmit="saveDoc(event)">
@@ -179,7 +181,7 @@ th{background:#f8fbff}
   </div>
 
   <div class="card">
-    <h2>Quotation Details</h2>
+    <h2 id="documentDetailsTitle">Quotation Details</h2>
 
     <div class="grid">
       <div><label>Quotation No</label><input id="quotationNo"></div>
@@ -197,7 +199,7 @@ th{background:#f8fbff}
         </select>
       </div>
 
-      <div><label>VAT %</label><input type="number" id="vatPercent" value="5" oninput="calc()"></div>
+      <div class="hidden"><label>VAT %</label><input type="number" id="vatPercent" value="5" oninput="calc()"></div>
       <div><label>Less Discount</label><input type="number" step="0.001" id="discount" value="0.000" oninput="calc()"></div>
 
       <div>
@@ -297,7 +299,7 @@ th{background:#f8fbff}
 </form>
 
 <div class="card">
-  <h2 class="screen-title">Quotation Output</h2>
+  <h2 class="screen-title" id="documentOutputTitle">Quotation Output</h2>
 
   <div class="paper">
 
@@ -400,7 +402,7 @@ th{background:#f8fbff}
 </div>
 
 <div class="card saved">
-  <h2>Saved Quotations</h2>
+  <h2 id="savedDocumentsTitle">Saved Quotations</h2>
   <input id="savedSearch" placeholder="Search saved..." oninput="loadSaved()">
   <br><br>
 
@@ -491,44 +493,72 @@ let CLOUD_BRANDS = [];
 let CLOUD_TYPES = [];
 
 let COMPANY_PROFILE = {};
-let CURRENT_TEMPLATE_KEY = "pump_service";
+let CURRENT_TEMPLATE_KEY = "general";
 let CURRENT_TEMPLATE = null;
 
 function loadCurrentTemplate(){
   CURRENT_TEMPLATE_KEY =
     COMPANY_PROFILE.industryTemplate ||
     COMPANY_PROFILE.businessType ||
-    "pump_service";
+    "general";
 
   CURRENT_TEMPLATE =
     typeof getIndustryTemplate === "function"
       ? getIndustryTemplate(CURRENT_TEMPLATE_KEY)
       : null;
 
+  CURRENT_TEMPLATE_KEY = CURRENT_TEMPLATE?.key || CURRENT_TEMPLATE_KEY || "general";
+
   applyQuotationTemplate();
 }
 
 function applyQuotationTemplate(){
-  const isPump = CURRENT_TEMPLATE_KEY === "pump_service";
+  const isTechnical = CURRENT_TEMPLATE?.showTechnicalDetails === true;
 
   if(technicalDetailsSection){
-    technicalDetailsSection.style.display = isPump ? "block" : "none";
+    technicalDetailsSection.style.display = isTechnical ? "block" : "none";
   }
 
   if(printTechnicalBox){
-    printTechnicalBox.style.display = isPump ? "grid" : "none";
+    printTechnicalBox.style.display = isTechnical ? "grid" : "none";
   }
 
   if(technicalDetailsTitle){
-    technicalDetailsTitle.textContent = isPump
-      ? "Pump / Vehicle / Technical Details"
-      : "Additional Details";
+    technicalDetailsTitle.textContent = CURRENT_TEMPLATE?.technicalTitle || "Additional Details";
   }
+
+  const title = CURRENT_TEMPLATE?.quotationTitle || "Quotation";
+
+  if(window.pageTitle) pageTitle.textContent = title;
+  if(window.pageSubtitle){
+    pageSubtitle.textContent = title + " with customer details, VAT and professional A4 print.";
+  }
+  if(window.documentDetailsTitle) documentDetailsTitle.textContent = title + " Details";
+  if(window.documentOutputTitle) documentOutputTitle.textContent = title + " Output";
+  if(window.savedDocumentsTitle) savedDocumentsTitle.textContent = "Saved " + title + "s";
 }
 
 function today(){return new Date().toISOString().split("T")[0]}
 function mv(n){return Number(n||0).toFixed(3)}
 function mt(n){return "OMR "+mv(n)}
+
+function defaultVatPercent(){
+  try{
+    const settings = JSON.parse(localStorage.getItem("post91Settings") || "{}");
+    return Number(settings.vatPercentage || 5);
+  }catch(e){
+    return 5;
+  }
+}
+
+function defaultSalesVatType(){
+  try{
+    const settings = JSON.parse(localStorage.getItem("post91Settings") || "{}");
+    return settings.defaultSalesVatType || "VAT Exclusive";
+  }catch(e){
+    return "VAT Exclusive";
+  }
+}
 
 function nm(c){return c.customerName||c.name||""}
 function addr(c){return c.address||c.customerAddress||""}
@@ -1149,8 +1179,8 @@ async function saveDoc(e){
     quotationNo:quotationNo.value,
     quotationDate:quotationDate.value,
 
-industryTemplate: CURRENT_TEMPLATE_KEY || "pump_service",
-industryTemplateName: CURRENT_TEMPLATE?.name || "Pump Service",
+industryTemplate: CURRENT_TEMPLATE_KEY || "general",
+industryTemplateName: CURRENT_TEMPLATE?.name || "General Business",
 
     customerName:customerName.value,
     customerAddress:customerAddress.value,
@@ -1269,8 +1299,8 @@ function editDoc(i){
 
   reference.value=d.referenceNo||"";
 
-  vatType.value=d.vatType||"VAT Exclusive";
-  vatPercent.value=d.vatPercent||5;
+  vatType.value=d.vatType||defaultSalesVatType();
+  vatPercent.value=d.vatPercent||defaultVatPercent();
   discount.value=d.discountAmount||"0.000";
 
   docStatus.value=d.docStatus||"Draft";
@@ -1330,9 +1360,9 @@ function setDefaults(){
 
   quotationDate.value=today();
 
-  vatType.value="VAT Exclusive";
+  vatType.value=defaultSalesVatType();
 
-  vatPercent.value=5;
+  vatPercent.value=defaultVatPercent();
 
   discount.value="0.000";
 
@@ -1382,5 +1412,7 @@ document.addEventListener("click",e=>{
 initCloudData();
 
 </script>
+<script src="/permission-guard.js"></script>
+<script src="/app-shell.js"></script>
 </body>
 </html>

@@ -129,6 +129,7 @@ body{
 }
 .full{grid-column:1/-1}
 .span2{grid-column:span 2}
+.hidden{display:none!important}
 label{
   display:block;
   font-size:12px;
@@ -266,6 +267,7 @@ tbody tr:hover{background:#f8fafc}
   .topbar{height:auto;padding:10px;align-items:flex-start}
 }
 </style>
+<link rel="stylesheet" href="/app-shell.css">
 </head>
 
 <body>
@@ -274,12 +276,12 @@ tbody tr:hover{background:#f8fafc}
     <div class="logo">Post<span>91</span><br><small style="font-size:11px;letter-spacing:3px;color:#bfdbfe;">ACCOUNTS</small></div>
     <nav class="nav">
       <a href="/dashboard.html">Dashboard</a>
-      <a href="/customers.html">Customers</a>
+      <a href="/customer-master.html">Customers</a>
       <a href="/sales-invoice.html">Sales</a>
-      <a href="/purchase-entry.html">Purchases</a>
+      <a href="/purchase-invoice.html">Purchases</a>
       <a class="active" href="/expense-entry.html">Expense Entry</a>
       <a href="/cash-bank-master.html">Cash / Bank</a>
-      <a href="/reports.html">Reports</a>
+      <a href="/dashboard-report.html">Reports</a>
       <a href="/settings.html">Settings</a>
     </nav>
   </aside>
@@ -360,7 +362,7 @@ tbody tr:hover{background:#f8fafc}
       <input id="paidTo" list="supplierList" placeholder="Supplier or person name">
     </div>
 
-    <div>
+    <div class="hidden">
       <label>Payment Mode</label>
       <select id="paymentMode">
         <option>Cash</option>
@@ -374,7 +376,7 @@ tbody tr:hover{background:#f8fafc}
 
     <div>
       <label>Cash / Bank Account</label>
-      <select id="cashBankAccount"></select>
+      <select id="cashBankAccount" onchange="syncPaymentModeFromAccount()"></select>
     </div>
 
     <div>
@@ -398,7 +400,7 @@ tbody tr:hover{background:#f8fafc}
       <input type="number" step=".001" id="amount" value="0.000" oninput="calcExpense()">
     </div>
 
-    <div>
+    <div class="hidden">
       <label>VAT %</label>
       <input type="number" id="vatPercent" value="5" oninput="calcExpense()">
     </div>
@@ -450,6 +452,7 @@ tbody tr:hover{background:#f8fafc}
         <th>Date</th>
         <th>Category</th>
         <th>Paid To</th>
+        <th>Reference / Bill No</th>
         <th>Payment</th>
         <th>Base</th>
         <th>VAT</th>
@@ -484,6 +487,76 @@ let CLOUD_ACCOUNTS=[];
 function today(){return new Date().toISOString().split("T")[0]}
 function mv(n){return Number(n||0).toFixed(3)}
 function mt(n){return "OMR "+mv(n)}
+
+function defaultVatPercent(){
+  try{
+    const settings = JSON.parse(localStorage.getItem("post91Settings") || "{}");
+    return Number(settings.vatPercentage || 5);
+  }catch(e){
+    return 5;
+  }
+}
+
+function defaultExpenseVatType(){
+  try{
+    const settings = JSON.parse(localStorage.getItem("post91Settings") || "{}");
+    return settings.defaultExpenseVatType || "Non-VAT";
+  }catch(e){
+    return "Non-VAT";
+  }
+}
+
+function getExpenseNumberSetting(){
+  try{
+    const settings = JSON.parse(localStorage.getItem("post91Settings") || "{}");
+    return settings.documentNumbering?.expenseEntry || {
+      mode: "Automatic",
+      prefix: "EXP",
+      nextNo: "1001"
+    };
+  }catch(e){
+    return {
+      mode: "Automatic",
+      prefix: "EXP",
+      nextNo: "1001"
+    };
+  }
+}
+
+function setExpenseNextNo(nextNo){
+  try{
+    const settings = JSON.parse(localStorage.getItem("post91Settings") || "{}");
+    settings.documentNumbering = settings.documentNumbering || {};
+    settings.documentNumbering.expenseEntry = {
+      ...getExpenseNumberSetting(),
+      nextNo:String(nextNo)
+    };
+    localStorage.setItem("post91Settings", JSON.stringify(settings));
+  }catch(e){
+    console.error("Unable to update expense number setting:", e);
+  }
+}
+
+function nextExpenseNo(){
+  const setting = getExpenseNumberSetting();
+  const prefix = (setting.prefix || "EXP").trim() || "EXP";
+  const nextNo = Number(setting.nextNo || 1001);
+  return `${prefix}-${nextNo}`;
+}
+
+function applyExpenseNumberMode(){
+  const setting = getExpenseNumberSetting();
+  const isManual = setting.mode === "Manual";
+  const wrap = expenseNo.closest(".grid > div");
+
+  if(wrap){
+    wrap.style.display = isManual ? "block" : "";
+  }
+
+  if(!isManual && !EDIT_ID){
+    expenseNo.value = nextExpenseNo();
+  }
+}
 
 async function smartLoad(collection){
   try{
@@ -577,6 +650,24 @@ function selectedCashBank(){
   return CLOUD_ACCOUNTS[idx]||{};
 }
 
+function paymentModeFromAccount(account){
+  const type = String(account.accountType || account.type || account.ledgerType || account.accountName || account.name || "")
+    .toLowerCase();
+
+  if(type.includes("cash") || type.includes("petty")) return "Cash";
+  if(type.includes("card")) return "Card";
+  if(type.includes("cheque") || type.includes("check")) return "Cheque";
+  if(type.includes("online")) return "Online Payment";
+  if(type.includes("bank")) return "Bank Transfer";
+
+  return "Bank Transfer";
+}
+
+function syncPaymentModeFromAccount(){
+  const acc = selectedCashBank();
+  paymentMode.value = cashBankAccount.value === "" ? "Cash" : paymentModeFromAccount(acc);
+}
+
 async function saveExpense(e){
   e.preventDefault();
 
@@ -587,6 +678,7 @@ async function saveExpense(e){
 
   let totals=calcExpense();
   let acc=selectedCashBank();
+  syncPaymentModeFromAccount();
 
   let rec={
     expenseNo:expenseNo.value,
@@ -626,6 +718,12 @@ async function saveExpense(e){
   let id = await saveToCloud(COLLECTIONS.EXPENSES, rec, EDIT_ID || null);
 
   if(id){
+    const setting = getExpenseNumberSetting();
+
+    if(!EDIT_ID && setting.mode !== "Manual"){
+      setExpenseNextNo(Number(setting.nextNo || 1001) + 1);
+    }
+
     alert(EDIT_ID ? "Expense updated successfully." : "Expense saved successfully.");
     clearForm();
     await loadExpenses();
@@ -649,11 +747,14 @@ async function editExpense(id){
   status.value=e.status||"Posted";
   expenseCategory.value=e.expenseCategory||"Office Expense";
   paidTo.value=e.paidTo||"";
-  paymentMode.value=e.paymentMode||"Cash";
   cashBankAccount.value=e.cashBankAccountIndex||"";
+  paymentMode.value=e.paymentMode||"Cash";
+  if(cashBankAccount.value !== ""){
+    syncPaymentModeFromAccount();
+  }
   referenceNo.value=e.referenceNo||"";
-  vatType.value=e.vatType||"VAT Exclusive";
-  vatPercent.value=e.vatPercent||5;
+  vatType.value=e.vatType||defaultExpenseVatType();
+  vatPercent.value=e.vatPercent||defaultVatPercent();
   amount.value=e.amount||"0.000";
   description.value=e.description||"";
 
@@ -674,13 +775,17 @@ function clearForm(){
 
   expenseForm.reset();
 
-  expenseNo.value="EXP-"+Date.now().toString().slice(-6);
+  applyExpenseNumberMode();
+  if(getExpenseNumberSetting().mode === "Manual"){
+    expenseNo.value="";
+  }
   expenseDate.value=today();
   if(document.getElementById("docExpenseNo")) docExpenseNo.textContent=expenseNo.value;
   if(document.getElementById("docExpenseDate")) docExpenseDate.textContent=expenseDate.value;
   status.value="Posted";
-  vatType.value="VAT Exclusive";
-  vatPercent.value=5;
+  paymentMode.value="Cash";
+  vatType.value=defaultExpenseVatType();
+  vatPercent.value=defaultVatPercent();
   amount.value="0.000";
   vatAmount.value="0.000";
   totalAmount.value="0.000";
@@ -713,6 +818,7 @@ async function loadExpenses(){
         <td>${e.expenseDate||"-"}</td>
         <td>${e.expenseCategory||"-"}</td>
         <td>${e.paidTo||"-"}</td>
+        <td>${e.referenceNo||"-"}</td>
         <td>${e.paymentMode||"-"}<br><small>${e.cashBankAccountName||""}</small></td>
         <td>${mt(e.baseAmount)}</td>
         <td>${mt(e.vatAmount)}</td>
@@ -728,7 +834,7 @@ async function loadExpenses(){
     });
 
   if(expenseBody.innerHTML.trim()===""){
-    expenseBody.innerHTML=`<tr><td colspan="10">No expenses found.</td></tr>`;
+    expenseBody.innerHTML=`<tr><td colspan="11">No expenses found.</td></tr>`;
   }
 }
 
@@ -742,5 +848,7 @@ async function initPage(){
 initPage();
 </script>
 
+<script src="/permission-guard.js"></script>
+<script src="/app-shell.js"></script>
 </body>
 </html>

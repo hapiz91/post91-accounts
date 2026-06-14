@@ -45,6 +45,7 @@ td{padding:12px;border-bottom:1px solid #eef2f7;font-weight:700;vertical-align:t
 @media(max-width:1000px){.grid,.summary-grid,.search-row{grid-template-columns:1fr 1fr;}table{display:block;overflow-x:auto;white-space:nowrap;}}
 @media(max-width:650px){.grid,.summary-grid,.search-row{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}}
 </style>
+<link rel="stylesheet" href="/app-shell.css">
 </head>
 
 <body>
@@ -573,5 +574,7 @@ resetForm();
 loadExpenses();
 </script>
 
+<script src="/permission-guard.js"></script>
+<script src="/app-shell.js"></script>
 </body>
 </html>

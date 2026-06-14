@@ -30,6 +30,7 @@ th{background:#f8fbff;text-align:left}
 .note{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:15px;padding:14px;margin-bottom:18px;font-weight:700}
 @media(max-width:900px){.grid,.permissions{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
 </style>
+<link rel="stylesheet" href="/app-shell.css">
 </head>
 
 <body>
@@ -129,7 +130,9 @@ let CURRENT_USERS=[];
 
 const MODULES=[
   "dashboard",
+  "financialYear",
   "companyProfile",
+  "settings",
   "userManagement",
   "customerMaster",
   "supplierMaster",
@@ -142,6 +145,7 @@ const MODULES=[
   "purchaseInvoice",
   "paymentVoucher",
   "expenseEntry",
+  "salesReport",
   "customerLedger",
   "supplierLedger",
   "stockLedger",
@@ -153,7 +157,9 @@ const MODULES=[
 
 const MODULE_LABELS={
   dashboard:"Dashboard",
+  financialYear:"Financial Year",
   companyProfile:"Company Profile",
+  settings:"Settings",
   userManagement:"User Management",
   customerMaster:"Customer Master",
   supplierMaster:"Supplier Master",
@@ -166,6 +172,7 @@ const MODULE_LABELS={
   purchaseInvoice:"Purchase Invoice",
   paymentVoucher:"Payment Voucher",
   expenseEntry:"Expense Entry",
+  salesReport:"Sales Report",
   customerLedger:"Customer Ledger",
   supplierLedger:"Supplier Ledger",
   stockLedger:"Stock Ledger",
@@ -309,5 +316,7 @@ renderPermissions([]);
 loadUsers();
 </script>
 
+<script src="/permission-guard.js"></script>
+<script src="/app-shell.js"></script>
 </body>
 </html>

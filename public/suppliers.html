@@ -36,6 +36,7 @@ td{padding:14px 0;border-top:1px solid #eef2f7;font-weight:700;vertical-align:to
 .delete{background:#fee2e2;color:#991b1b;}
 @media(max-width:850px){.grid{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}table{font-size:13px;display:block;overflow-x:auto;white-space:nowrap}}
 </style>
+<link rel="stylesheet" href="/app-shell.css">
 </head>
 
 <body>
@@ -324,5 +325,7 @@ function resetForm(){
 loadSuppliers();
 </script>
 
+<script src="/permission-guard.js"></script>
+<script src="/app-shell.js"></script>
 </body>
 </html>

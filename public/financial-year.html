@@ -32,6 +32,7 @@ th{background:#f8fbff}
 .open{background:#e0f2fe;color:#075985}
 @media(max-width:900px){.grid{grid-template-columns:1fr}.header{align-items:flex-start;gap:10px;flex-direction:column}table{display:block;overflow-x:auto;white-space:nowrap}}
 </style>
+<link rel="stylesheet" href="/app-shell.css">
 </head>
 
 <body>
@@ -301,5 +302,7 @@ async function deleteYear(id){
 loadYears();
 </script>
 
+<script src="/permission-guard.js"></script>
+<script src="/app-shell.js"></script>
 </body>
 </html>

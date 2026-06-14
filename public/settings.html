@@ -15,6 +15,11 @@ body{background:#f4f8fc;color:#061833;padding:32px;}
 .card{background:white;border-radius:28px;padding:30px;box-shadow:0 16px 38px rgba(15,23,42,.08);border:1px solid #e5edf7;margin-bottom:25px;}
 .section-title{font-size:22px;margin:28px 0 18px;color:#0d6efd;}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+.numbering-table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid #d8dee8;border-radius:8px;overflow:hidden;margin-bottom:18px}
+.numbering-table th,.numbering-table td{border-bottom:1px solid #edf0f5;padding:9px 10px;text-align:left;vertical-align:middle}
+.numbering-table th{background:#eef2f6;color:#344054;font-size:12px;text-transform:uppercase}
+.numbering-table tr:last-child td{border-bottom:0}
+.numbering-table input,.numbering-table select{padding:8px 10px;border-radius:6px;font-size:13px}
 .form-group{margin-bottom:18px;}
 label{display:block;margin-bottom:8px;font-weight:800;}
 input,select,textarea{width:100%;padding:15px 16px;border-radius:14px;border:1px solid #dbe4f0;font-size:15px;outline:none;background:white;}
@@ -25,6 +30,7 @@ input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4p
 .btn{border:none;background:#0d6efd;color:white;padding:15px 24px;border-radius:14px;font-weight:900;cursor:pointer;font-size:15px;box-shadow:0 14px 30px rgba(13,110,253,.22);}
 @media(max-width:850px){.grid{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start;gap:15px}}
 </style>
+<link rel="stylesheet" href="/app-shell.css">
 </head>
 
 <body>
@@ -47,37 +53,22 @@ input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4p
 
     <div class="section-title">Document Numbering</div>
 
-    <div class="grid">
-      <div class="form-group">
-        <label>Sales Invoice Prefix</label>
-        <input type="text" id="invoicePrefix" value="INV">
-      </div>
-
-      <div class="form-group">
-        <label>Next Sales Invoice Number</label>
-        <input type="number" id="nextInvoiceNo" value="1001">
-      </div>
-
-      <div class="form-group">
-        <label>Quotation Prefix</label>
-        <input type="text" id="quotationPrefix" value="QT">
-      </div>
-
-      <div class="form-group">
-        <label>Next Quotation Number</label>
-        <input type="number" id="nextQuotationNo" value="1001">
-      </div>
-
-      <div class="form-group">
-        <label>Delivery Order Prefix</label>
-        <input type="text" id="doPrefix" value="DO">
-      </div>
-
-      <div class="form-group">
-        <label>Next Delivery Order Number</label>
-        <input type="number" id="nextDoNo" value="1001">
-      </div>
+    <div class="note">
+      Choose <b>Automatic</b> when Post91 should create the number. Choose <b>Manual</b> when users should enter the document number on the entry page.
     </div>
+
+    <table class="numbering-table">
+      <thead>
+        <tr>
+          <th>Document</th>
+          <th>Mode</th>
+          <th>Prefix</th>
+          <th>Next No</th>
+          <th>Preview</th>
+        </tr>
+      </thead>
+      <tbody id="numberingBody"></tbody>
+    </table>
 
     <div class="section-title">VAT Settings</div>
 
@@ -96,13 +87,35 @@ input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4p
       </div>
 
       <div class="form-group">
-        <label>Default Invoice VAT Type</label>
-        <select id="defaultVatType">
-          <option>Non-VAT Invoice</option>
+        <label>Default Sales Invoice VAT Type</label>
+        <select id="defaultSalesVatType">
+          <option>VAT Exclusive</option>
+          <option>VAT Inclusive</option>
+          <option>Non-VAT</option>
+          <option>Zero Rated</option>
+          <option>Exempt</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Default Purchase VAT Type</label>
+        <select id="defaultPurchaseVatType">
+          <option>VAT Exclusive</option>
+          <option>VAT Inclusive</option>
+          <option>Non-VAT</option>
+          <option>Zero Rated</option>
+          <option>Exempt</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Default Expense VAT Type</label>
+        <select id="defaultExpenseVatType">
+          <option>Non-VAT</option>
           <option>VAT Exclusive</option>
           <option>VAT Inclusive</option>
           <option>Zero Rated</option>
-          <option>Exempt Supply</option>
+          <option>Exempt</option>
         </select>
       </div>
 
@@ -208,8 +221,106 @@ input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4p
 </div>
 
 <script>
+const NUMBERING_DOCS = [
+  { key:"quotation", label:"Quotation", prefix:"QT", next:"1001" },
+  { key:"deliveryOrder", label:"Delivery Order", prefix:"DO", next:"1001" },
+  { key:"salesInvoice", label:"Sales Invoice", prefix:"SI", next:"1001" },
+  { key:"purchaseInvoice", label:"Purchase Invoice", prefix:"PINV", next:"1001" },
+  { key:"receiptVoucher", label:"Receipt Voucher", prefix:"RV", next:"1001" },
+  { key:"paymentVoucher", label:"Payment Voucher", prefix:"PV", next:"1001" },
+  { key:"expenseEntry", label:"Expense Entry", prefix:"EXP", next:"1001" }
+];
+
+function defaultNumbering(){
+  const out = {};
+  NUMBERING_DOCS.forEach(doc=>{
+    out[doc.key] = {
+      mode: "Automatic",
+      prefix: doc.prefix,
+      nextNo: doc.next
+    };
+  });
+  return out;
+}
+
+function renderNumbering(settings={}){
+  const numbering = settings.documentNumbering || defaultNumbering();
+
+  numberingBody.innerHTML = NUMBERING_DOCS.map(doc=>{
+    const row = numbering[doc.key] || {};
+    const mode = row.mode || "Automatic";
+    const prefix = row.prefix || doc.prefix;
+    const nextNo = row.nextNo || doc.next;
+    const preview = mode === "Manual" ? "Manual entry" : `${prefix}-${nextNo}`;
+
+    return `
+      <tr data-doc="${doc.key}">
+        <td><b>${doc.label}</b></td>
+        <td>
+          <select data-field="mode" onchange="updateNumberingPreview('${doc.key}')">
+            <option ${mode==="Automatic" ? "selected" : ""}>Automatic</option>
+            <option ${mode==="Manual" ? "selected" : ""}>Manual</option>
+          </select>
+        </td>
+        <td><input data-field="prefix" value="${prefix}" oninput="updateNumberingPreview('${doc.key}')"></td>
+        <td><input data-field="nextNo" type="number" value="${nextNo}" oninput="updateNumberingPreview('${doc.key}')"></td>
+        <td><b data-preview>${preview}</b></td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function updateNumberingPreview(docKey){
+  const row = document.querySelector(`[data-doc="${docKey}"]`);
+  if(!row)return;
+
+  const mode = row.querySelector('[data-field="mode"]').value;
+  const prefix = row.querySelector('[data-field="prefix"]').value || "";
+  const nextNo = row.querySelector('[data-field="nextNo"]').value || "";
+  const preview = row.querySelector("[data-preview]");
+
+  preview.textContent = mode === "Manual" ? "Manual entry" : `${prefix}-${nextNo}`;
+}
+
+function collectNumbering(){
+  const out = {};
+
+  NUMBERING_DOCS.forEach(doc=>{
+    const row = document.querySelector(`[data-doc="${doc.key}"]`);
+    out[doc.key] = {
+      mode: row.querySelector('[data-field="mode"]').value,
+      prefix: row.querySelector('[data-field="prefix"]').value.trim(),
+      nextNo: row.querySelector('[data-field="nextNo"]').value
+    };
+  });
+
+  return out;
+}
+
+function normalizeVatType(value, fallback){
+  if(value === "Non-VAT Invoice") return "Non-VAT";
+  if(value === "Exempt Supply") return "Exempt";
+  return value || fallback;
+}
+
 function loadSettings(){
   const settings = JSON.parse(localStorage.getItem("post91Settings") || "{}");
+  const oldVatType = normalizeVatType(settings.defaultVatType, "");
+
+  settings.defaultSalesVatType = normalizeVatType(
+    settings.defaultSalesVatType,
+    oldVatType || "VAT Exclusive"
+  );
+  settings.defaultPurchaseVatType = normalizeVatType(
+    settings.defaultPurchaseVatType,
+    "VAT Exclusive"
+  );
+  settings.defaultExpenseVatType = normalizeVatType(
+    settings.defaultExpenseVatType,
+    "Non-VAT"
+  );
+
+  renderNumbering(settings);
 
   Object.keys(settings).forEach(key => {
     const field = document.getElementById(key);
@@ -223,15 +334,12 @@ document.getElementById("settingsForm").addEventListener("submit", function(e){
   e.preventDefault();
 
   const settings = {
-    invoicePrefix: document.getElementById("invoicePrefix").value,
-    nextInvoiceNo: document.getElementById("nextInvoiceNo").value,
-    quotationPrefix: document.getElementById("quotationPrefix").value,
-    nextQuotationNo: document.getElementById("nextQuotationNo").value,
-    doPrefix: document.getElementById("doPrefix").value,
-    nextDoNo: document.getElementById("nextDoNo").value,
+    documentNumbering: collectNumbering(),
     companyVatRegistered: document.getElementById("companyVatRegistered").value,
     vatPercentage: document.getElementById("vatPercentage").value,
-    defaultVatType: document.getElementById("defaultVatType").value,
+    defaultSalesVatType: document.getElementById("defaultSalesVatType").value,
+    defaultPurchaseVatType: document.getElementById("defaultPurchaseVatType").value,
+    defaultExpenseVatType: document.getElementById("defaultExpenseVatType").value,
     showVatSummary: document.getElementById("showVatSummary").value,
     currency: document.getElementById("currency").value,
     decimalPlaces: document.getElementById("decimalPlaces").value,
@@ -253,5 +361,7 @@ document.getElementById("settingsForm").addEventListener("submit", function(e){
 loadSettings();
 </script>
 
+<script src="/permission-guard.js"></script>
+<script src="/app-shell.js"></script>
 </body>
 </html>
