@@ -238,6 +238,54 @@
     });
   }
 
+  function pageType(){
+    const path = currentPath();
+    if(path.includes("master") || path.includes("settings") || path.includes("profile") || path.includes("user-management") || path.includes("financial-year")){
+      return "master";
+    }
+    if(path.includes("invoice") || path.includes("quotation") || path.includes("delivery-order") || path.includes("voucher") || path.includes("expense-entry")){
+      return "entry";
+    }
+    if(path.includes("report") || path.includes("ledger") || path.includes("profit-loss") || path.includes("vat-report") || path.includes("soa")){
+      return "report";
+    }
+    return "workspace";
+  }
+
+  function enhanceCards(){
+    document.body.classList.add("p91-page-" + pageType());
+
+    document.querySelectorAll(".card, .section, .form-card").forEach(card => {
+      if(card.closest(".paper")) return;
+
+      const heading = card.querySelector("h2");
+      const headingText = (heading?.textContent || "").toLowerCase();
+      const hasTable = !!card.querySelector("table");
+      const hasInputs = !!card.querySelector("input, select, textarea");
+
+      if(hasTable || headingText.includes("saved") || headingText.includes("list")){
+        card.classList.add("erp-list-card");
+      }else if(hasInputs){
+        card.classList.add("erp-form-card");
+      }
+
+      if(heading && !heading.parentElement.classList.contains("erp-card-title")){
+        const title = document.createElement("div");
+        title.className = "erp-card-title";
+        heading.parentNode.insertBefore(title, heading);
+        title.appendChild(heading);
+      }
+    });
+
+    document.querySelectorAll(".btn-row").forEach(row => {
+      row.classList.add("erp-action-row");
+    });
+
+    document.querySelectorAll(".total-box").forEach(box => {
+      box.classList.add("erp-total-box");
+    });
+  }
+
   function render(){
     if(document.getElementById("p91Shell")) return;
 
@@ -301,6 +349,8 @@
     setTimeout(applyExistingPermissions, 100);
     enhanceEntryPage();
     setTimeout(enhanceEntryPage, 200);
+    enhanceCards();
+    setTimeout(enhanceCards, 200);
     enhanceListTables();
     setInterval(enhanceListTables, 1200);
   }
