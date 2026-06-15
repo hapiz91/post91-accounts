@@ -48,10 +48,19 @@ body.post91-shell-ready .btn,body.post91-shell-ready button.btn{background:#125f
 body.post91-shell-ready .btn-light,body.post91-shell-ready .back,body.post91-shell-ready .quick{background:#eef2f6!important;color:#172033!important;border:1px solid #d5dbe5!important}
 body.post91-shell-ready .btn-danger{background:#b42318!important;color:#fff!important}
 body.post91-shell-ready .note{background:#fff8eb!important;color:#7a3d00!important;border:1px solid #f3c77b!important;border-radius:8px!important;padding:10px 12px!important;margin-bottom:12px!important;font-size:13px!important;font-weight:700!important}
-body.post91-shell-ready table{border-collapse:separate!important;border-spacing:0!important;border:1px solid var(--p91-line)!important;border-radius:8px!important;overflow:hidden;background:#fff!important}
-body.post91-shell-ready th{background:#eef2f6!important;color:#344054!important;font-size:12px!important;font-weight:800!important;text-align:left!important;border:0!important;border-bottom:1px solid var(--p91-line)!important;padding:8px 10px!important;white-space:nowrap}
-body.post91-shell-ready td{border:0!important;border-bottom:1px solid #edf0f5!important;padding:8px 10px!important;font-size:13px!important;vertical-align:middle!important}
+body.post91-shell-ready table{width:100%!important;border-collapse:separate!important;border-spacing:0!important;border:1px solid var(--p91-line)!important;border-radius:8px!important;overflow:hidden;background:#fff!important;table-layout:auto!important}
+body.post91-shell-ready th{background:#eef2f6!important;color:#344054!important;font-size:12px!important;font-weight:850!important;text-align:left!important;border:0!important;border-bottom:1px solid var(--p91-line)!important;padding:9px 12px!important;white-space:nowrap;line-height:1.25!important}
+body.post91-shell-ready td{border:0!important;border-bottom:1px solid #edf0f5!important;padding:10px 12px!important;font-size:13px!important;vertical-align:middle!important;line-height:1.35!important}
 body.post91-shell-ready tbody tr:hover{background:#f8fafc!important}
+body.post91-shell-ready .search-box,body.post91-shell-ready #savedSearch,body.post91-shell-ready #searchBox{height:40px!important;margin:0 0 12px!important}
+body.post91-shell-ready table.erp-list-table{table-layout:auto!important}
+body.post91-shell-ready table.erp-list-table tbody tr{height:52px!important}
+body.post91-shell-ready table.erp-list-table td:first-child,body.post91-shell-ready table.erp-list-table th:first-child{width:48px!important;text-align:center!important;color:#344054!important}
+body.post91-shell-ready table.erp-list-table td small{display:block;color:#475467!important;font-size:12px!important;line-height:1.35!important;margin-top:3px!important;font-weight:500!important}
+body.post91-shell-ready table.erp-list-table td b{font-weight:850!important;color:#061833!important}
+body.post91-shell-ready table.erp-list-table td:last-child,body.post91-shell-ready table.erp-list-table th:last-child{white-space:nowrap!important;width:1%!important}
+body.post91-shell-ready table.erp-list-table td:last-child .btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:32px!important;padding:7px 10px!important;margin:0 4px 0 0!important;vertical-align:middle!important}
+body.post91-shell-ready table.erp-list-table td:last-child .btn:last-child{margin-right:0!important}
 body.post91-shell-ready .badge{border-radius:999px!important;font-size:11px!important;padding:4px 8px!important;font-weight:800!important}
 body.post91-shell-ready .total-box,body.post91-shell-ready .box{border:1px solid var(--p91-line)!important;border-radius:8px!important;box-shadow:none!important;background:#f8fafc!important}
 body.post91-shell-ready .modal-box{border-radius:8px!important;box-shadow:0 18px 40px rgba(16,36,54,.28)!important}

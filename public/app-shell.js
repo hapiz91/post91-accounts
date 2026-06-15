@@ -220,6 +220,19 @@
     setInterval(refreshMeta, 700);
   }
 
+  function enhanceListTables(){
+    document.querySelectorAll("table").forEach(table => {
+      if(table.closest(".paper")) return;
+
+      const headers = [...table.querySelectorAll("thead th")].map(th => th.textContent.trim().toLowerCase());
+      const lastHeader = headers[headers.length - 1] || "";
+
+      if(lastHeader === "action" || lastHeader === "actions"){
+        table.classList.add("erp-list-table");
+      }
+    });
+  }
+
   function render(){
     if(document.getElementById("p91Shell")) return;
 
@@ -283,6 +296,8 @@
     setTimeout(applyExistingPermissions, 100);
     enhanceEntryPage();
     setTimeout(enhanceEntryPage, 200);
+    enhanceListTables();
+    setInterval(enhanceListTables, 1200);
   }
 
   document.addEventListener("DOMContentLoaded", render);
