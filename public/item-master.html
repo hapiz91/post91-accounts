@@ -31,6 +31,15 @@ th{background:#f8fbff}
 .hidden{display:none!important}
 .loading{color:#0d6efd;font-weight:900;padding:15px}
 .viewbar{display:grid;grid-template-columns:280px 1fr;gap:14px;align-items:end}
+.saved-master-table .item-main{min-width:280px}
+.saved-master-table .item-name{display:block;font-weight:850;color:#061833;line-height:1.25}
+.saved-master-table .item-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:5px;color:#475467;font-size:12px}
+.saved-master-table .item-meta span{background:#f2f4f7;border:1px solid #e1e6ee;border-radius:999px;padding:2px 7px}
+.saved-master-table .muted{color:#667085}
+.saved-master-table .num{text-align:right;font-variant-numeric:tabular-nums}
+.saved-master-table .actions{white-space:nowrap;text-align:right}
+.status-pill{display:inline-flex;align-items:center;border-radius:999px;padding:4px 9px;font-size:12px;font-weight:850;background:#dcfce7;color:#166534}
+.status-pill.inactive{background:#fee2e2;color:#991b1b}
 @media(max-width:1000px){.grid,.mode-box,.viewbar{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:700px){.grid,.mode-box,.viewbar{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
 </style>
@@ -121,7 +130,7 @@ th{background:#f8fbff}
 
   <h2 id="savedTitle">Saved Items</h2>
 
-  <table>
+  <table class="saved-master-table">
     <thead id="savedHead"></thead>
     <tbody id="savedBody"></tbody>
   </table>
@@ -422,13 +431,12 @@ function renderSaved(){
   if(type==="ITEM"){
     savedHead.innerHTML = `
       <tr>
-        <th>Item Name</th>
-        <th>Part No</th>
-        <th>OEM No</th>
-        <th>Category</th>
-        <th>Brand</th>
-        <th>${CURRENT_TEMPLATE?.typeName || "Type"}</th>
-        <th>Selling Price</th>
+        <th>Item / Service</th>
+        <th>Classification</th>
+        <th>Unit</th>
+        <th>Selling</th>
+        <th>Cost</th>
+        <th>Stock</th>
         <th>Status</th>
         <th>Action</th>
       </tr>
@@ -438,20 +446,28 @@ function renderSaved(){
 
     savedBody.innerHTML = data.map(i=>`
       <tr>
-        <td>${i.itemName||"-"}</td>
-        <td>${i.partNo||i.partNumber||"-"}</td>
-        <td>${i.oemNo||i.oemNumber||"-"}</td>
-        <td>${i.category||"-"}</td>
-        <td>${i.brand||i.brandName||"-"}</td>
-        <td>${i.machineType||i.vehicleMachinePumpType||"-"}</td>
-        <td>${Number(i.sellingPrice||0).toFixed(3)}</td>
-        <td>${i.status||"Active"}</td>
+        <td class="item-main">
+          <span class="item-name">${i.itemName||"-"}</span>
+          <span class="item-meta">
+            <span>Part: ${i.partNo||i.partNumber||"-"}</span>
+            <span>OEM: ${i.oemNo||i.oemNumber||"-"}</span>
+          </span>
+        </td>
         <td>
+          <b>${i.category||"-"}</b>
+          <small>${i.brand||i.brandName||"-"} / ${i.machineType||i.vehicleMachinePumpType||"-"}</small>
+        </td>
+        <td>${i.unit||"-"}</td>
+        <td class="num">${Number(i.sellingPrice||0).toFixed(3)}</td>
+        <td class="num">${Number(i.costPrice||i.purchasePrice||0).toFixed(3)}</td>
+        <td class="num">${Number(i.openingStock||0).toFixed(3)}</td>
+        <td><span class="status-pill ${String(i.status||"Active")==="Active" ? "" : "inactive"}">${i.status||"Active"}</span></td>
+        <td class="actions">
           <button class="btn btn-light" onclick="editRecord('ITEM','${i.id}')">Edit</button>
           <button class="btn btn-danger" onclick="deleteRecord('ITEM','${i.id}')">Delete</button>
         </td>
       </tr>
-    `).join("") || `<tr><td colspan="9">No items found.</td></tr>`;
+    `).join("") || `<tr><td colspan="8">No items found.</td></tr>`;
 
     return;
   }
@@ -469,10 +485,10 @@ function renderSaved(){
 
   savedBody.innerHTML = data.map(x=>`
     <tr>
-      <td>${x.name||"-"}</td>
-      <td>${x.status||"Active"}</td>
+      <td><b>${x.name||"-"}</b></td>
+      <td><span class="status-pill ${String(x.status||"Active")==="Active" ? "" : "inactive"}">${x.status||"Active"}</span></td>
       <td>${x.updatedAt||"-"}</td>
-      <td>
+      <td class="actions">
         <button class="btn btn-light" onclick="editRecord('${type}','${x.id}')">Edit</button>
         <button class="btn btn-danger" onclick="deleteRecord('${type}','${x.id}')">Delete</button>
       </td>

@@ -230,6 +230,11 @@
       if(lastHeader === "action" || lastHeader === "actions"){
         table.classList.add("erp-list-table");
       }
+
+      const firstHeader = headers[0] || "";
+      if(firstHeader === "#" || firstHeader === "no" || firstHeader === "no."){
+        table.classList.add("erp-numbered-table");
+      }
     });
   }
 
