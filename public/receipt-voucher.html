@@ -964,6 +964,10 @@ async function loadSaved(){
           Edit
         </button>
 
+        <button class="btn btn-light" onclick="printReceiptVoucher(${i})">
+          Print
+        </button>
+
         <button class="btn btn-danger" onclick="delDoc('${r.id}')">
           Delete
         </button>
@@ -972,6 +976,29 @@ async function loadSaved(){
     `;
 
     savedBody.appendChild(tr);
+  });
+}
+
+function printReceiptVoucher(i){
+  const r = CURRENT_RECEIPTS[i];
+  if(!r)return;
+
+  window.printPost91Voucher({
+    title:"Receipt Voucher",
+    no:r.receiptNo,
+    date:r.receiptDate,
+    party:r.customerName,
+    account:r.cashBankAccountName || r.paymentMode,
+    mode:r.paymentMode,
+    reference:r.paymentReference || r.manualAgainst || (r.allocations||[]).map(a=>a.invoiceNo).filter(Boolean).join(", "),
+    remarks:r.remarks,
+    status:r.docStatus,
+    amount:mt(r.totalReceiptAmount),
+    allocations:(r.allocations||[]).map(a=>({
+      no:a.invoiceNo,
+      date:a.invoiceDate,
+      amount:mt(a.amountReceived)
+    }))
   });
 }
 

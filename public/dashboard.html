@@ -8,7 +8,7 @@
 <style>
 *{box-sizing:border-box}
 :root{--primary:#0d6efd;--sidebar:#061833;--bg:#eef3f8;--card:#ffffff}
-body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:#061833}
+body{margin:0;font-family:Aptos,Inter,"Segoe UI",Arial,sans-serif;background:var(--bg);color:#061833}
 .app-header{position:sticky;top:0;z-index:50;height:118px;background:linear-gradient(90deg,#061833,#082b57);color:#fff;display:grid;grid-template-columns:300px 1fr 260px;align-items:center;border-bottom:1px solid #123b70;box-shadow:0 8px 25px #0002}
 .header-brand{padding:18px 24px;border-right:1px solid #ffffff22;display:flex;align-items:center;gap:14px}
 .brand-logo{width:58px;height:58px;object-fit:contain;background:#fff;border-radius:14px;padding:6px}
@@ -92,7 +92,7 @@ if(currentUser && currentUser.accountActive === false){
   </div>
 
   <div class="header-company">
-    <div class="company-icon">▦</div>
+    <div class="company-icon">CO</div>
     <div class="company-info">
       <h3 id="companyNameTop">Company Name</h3>
       <p id="companyAddressTop">Muscat, Sultanate of Oman</p>
@@ -374,6 +374,41 @@ Object.keys(labelMap).forEach(id=>{
   const el = document.getElementById(id);
   if(el) el.textContent = labelMap[id];
 });
+
+applyWorkflowSettings();
+}
+
+function workflowSettings(){
+  try{
+    const settings = JSON.parse(localStorage.getItem("post91Settings") || "{}");
+    return {
+      quotation: settings.enableQuotation !== "No",
+      deliveryOrder: settings.enableDeliveryOrder !== "No"
+    };
+  }catch(e){
+    return { quotation: true, deliveryOrder: true };
+  }
+}
+
+function applyWorkflowSettings(){
+  const workflow = workflowSettings();
+
+  document.querySelectorAll('a[href="/quotation.html"]').forEach(a=>{
+    a.style.display = workflow.quotation ? "" : "none";
+  });
+
+  document.querySelectorAll('a[href="/delivery-order.html"]').forEach(a=>{
+    a.style.display = workflow.deliveryOrder ? "" : "none";
+  });
+
+  const salesSteps = document.querySelectorAll(".workflow-lane:first-child .workflow-step");
+  let number = 1;
+  salesSteps.forEach(step=>{
+    if(step.style.display === "none") return;
+    const badge = step.querySelector("b");
+    if(badge) badge.textContent = String(number).padStart(2, "0");
+    number++;
+  });
 }
 function logout(){
   localStorage.removeItem("post91CurrentUser");

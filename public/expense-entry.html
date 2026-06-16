@@ -826,6 +826,7 @@ async function loadExpenses(){
         <td>${badge(e.status)}</td>
         <td>
           <button class="btn btn-light" onclick="editExpense('${e.id}')">Edit</button>
+          <button class="btn btn-light" onclick="printExpenseVoucher('${e.id}')">Print</button>
           <button class="btn btn-danger" onclick="deleteExpense('${e.id}')">Delete</button>
         </td>
       `;
@@ -836,6 +837,25 @@ async function loadExpenses(){
   if(expenseBody.innerHTML.trim()===""){
     expenseBody.innerHTML=`<tr><td colspan="11">No expenses found.</td></tr>`;
   }
+}
+
+async function printExpenseVoucher(id){
+  const list = await smartLoad(COLLECTIONS.EXPENSES);
+  const e = list.find(x=>x.id===id);
+  if(!e)return;
+
+  window.printPost91Voucher({
+    title:"Expense Voucher",
+    no:e.expenseNo,
+    date:e.expenseDate,
+    party:e.paidTo || e.expenseCategory,
+    account:e.cashBankAccountName || e.paymentMode,
+    mode:e.paymentMode,
+    reference:e.referenceNo,
+    remarks:e.description,
+    status:e.status,
+    amount:mt(e.totalAmount)
+  });
 }
 
 async function initPage(){

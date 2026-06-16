@@ -7,7 +7,7 @@
 
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
+body{margin:0;font-family:Aptos,Inter,"Segoe UI",Arial,sans-serif;background:#eef3f8;color:#061833;padding:26px}
 .header{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:20px}
 .header h1{margin:0;color:#0d6efd}
 .back,.quick{background:#fff;color:#0d6efd;text-decoration:none;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 8px 20px #0001;display:inline-block}
@@ -334,7 +334,7 @@ th{background:#f8fbff}
 <link rel="stylesheet" href="/app-shell.css">
 </head>
 
-<body>
+<body class="sales-doc-page">
 
 <div class="header">
   <div>
@@ -1368,9 +1368,17 @@ function silent(){
 function updatePreview(){
   let company=COMPANY_PROFILE||{};
 
-  if(company.letterhead){
+  const headerMode = company.letterheadMode || (company.letterhead ? "Uploaded Letterhead Header" : "System Company Header");
+  const headerBox = pLetterhead.closest(".doc-letterhead-space");
+  if(headerBox) headerBox.style.height = (company.headerHeight || "4") + "cm";
+
+  if(headerMode === "Uploaded Letterhead Header" && company.letterhead){
     pLetterhead.src=company.letterhead;
     pLetterhead.style.display="block";
+    pCompanyHeader.style.display="none";
+  }else if(headerMode === "Blank Space for Pre-Printed Letterhead"){
+    pLetterhead.removeAttribute("src");
+    pLetterhead.style.display="none";
     pCompanyHeader.style.display="none";
   }else{
     pLetterhead.removeAttribute("src");

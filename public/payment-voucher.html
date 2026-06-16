@@ -628,6 +628,7 @@ async function loadSaved(){
       <td>${badge(p.docStatus)}</td>
       <td>
         <button class="btn btn-light" onclick="editDoc('${p.id}')">Edit</button>
+        <button class="btn btn-light" onclick="printPaymentVoucher('${p.id}')">Print</button>
         <button class="btn btn-danger" onclick="delDoc('${p.id}')">Delete</button>
       </td>
     `;
@@ -638,6 +639,30 @@ async function loadSaved(){
   if(savedBody.innerHTML.trim()===""){
     savedBody.innerHTML='<tr><td colspan="9">No payment vouchers found.</td></tr>';
   }
+}
+
+async function printPaymentVoucher(id){
+  let list = await smartLoad(COLLECTIONS.PAYMENTS);
+  let p = list.find(x=>x.id===id);
+  if(!p)return;
+
+  window.printPost91Voucher({
+    title:"Payment Voucher",
+    no:p.paymentNo,
+    date:p.paymentDate,
+    party:p.supplierName,
+    account:p.cashBankAccountName || p.paymentMode,
+    mode:p.paymentMode,
+    reference:p.paymentReference || p.manualAgainst || (p.allocations||[]).map(a=>a.purchaseNo||a.invoiceNo).filter(Boolean).join(", "),
+    remarks:p.remarks,
+    status:p.docStatus,
+    amount:mt(p.totalPaymentAmount),
+    allocations:(p.allocations||[]).map(a=>({
+      no:a.purchaseNo || a.invoiceNo,
+      date:a.invoiceDate || a.purchaseDate,
+      amount:mt(a.amountPaid)
+    }))
+  });
 }
 
 async function editDoc(id){

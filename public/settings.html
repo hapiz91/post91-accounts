@@ -70,6 +70,50 @@ input:focus,select:focus,textarea:focus{border-color:#0d6efd;box-shadow:0 0 0 4p
       <tbody id="numberingBody"></tbody>
     </table>
 
+    <div class="section-title">Document Workflow</div>
+
+    <div class="note">
+      Disable documents a company does not use. Disabled modules are hidden from menus and dashboard shortcuts, but existing saved data is not deleted.
+    </div>
+
+    <div class="grid">
+      <div class="form-group">
+        <label>Enable Quotation</label>
+        <select id="enableQuotation">
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Enable Delivery Order</label>
+        <select id="enableDeliveryOrder">
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Sales Invoice Source</label>
+        <select id="salesInvoiceSource">
+          <option>Manual invoice only</option>
+          <option>From Quotation</option>
+          <option>From Delivery Order</option>
+          <option>Both Quotation and Delivery Order</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Default Sales Workflow</label>
+        <select id="defaultSalesWorkflow">
+          <option>Quotation → Delivery Order → Sales Invoice</option>
+          <option>Quotation → Sales Invoice</option>
+          <option>Delivery Order → Sales Invoice</option>
+          <option>Sales Invoice only</option>
+        </select>
+      </div>
+    </div>
+
     <div class="section-title">VAT Settings</div>
 
     <div class="grid">
@@ -348,6 +392,10 @@ document.getElementById("settingsForm").addEventListener("submit", function(e){
     defaultPaymentTerms: document.getElementById("defaultPaymentTerms").value,
     invoiceFooter: document.getElementById("invoiceFooter").value,
     quotationFooter: document.getElementById("quotationFooter").value,
+    enableQuotation: document.getElementById("enableQuotation").value,
+    enableDeliveryOrder: document.getElementById("enableDeliveryOrder").value,
+    salesInvoiceSource: document.getElementById("salesInvoiceSource").value,
+    defaultSalesWorkflow: document.getElementById("defaultSalesWorkflow").value,
     theme: document.getElementById("theme").value,
     language: document.getElementById("language").value,
     packageName: document.getElementById("packageName").value,
@@ -355,6 +403,9 @@ document.getElementById("settingsForm").addEventListener("submit", function(e){
   };
 
   localStorage.setItem("post91Settings", JSON.stringify(settings));
+  if(typeof window.applyPost91Theme === "function"){
+    window.applyPost91Theme();
+  }
   alert("Settings saved successfully.");
 });
 

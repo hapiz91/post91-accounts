@@ -93,7 +93,39 @@ textarea{min-height:90px}
 </div>
 
 <div class="card">
-  <h2>Letterhead Upload</h2>
+  <h2>Print & Letterhead Settings</h2>
+
+  <div class="grid">
+    <div>
+      <label>Header Type</label>
+      <select id="letterheadMode">
+        <option>System Company Header</option>
+        <option>Uploaded Letterhead Header</option>
+        <option>Blank Space for Pre-Printed Letterhead</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Footer Type</label>
+      <select id="footerMode">
+        <option>System Footer</option>
+        <option>Uploaded Footer Image</option>
+        <option>No Footer</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Header Height (cm)</label>
+      <input type="number" step="0.1" id="headerHeight" value="4">
+    </div>
+
+    <div>
+      <label>Footer Height (cm)</label>
+      <input type="number" step="0.1" id="footerHeight" value="1.5">
+    </div>
+  </div>
+
+  <br>
 
   <div class="grid">
     <div>
@@ -112,8 +144,26 @@ textarea{min-height:90px}
     </div>
   </div>
 
+  <div class="grid" style="margin-top:14px;">
+    <div>
+      <label>Upload Footer Image</label>
+      <input type="file" id="footerFile" accept="image/*" onchange="previewNewFooter()">
+      <p class="note" style="margin-top:10px;">
+        Optional: footer image for printed documents, such as bank details, terms, stamp area or branch contacts.
+      </p>
+    </div>
+
+    <div class="preview-box">
+      <b>Footer Preview</b>
+      <br><br>
+      <img id="footerPreview" alt="">
+      <p id="noFooterText">No footer image uploaded. System footer/signature area will be used.</p>
+    </div>
+  </div>
+
   <div class="btn-row">
     <button class="btn btn-danger" type="button" onclick="removeLetterhead()">Remove Letterhead</button>
+    <button class="btn btn-danger" type="button" onclick="removeFooter()">Remove Footer Image</button>
   </div>
 </div>
 
@@ -144,6 +194,7 @@ textarea{min-height:90px}
 
 <script>
 let selectedLetterheadBase64 = "";
+let selectedFooterBase64 = "";
 let PROFILE_ID = "";
 
 function getLocalCompanyProfile(){
@@ -178,6 +229,14 @@ function fillCompanyForm(company){
 industryTemplate.value = company.industryTemplate || company.businessType || "general";
 
   selectedLetterheadBase64 = company.letterhead || "";
+  selectedFooterBase64 = company.footerImage || "";
+
+  if(document.getElementById("letterheadMode")){
+    letterheadMode.value = company.letterheadMode || "System Company Header";
+    footerMode.value = company.footerMode || "System Footer";
+    headerHeight.value = company.headerHeight || "4";
+    footerHeight.value = company.footerHeight || "1.5";
+  }
 
   if(selectedLetterheadBase64){
     letterheadPreview.src = selectedLetterheadBase64;
@@ -187,6 +246,18 @@ industryTemplate.value = company.industryTemplate || company.businessType || "ge
     letterheadPreview.removeAttribute("src");
     letterheadPreview.style.display = "none";
     noLetterheadText.style.display = "block";
+  }
+
+  if(document.getElementById("footerPreview")){
+    if(selectedFooterBase64){
+      footerPreview.src = selectedFooterBase64;
+      footerPreview.style.display = "block";
+      noFooterText.style.display = "none";
+    }else{
+      footerPreview.removeAttribute("src");
+      footerPreview.style.display = "none";
+      noFooterText.style.display = "block";
+    }
   }
 
   updateFallbackPreview();
@@ -246,6 +317,31 @@ function removeLetterhead(){
   alert("Letterhead removed. Save profile to confirm.");
 }
 
+function previewNewFooter(){
+  let file = footerFile.files[0];
+  if(!file)return;
+
+  let reader = new FileReader();
+
+  reader.onload = function(e){
+    selectedFooterBase64 = e.target.result;
+    footerPreview.src = selectedFooterBase64;
+    footerPreview.style.display = "block";
+    noFooterText.style.display = "none";
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function removeFooter(){
+  selectedFooterBase64 = "";
+  footerFile.value = "";
+  footerPreview.removeAttribute("src");
+  footerPreview.style.display = "none";
+  noFooterText.style.display = "block";
+  alert("Footer image removed. Save profile to confirm.");
+}
+
 async function saveCompanyProfile(){
   if(!companyName.value.trim()){
     alert("Company name is required.");
@@ -273,6 +369,11 @@ industryTemplateName: industryTemplate.options[industryTemplate.selectedIndex]?.
     crNumber: crNumber.value.trim(),
     crNo: crNumber.value.trim(),
     letterhead: selectedLetterheadBase64 || "",
+    footerImage: selectedFooterBase64 || "",
+    letterheadMode: letterheadMode.value,
+    footerMode: footerMode.value,
+    headerHeight: headerHeight.value || "4",
+    footerHeight: footerHeight.value || "1.5",
     updatedAt: new Date().toISOString()
   };
 
@@ -327,11 +428,20 @@ async function clearCompanyProfile(){
   crNumber.value = "";
 industryTemplate.value = "general";
   letterheadFile.value = "";
+  footerFile.value = "";
   selectedLetterheadBase64 = "";
+  selectedFooterBase64 = "";
 
   letterheadPreview.removeAttribute("src");
   letterheadPreview.style.display = "none";
   noLetterheadText.style.display = "block";
+  footerPreview.removeAttribute("src");
+  footerPreview.style.display = "none";
+  noFooterText.style.display = "block";
+  letterheadMode.value = "System Company Header";
+  footerMode.value = "System Footer";
+  headerHeight.value = "4";
+  footerHeight.value = "1.5";
 
   updateFallbackPreview();
   profileStatus.textContent = "Company profile cleared.";
