@@ -29,7 +29,12 @@ th{background:#f8fbff;text-align:left}
 .inward{color:#166534;font-weight:900}
 .outward{color:#b91c1c;font-weight:900}
 .balance{font-weight:900;color:#0d6efd}
+.right{text-align:right}
 @media(max-width:900px){.grid,.summary{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:nowrap}}
+@media print{
+  @page{size:A4 portrait;margin:8mm}
+  body{background:#fff;padding:0}
+}
 </style>
 <link rel="stylesheet" href="/app-shell.css">
 </head>
@@ -48,7 +53,7 @@ th{background:#f8fbff;text-align:left}
   Ledger reads from Cash / Bank Master, Receipt Vouchers, Payment Vouchers and Expense Entries.
 </div>
 
-<div class="card">
+<div class="card filters">
   <h2>Filters</h2>
 
   <div class="grid">
@@ -73,6 +78,8 @@ th{background:#f8fbff;text-align:left}
   <div class="btn-row">
     <button class="btn" onclick="generateLedger()">Refresh Ledger</button>
     <button class="btn btn-light" onclick="clearFilters()">Clear Filter</button>
+    <button class="btn btn-light" onclick="downloadCSV()">Download CSV</button>
+    <button class="btn btn-light" onclick="window.print()">Print</button>
   </div>
 </div>
 
@@ -83,12 +90,12 @@ th{background:#f8fbff;text-align:left}
   </div>
 
   <div class="box">
-    <b>Total In</b>
+    <b>Total Debit (Dr)</b>
     <span id="totalIn">OMR 0.000</span>
   </div>
 
   <div class="box">
-    <b>Total Out</b>
+    <b>Total Credit (Cr)</b>
     <span id="totalOut">OMR 0.000</span>
   </div>
 
@@ -103,17 +110,18 @@ th{background:#f8fbff;text-align:left}
 <div class="card">
   <h2>Ledger Details</h2>
 
-  <table>
+  <table class="p91-ledger-print-table">
     <thead>
       <tr>
         <th>Date</th>
-        <th>Account</th>
+        <th>Particulars</th>
         <th>Type</th>
-        <th>Document No</th>
-        <th>Party / Reference</th>
-        <th>Money In</th>
-        <th>Money Out</th>
-        <th>Running Balance</th>
+        <th>Voucher No</th>
+        <th>Invoice / Reference</th>
+        <th>Remarks / Narration</th>
+        <th class="right">Debit (Dr)</th>
+        <th class="right">Credit (Cr)</th>
+        <th class="right">Balance Dr/Cr</th>
       </tr>
     </thead>
     <tbody id="ledgerBody"></tbody>
@@ -130,9 +138,15 @@ let ACCOUNTS = [];
 let RECEIPTS = [];
 let PAYMENTS = [];
 let EXPENSES = [];
+let EXPORT_ROWS = [];
 
 function mv(n){return Number(n||0).toFixed(3)}
 function mt(n){return "OMR " + mv(n)}
+function drCr(n){
+  const value = Number(n || 0);
+  if(value === 0) return "OMR 0.000";
+  return `${mt(Math.abs(value))} ${value > 0 ? "Dr" : "Cr"}`;
+}
 
 function accountNameOf(a){
   return a.accountName || a.name || "";
@@ -159,6 +173,15 @@ async function loadAccounts(){
 function selectedAccount(){
   if(!accountSelect.value) return null;
   return ACCOUNTS.find(a => a.id === accountSelect.value) || null;
+}
+
+function selectedAccountName(){
+  const selected = selectedAccount();
+  return selected ? accountNameOf(selected) : "All Cash / Bank Accounts";
+}
+
+function updatePrintSubject(){
+  document.body.dataset.printSubject = `Cash / Bank Ledger - ${selectedAccountName()}`;
 }
 
 function dateOk(date){
@@ -211,7 +234,20 @@ function addRow(rows, obj){
   rows.push(obj);
 }
 
+function joinedRefs(items, fields){
+  return (items || [])
+    .map(item => fields.map(field => item[field]).find(Boolean))
+    .filter(Boolean)
+    .join(", ");
+}
+
+function narrationOf(source, fallback){
+  return source.remarks || source.description || source.narration || source.notes || fallback || "";
+}
+
 async function generateLedger(){
+  updatePrintSubject();
+
   RECEIPTS = await loadFromCloudSmart("receiptVouchers");
   PAYMENTS = await loadFromCloudSmart("paymentVouchers");
   EXPENSES = await loadFromCloudSmart("expenseEntries");
@@ -225,11 +261,13 @@ async function generateLedger(){
       date: rv.receiptDate || rv.date || "",
       accountId: rv.cashBankAccountId || "",
       accountName: rv.cashBankAccountName || rv.bankAccountName || rv.paymentMode || "Cash/Bank Not Selected",
+      party: rv.customerName || rv.receivedFrom || rv.manualAgainst || "Received From",
       type: "Receipt Voucher",
       docNo: rv.receiptNo || rv.voucherNo || "",
-      ref: rv.customerName || rv.paymentReference || rv.referenceNo || "",
-      moneyIn: Number(rv.totalReceiptAmount || rv.amount || 0),
-      moneyOut: 0
+      ref: joinedRefs(rv.allocations, ["invoiceNo", "voucherNo"]) || rv.paymentReference || rv.referenceNo || rv.manualAgainst || rv.customerName || "",
+      narration: narrationOf(rv, rv.paymentReference || rv.manualAgainst || ""),
+      debit: Number(rv.totalReceiptAmount || rv.amount || 0),
+      credit: 0
     });
   });
 
@@ -240,11 +278,13 @@ async function generateLedger(){
       date: pv.paymentDate || pv.date || "",
       accountId: pv.cashBankAccountId || "",
       accountName: pv.cashBankAccountName || pv.bankAccountName || pv.paymentMode || "Cash/Bank Not Selected",
+      party: pv.supplierName || pv.paidTo || pv.manualAgainst || "Paid To",
       type: "Payment Voucher",
       docNo: pv.paymentNo || pv.voucherNo || "",
-      ref: pv.supplierName || pv.paymentReference || pv.referenceNo || "",
-      moneyIn: 0,
-      moneyOut: Number(pv.totalPaymentAmount || pv.amount || 0)
+      ref: joinedRefs(pv.allocations, ["purchaseNo", "invoiceNo", "voucherNo"]) || pv.paymentReference || pv.referenceNo || pv.manualAgainst || pv.supplierName || "",
+      narration: narrationOf(pv, pv.paymentReference || pv.manualAgainst || ""),
+      debit: 0,
+      credit: Number(pv.totalPaymentAmount || pv.amount || 0)
     });
   });
 
@@ -255,11 +295,13 @@ async function generateLedger(){
       date: ex.expenseDate || ex.date || "",
       accountId: ex.cashBankAccountId || "",
       accountName: ex.cashBankAccountName || ex.paymentMode || "Cash/Bank Not Selected",
+      party: ex.paidTo || ex.supplierName || ex.expenseCategory || "Paid To",
       type: "Expense Entry",
       docNo: ex.expenseNo || "",
-      ref: ex.paidTo || ex.expenseCategory || ex.referenceNo || "",
-      moneyIn: 0,
-      moneyOut: Number(ex.totalAmount || 0)
+      ref: ex.referenceNo || ex.billNo || ex.invoiceNo || ex.paymentReference || ex.paidTo || ex.expenseCategory || "",
+      narration: narrationOf(ex, ex.expenseCategory || ""),
+      debit: 0,
+      credit: Number(ex.totalAmount || 0)
     });
   });
 
@@ -270,37 +312,51 @@ async function generateLedger(){
   let inTotal = 0;
   let outTotal = 0;
 
+  EXPORT_ROWS = [];
   ledgerBody.innerHTML = "";
 
   rows.forEach(r=>{
-    inTotal += r.moneyIn;
-    outTotal += r.moneyOut;
-    running += r.moneyIn - r.moneyOut;
+    inTotal += r.debit;
+    outTotal += r.credit;
+    running += r.debit - r.credit;
+
+    EXPORT_ROWS.push({
+      Date: r.date || "",
+      Particulars: r.party || "",
+      Type: r.type || "",
+      VoucherNo: r.docNo || "",
+      InvoiceReference: r.ref || "",
+      RemarksNarration: r.narration || "",
+      Debit: mv(r.debit),
+      Credit: mv(r.credit),
+      Balance: drCr(running)
+    });
 
     let tr = document.createElement("tr");
 
     tr.innerHTML = `
       <td>${r.date || "-"}</td>
-      <td>${r.accountName || "-"}</td>
+      <td>${r.party || "-"}</td>
       <td>${r.type}</td>
       <td>${r.docNo || "-"}</td>
       <td>${r.ref || "-"}</td>
-      <td class="inward">${r.moneyIn ? mt(r.moneyIn) : "-"}</td>
-      <td class="outward">${r.moneyOut ? mt(r.moneyOut) : "-"}</td>
-      <td class="balance">${mt(running)}</td>
+      <td>${r.narration || "-"}</td>
+      <td class="inward right">${r.debit ? mt(r.debit) : "-"}</td>
+      <td class="outward right">${r.credit ? mt(r.credit) : "-"}</td>
+      <td class="balance right">${drCr(running)}</td>
     `;
 
     ledgerBody.appendChild(tr);
   });
 
   if(ledgerBody.innerHTML.trim() === ""){
-    ledgerBody.innerHTML = `<tr><td colspan="8">No ledger movement found.</td></tr>`;
+    ledgerBody.innerHTML = `<tr><td colspan="9">No ledger movement found.</td></tr>`;
   }
 
-  openingBalance.textContent = mt(opening);
+  openingBalance.textContent = drCr(opening);
   totalIn.textContent = mt(inTotal);
   totalOut.textContent = mt(outTotal);
-  closingBalance.textContent = mt(running);
+  closingBalance.textContent = drCr(running);
 }
 
 function clearFilters(){
@@ -308,6 +364,29 @@ function clearFilters(){
   fromDate.value = "";
   toDate.value = "";
   generateLedger();
+}
+
+function downloadCSV(){
+  if(!EXPORT_ROWS.length){
+    alert("No data to download");
+    return;
+  }
+
+  const headers = Object.keys(EXPORT_ROWS[0]);
+  const csv = [
+    headers.join(","),
+    ...EXPORT_ROWS.map(row=>
+      headers.map(h=>`"${String(row[h] ?? "").replace(/"/g,'""')}"`).join(",")
+    )
+  ].join("\n");
+
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `cash-bank-ledger-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 async function initPage(){

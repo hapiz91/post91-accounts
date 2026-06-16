@@ -148,6 +148,7 @@ body.post91-dashboard .workflow-step:hover{border-color:#125f8f;background:#edf6
 body.post91-dashboard .workflow-step b{grid-row:1/3;display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:#e6eef5;color:#125f8f;font-size:12px}
 body.post91-dashboard .workflow-step span{font-weight:850;font-size:14px;line-height:1.15}
 body.post91-dashboard .workflow-step small{color:#667085;font-size:12px;line-height:1.2}
+.p91-print-header,.p91-print-footer{display:none}
 @media(max-width:1000px){
   body.post91-shell-ready{padding-top:72px!important}
   .p91-shell-bar{height:64px;grid-template-columns:1fr auto;gap:10px;padding:0 14px}
@@ -166,6 +167,54 @@ body.post91-dashboard .workflow-step small{color:#667085;font-size:12px;line-hei
   body.post91-dashboard .erp-module-grid{grid-template-columns:1fr!important}
 }
 @media print{
-  body.post91-shell-ready{padding-top:0}
-  .p91-shell,.p91-shell-drawer{display:none!important}
+  body.post91-shell-ready{padding:0!important;background:#fff!important;color:#000!important;font-family:Arial,"Segoe UI",sans-serif!important;font-size:10.5px!important;line-height:1.28!important}
+  .p91-shell,.p91-shell-drawer,.p91-shell-panel{display:none!important}
+  body.post91-shell-ready.p91-page-report>.header,
+  body.post91-shell-ready.p91-page-report .note,
+  body.post91-shell-ready.p91-page-report .filters,
+  body.post91-shell-ready.p91-page-report .btn-row,
+  body.post91-shell-ready.p91-page-report .erp-action-row,
+  body.post91-shell-ready.p91-page-report .back{display:none!important}
+  body.post91-shell-ready.p91-page-report .p91-print-header{display:grid!important;grid-template-columns:1fr auto;align-items:start;gap:18px;border-bottom:2px solid #111;padding:0 0 8px;margin:0 0 8px;color:#000}
+  body.post91-shell-ready.p91-page-report .p91-print-header h1{font-size:18px!important;line-height:1.1!important;margin:0 0 3px!important;color:#000!important;font-weight:900!important}
+  body.post91-shell-ready.p91-page-report .p91-print-header p{font-size:9.5px!important;margin:0!important;color:#222!important;line-height:1.25!important;letter-spacing:0!important;text-transform:none!important;font-weight:600!important}
+  body.post91-shell-ready.p91-page-report .p91-print-header p span{display:block!important}
+  body.post91-shell-ready.p91-page-report .p91-print-report-title{text-align:right;font-size:10.5px;color:#000}
+  body.post91-shell-ready.p91-page-report .p91-print-report-title strong{display:block;font-size:15px;text-transform:uppercase;letter-spacing:.02em;margin-bottom:3px}
+  body.post91-shell-ready.p91-page-report .p91-print-report-title span{display:block;color:#333}
+  body.post91-shell-ready.p91-page-report .p91-print-footer{display:flex!important;justify-content:space-between;border-top:1px solid #777;margin-top:10px;padding-top:5px;font-size:9px;color:#333}
+  body.post91-shell-ready.p91-page-report .card,
+  body.post91-shell-ready.p91-page-report .section,
+  body.post91-shell-ready.p91-page-report .form-card,
+  body.post91-shell-ready.p91-page-report .erp-list-card,
+  body.post91-shell-ready.p91-page-report .erp-form-card{border:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;margin:0 0 8px!important;background:#fff!important;overflow:visible!important}
+  body.post91-shell-ready.p91-page-report .erp-card-title{display:block!important;background:#fff!important;border:0!important;border-bottom:1px solid #111!important;padding:0 0 4px!important;margin:0 0 5px!important}
+  body.post91-shell-ready.p91-page-report .erp-card-title h2,
+  body.post91-shell-ready.p91-page-report .card h2{font-size:12px!important;color:#000!important;text-transform:uppercase!important;margin:0!important;font-weight:900!important}
+  body.post91-shell-ready.p91-page-report .summary{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:0!important;border:1px solid #111!important;margin:0 0 8px!important;break-inside:avoid!important}
+  body.post91-shell-ready.p91-page-report .summary+.summary{margin-top:-9px!important;border-top:0!important}
+  body.post91-shell-ready.p91-page-report .box{border:0!important;border-right:1px solid #111!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;padding:6px 7px!important;min-height:0!important}
+  body.post91-shell-ready.p91-page-report .box:last-child{border-right:0!important}
+  body.post91-shell-ready.p91-page-report .box b{font-size:8.5px!important;color:#333!important;text-transform:uppercase!important;letter-spacing:.03em!important;margin:0 0 2px!important;display:block!important}
+  body.post91-shell-ready.p91-page-report .box span{font-size:11px!important;color:#000!important;font-weight:900!important;line-height:1.15!important}
+  body.post91-shell-ready.p91-page-report table,
+  body.post91-shell-ready.p91-page-report .erp-list-card>table{width:100%!important;max-width:none!important;margin:0!important;border:1px solid #111!important;border-radius:0!important;border-collapse:collapse!important;background:#fff!important;table-layout:fixed!important}
+  body.post91-shell-ready.p91-page-report th{background:#e7e7e7!important;color:#000!important;border:1px solid #111!important;padding:4px 5px!important;font-size:9px!important;font-weight:900!important;line-height:1.15!important;text-align:left!important;white-space:normal!important}
+  body.post91-shell-ready.p91-page-report td{color:#000!important;border:1px solid #333!important;padding:3px 5px!important;font-size:9px!important;line-height:1.2!important;vertical-align:top!important}
+  body.post91-shell-ready.p91-page-report .right,
+  body.post91-shell-ready.p91-page-report .inward,
+  body.post91-shell-ready.p91-page-report .outward,
+  body.post91-shell-ready.p91-page-report .balance,
+  body.post91-shell-ready.p91-page-report .debit,
+  body.post91-shell-ready.p91-page-report .credit{text-align:right!important;color:#000!important;font-weight:700!important}
+  body.post91-shell-ready.p91-page-report tr{break-inside:avoid!important}
+  body.post91-shell-ready.p91-page-report .p91-ledger-print-table th:nth-child(1){width:8%!important}
+  body.post91-shell-ready.p91-page-report .p91-ledger-print-table th:nth-child(2){width:16%!important}
+  body.post91-shell-ready.p91-page-report .p91-ledger-print-table th:nth-child(3){width:11%!important}
+  body.post91-shell-ready.p91-page-report .p91-ledger-print-table th:nth-child(4){width:11%!important}
+  body.post91-shell-ready.p91-page-report .p91-ledger-print-table th:nth-child(5){width:13%!important}
+  body.post91-shell-ready.p91-page-report .p91-ledger-print-table th:nth-child(6){width:23%!important}
+  body.post91-shell-ready.p91-page-report .p91-ledger-print-table th:nth-child(7){width:6%!important}
+  body.post91-shell-ready.p91-page-report .p91-ledger-print-table th:nth-child(8){width:6%!important}
+  body.post91-shell-ready.p91-page-report .p91-ledger-print-table th:nth-child(9){width:6%!important}
 }

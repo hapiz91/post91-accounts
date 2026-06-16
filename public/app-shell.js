@@ -286,6 +286,135 @@
     });
   }
 
+  function escapeHtml(value){
+    return String(value || "").replace(/[&<>"']/g, match => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[match]));
+  }
+
+  function localCompanyProfile(){
+    const fallbacks = [
+      "post91CompanyProfile",
+      "post91Company",
+      "companyProfile"
+    ];
+
+    for(const key of fallbacks){
+      try{
+        const data = JSON.parse(localStorage.getItem(key) || "{}");
+        if(data.companyName || data.businessName || data.name) return data;
+      }catch(e){}
+    }
+
+    const headerName = document.querySelector(".company-info h3")?.textContent?.trim();
+    return headerName ? { companyName: headerName } : {};
+  }
+
+  function companyDetails(profile){
+    const details = profile || localCompanyProfile();
+    const name = details.companyName || details.businessName || details.name || "Company Name";
+    const address = details.address || details.companyAddress || "";
+    const contact = [
+      details.phone,
+      details.mobile,
+      details.email,
+      details.website
+    ].filter(Boolean).join(" | ");
+    const registration = [
+      details.vatNumber || details.vatIn ? `VAT IN: ${details.vatNumber || details.vatIn}` : "",
+      details.crNumber || details.crNo ? `C.R. No: ${details.crNumber || details.crNo}` : ""
+    ].filter(Boolean).join(" | ");
+
+    return {
+      name,
+      lines: [address, contact, registration].filter(Boolean)
+    };
+  }
+
+  function renderPrintCompany(profile){
+    const company = companyDetails(profile);
+    const nameEl = document.querySelector("[data-print-company-name]");
+    const detailsEl = document.querySelector("[data-print-company-details]");
+
+    if(nameEl) nameEl.textContent = company.name;
+    if(detailsEl){
+      detailsEl.innerHTML = company.lines.length
+        ? company.lines.map(line => `<span>${escapeHtml(line)}</span>`).join("")
+        : "<span>Company details not set</span>";
+    }
+  }
+
+  async function loadReportCompanyProfile(){
+    if(typeof window.loadFromCloudSmart !== "function" && typeof window.loadFromCloud !== "function") return;
+
+    const loader = window.loadFromCloudSmart || window.loadFromCloud;
+    const collections = ["companyProfile", "companyProfiles", "companies"];
+
+    for(const collection of collections){
+      try{
+        const rows = await loader(collection);
+        if(rows && rows.length){
+          localStorage.setItem("post91CompanyProfile", JSON.stringify(rows[0]));
+          renderPrintCompany(rows[0]);
+          return;
+        }
+      }catch(e){}
+    }
+  }
+
+  function reportPeriodText(){
+    const from = document.getElementById("fromDate")?.value || "";
+    const to = document.getElementById("toDate")?.value || "";
+    if(from && to) return `${from} to ${to}`;
+    if(from) return `From ${from}`;
+    if(to) return `Up to ${to}`;
+    return "All dates";
+  }
+
+  function reportTitleText(defaultTitle){
+    return document.body.dataset.printSubject || defaultTitle;
+  }
+
+  function enhancePrintReport(){
+    if(pageType() !== "report" || document.getElementById("p91PrintHeader")) return;
+
+    const title = currentItem()[0];
+    const generated = new Date().toLocaleString();
+    const company = companyDetails();
+
+    document.body.insertAdjacentHTML("afterbegin", `
+      <div class="p91-print-header" id="p91PrintHeader">
+        <div>
+          <h1 data-print-company-name>${escapeHtml(company.name)}</h1>
+          <p data-print-company-details>${company.lines.map(line => `<span>${escapeHtml(line)}</span>`).join("") || "<span>Company details not set</span>"}</p>
+        </div>
+        <div class="p91-print-report-title">
+          <strong data-print-title>${reportTitleText(title)}</strong>
+          <span data-print-period>${reportPeriodText()}</span>
+        </div>
+      </div>
+      <div class="p91-print-footer" id="p91PrintFooter">
+        <span>Generated: ${generated}</span>
+        <span>Printed from company accounting records</span>
+      </div>
+    `);
+
+    function refreshPrintMeta(){
+      const reportTitle = document.querySelector("[data-print-title]");
+      const period = document.querySelector("[data-print-period]");
+      if(reportTitle) reportTitle.textContent = reportTitleText(title);
+      if(period) period.textContent = reportPeriodText();
+    }
+
+    window.addEventListener("beforeprint", refreshPrintMeta);
+    refreshPrintMeta();
+    loadReportCompanyProfile();
+  }
+
   function render(){
     if(document.getElementById("p91Shell")) return;
 
@@ -351,6 +480,7 @@
     setTimeout(enhanceEntryPage, 200);
     enhanceCards();
     setTimeout(enhanceCards, 200);
+    enhancePrintReport();
     enhanceListTables();
     setInterval(enhanceListTables, 1200);
   }

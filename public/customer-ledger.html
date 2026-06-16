@@ -127,11 +127,11 @@ th{background:#f8fbff;text-align:left}
         <th>Date</th>
         <th>Customer</th>
         <th>Type</th>
-        <th>Document No</th>
-        <th>Reference</th>
-        <th class="right">Debit</th>
-        <th class="right">Credit</th>
-        <th class="right">Running Balance</th>
+        <th>Voucher No</th>
+        <th>Invoice / Reference</th>
+        <th class="right">Debit (Dr)</th>
+        <th class="right">Credit (Cr)</th>
+        <th class="right">Balance Dr/Cr</th>
       </tr>
     </thead>
     <tbody id="ledgerBody"></tbody>
@@ -152,6 +152,11 @@ let EXPORT_ROWS=[];
 
 function mv(n){return Number(n||0).toFixed(3)}
 function mt(n){return "OMR "+mv(n)}
+function drCr(n){
+  const value = Number(n || 0);
+  if(value === 0) return "OMR 0.000";
+  return `${mt(Math.abs(value))} ${value > 0 ? "Dr" : "Cr"}`;
+}
 
 function esc(v){
   return String(v||"").replace(/[&<>"']/g,m=>({
@@ -310,11 +315,11 @@ function generateLedger(){
       Date:r.date,
       Customer:r.customer,
       Type:r.type,
-      DocumentNo:r.docNo,
-      Reference:r.ref,
+      VoucherNo:r.docNo,
+      InvoiceReference:r.ref,
       Debit:mv(r.debit),
       Credit:mv(r.credit),
-      RunningBalance:mv(running)
+      RunningBalance:drCr(running)
     });
 
     let tr=document.createElement("tr");
@@ -326,7 +331,7 @@ function generateLedger(){
       <td>${esc(r.ref||"-")}</td>
       <td class="debit right">${r.debit?mt(r.debit):"-"}</td>
       <td class="credit right">${r.credit?mt(r.credit):"-"}</td>
-      <td class="balance right">${mt(running)}</td>
+      <td class="balance right">${drCr(running)}</td>
     `;
     ledgerBody.appendChild(tr);
   });
@@ -338,7 +343,7 @@ function generateLedger(){
   totalInvoices.textContent=mt(debitTotal);
   totalReceipts.textContent=mt(creditTotal);
   totalAdvance.textContent=mt(advanceTotal);
-  netBalance.textContent=mt(running);
+  netBalance.textContent=drCr(running);
 }
 
 function clearFilters(){
@@ -783,8 +788,8 @@ th,td{
   </div>
 
 </div>
-<script src="/permission-guard.js"></script>
-<script src="/app-shell.js"></script>
+<script src="/permission-guard.js"><\/script>
+<script src="/app-shell.js"><\/script>
 </body>
 </html>
 `;
