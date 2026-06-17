@@ -584,7 +584,7 @@ th{background:#f8fbff}
 <div class="card editor">
   <h2>Delivery Items</h2>
 
-  <div class="grid">
+  <div class="grid hidden">
     <div>
       <label>Filter Vehicle / Machine / Pump Type</label>
       <input id="filterType" list="typeList">
@@ -789,7 +789,7 @@ font-size:11px;
 color:#555;
 font-weight:700;
 ">
-Powered by <b>Post91 Accounts</b> | Simple Accounting for Smart Businesses | accounts.vehicallapp.com
+<span id="pCompanyEmailFooter"></span>Powered by <b>Post91 Accounts</b> | Simple Accounting for Smart Businesses | accounts.vehicallapp.com
 </div>
 
   </div>
@@ -956,6 +956,15 @@ function defaultSalesVatType(){
   }catch(e){
     return "VAT Exclusive";
   }
+}
+
+function defaultCompanyEmail(){
+  return COMPANY_PROFILE.email || "";
+}
+
+function defaultSignatureText(){
+  const name = COMPANY_PROFILE.tradeName || COMPANY_PROFILE.companyName || COMPANY_PROFILE.businessName || COMPANY_PROFILE.name || "Company";
+  return "For " + name;
 }
 
 function nm(c){return c.customerName||c.name||""}
@@ -1229,7 +1238,20 @@ function addRow(d=null){
     </td>
     <td><textarea class="desc"></textarea></td>
     <td><input type="number" step=".001" class="qty" value="1" oninput="calc()"></td>
-    <td><input class="unit" value="PCS"></td>
+    <td>
+      <select class="unit">
+        <option>PCS</option>
+        <option>NOS</option>
+        <option>SET</option>
+        <option>JOB</option>
+        <option>LOT</option>
+        <option>HRS</option>
+        <option>DAY</option>
+        <option>KG</option>
+        <option>LTR</option>
+        <option>MTR</option>
+      </select>
+    </td>
     <td class="priceCol"><input type="number" step=".001" class="rate" value="0.000" oninput="calc()"></td>
     <td class="priceCol"><input class="amount" value="0.000" readonly></td>
     <td><button type="button" class="btn btn-danger" onclick="remRow(this)">X</button></td>
@@ -1613,7 +1635,10 @@ document.getElementById("pDisc")
   pVatRow.style.display=["Non-VAT","Zero Rated","Exempt"].includes(vatType.value)?"none":"grid";
 
   pTerms.textContent=terms.value||"-";
-  pSignature.textContent=signatureText.value||"For Company";
+  pSignature.textContent=signatureText.value||defaultSignatureText();
+  if(window.pCompanyEmailFooter){
+    pCompanyEmailFooter.textContent = companyEmail.value ? companyEmail.value + " | " : "";
+  }
 
   let show=printMode.value==="With Price";
 
@@ -1791,8 +1816,8 @@ function editDoc(i){
   serialNo.value=d.serialNo||"";
 
   terms.value=d.terms||"";
-  signatureText.value=d.signatureText||"For Company";
-  companyEmail.value=d.companyEmail||"";
+  signatureText.value=d.signatureText||defaultSignatureText();
+  companyEmail.value=d.companyEmail||defaultCompanyEmail();
 
 itemsBody.innerHTML="";
 serviceFeesBody.innerHTML="";
@@ -1896,7 +1921,8 @@ addServiceFee({
   discount.value="0.000";
   docStatus.value="Draft";
   terms.value="Received the above listed materials/services in good condition.";
-  signatureText.value="For Company";
+  companyEmail.value=defaultCompanyEmail();
+  signatureText.value=defaultSignatureText();
 
   sourceChanged();
   addRow();
