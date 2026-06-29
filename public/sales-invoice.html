@@ -266,9 +266,22 @@ th{background:#f8fbff}
     background:#fff;
   }
 
-  .header,.editor,.saved,.note,.btn-row,.screen-title{
-    display:none!important;
-  }
+  body > .header,
+body > .note,
+form#docForm,
+.card.saved,
+.screen-title,
+.erp-doc-meta{
+  display:none !important;
+}
+
+body > .card{
+  display:block !important;
+}
+
+body > .card:not(:has(.paper)){
+  display:none !important;
+}
 
   .card{
     border:0!important;
@@ -279,15 +292,15 @@ th{background:#f8fbff}
   }
 
   .paper{
-    width:200mm!important;
-    max-width:200mm!important;
-    min-height:287mm;
-    margin:0 auto!important;
-    padding:4mm!important;
-    border:1px solid #111!important;
-    background:#fff!important;
-    overflow:hidden;
-  }
+  width:200mm!important;
+  max-width:200mm!important;
+  min-height:auto!important;
+  margin:0 auto!important;
+  padding:4mm!important;
+  border:1px solid #111!important;
+  background:#fff!important;
+  overflow:hidden;
+}
 
   .doc-letterhead-space{
   width:100%;
