@@ -72,14 +72,18 @@ th{background:#f8fbff}
 
 /* PRINT DOCUMENT */
 .paper{
-    background:#fff;
-    border:1px solid #111;
-    width:190mm;
-    margin:auto;
-    padding:8mm;
-    box-sizing:border-box;
+  width:200mm !important;
+  max-width:200mm !important;
+  min-height:287mm !important;
+  margin:0 auto !important;
+  padding:4mm !important;
+  border:1px solid #111 !important;
+  box-shadow:none !important;
+  background:#fff !important;
+  color:#000 !important;
+  box-sizing:border-box !important;
+  overflow:hidden !important;
 }
-
 .doc-letterhead-space{
   width:100%;
   height:4cm;
@@ -1505,7 +1509,7 @@ function updatePreview(){
     printedRows++;
   });
 
-  for(let i=printedRows+1;i<=10;i++){
+  for(let i=printedRows+1;i<=14;i++){
     let tr=document.createElement("tr");
     tr.innerHTML=`<td></td><td></td><td></td><td></td><td class="priceCol"></td><td class="priceCol"></td>`;
     pItems.appendChild(tr);
