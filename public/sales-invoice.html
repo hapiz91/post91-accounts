@@ -17,6 +17,29 @@ body{margin:0;font-family:Aptos,Inter,"Segoe UI",Arial,sans-serif;background:#ee
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .full{grid-column:1/-1}
 .hidden{display:none!important}
+.sales-invoice-page .grid.editor{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:14px !important;
+  align-items:start !important;
+}
+
+.sales-invoice-page .grid.editor > .card{
+  width:100% !important;
+}
+
+.sales-invoice-page #technicalDetailsSection,
+.sales-invoice-page .erp-list-card{
+  grid-column:auto !important;
+}
+
+.sales-invoice-page .card.editor{
+  overflow:visible !important;
+}
+
+.sales-invoice-page table{
+  width:100% !important;
+}
 label{display:block;font-weight:800;margin-bottom:6px}
 input,select,textarea{width:100%;padding:12px;border:1px solid #dbe4f0;border-radius:11px;font-size:15px}
 textarea{min-height:75px}
@@ -338,7 +361,7 @@ th{background:#f8fbff}
 <link rel="stylesheet" href="/app-shell.css">
 </head>
 
-<body class="sales-doc-page">
+<body class="sales-doc-page sales-invoice-page">
 
 <div class="header">
   <div>
